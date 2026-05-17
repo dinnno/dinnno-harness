@@ -36,31 +36,62 @@ claude
 
 → Claude가 `apply.sh`로 templates를 깔고, 곧바로 RESEARCH_SPEC의 thesis 채우기로 진입.
 
-## 무엇이 깔리는가
+## 머신당 1번 클론 (본체 모델)
 
-**전역 (`~/.claude/`)** — symlink, 본체 업데이트 자동 전파
-- `~/.claude/CLAUDE.md` → 4원칙(Think Before / Simplicity / Surgical / Goal-Driven) + 로보틱스 도메인
-- `~/.claude/commands/harness.md` → `/harness` 슬래시 커맨드
+dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 클론하지 않음.
 
-**프로젝트 (`/path/to/project/`)** — copy, 자유 편집
-- `CLAUDE.md` — 프로젝트 thesis · 현재 plan · 핵심 디렉토리
-- `.gitignore` — 로보틱스용 (data/, ckpt/, runs/, wandb/, *.pt, ...)
-- `docs/CLAUDE.md` — docs/ 안내
-- `docs/RESEARCH_SPEC.md` — 7섹션 spec 양식
-- `docs/ARCHITECTURE.md` — configs/src/scripts/libs/data/ckpt 레이아웃
-- `docs/plans/CLAUDE.md`, `docs/done/CLAUDE.md` — 폴더별 작성 가이드
+```
+~/                                            # 어느 머신이든
+├── .claude/
+│   ├── CLAUDE.md  ───────────────────┐       # symlink (4원칙 + 도메인)
+│   └── commands/harness.md  ─────────┤       # symlink (/harness)
+│                                      │
+└── Workspace/sangjun_noh/for_claude/  │
+    ├── dinnno-harness/   ◀───────────┘       # ★ 본체 (1번 클론)
+    │   ├── CLAUDE.md, commands/, apply.sh
+    │   └── templates/{CLAUDE.md, gitignore, docs/...}
+    │
+    ├── paper-A/                               # 프로젝트 1 (자체 git)
+    │   ├── CLAUDE.md, .gitignore   ← templates cp (자유 편집)
+    │   └── docs/{RESEARCH_SPEC, ARCHITECTURE, plans/, done/}
+    │
+    └── paper-B/                               # 프로젝트 2
+        └── ...
+```
+
+## 본체 → 프로젝트 업데이트 흐름
+
+| 본체에서 바꾼 것 | 자동 반영? | 기존 프로젝트 |
+|---|---|---|
+| `CLAUDE.md`, `commands/harness.md` | ✓ symlink — 새 세션부터 즉시 | n/a |
+| `templates/*` | ✗ 이미 깔린 사본은 영향 없음 | 그 프로젝트에서 `./apply.sh <경로>` 재실행 → `cp -n`이라 **새 파일만** 추가, 기존 사본은 그대로 |
 
 ## 사용 흐름
 
 1. 새 논문 프로젝트 시작 → `./apply.sh /path/to/proj`
 2. `docs/RESEARCH_SPEC.md` 작성 (thesis 채울 때까지)
-3. Claude 세션 띄울 때마다 `/harness` 입력 → 현황 파악 후 그 세션의 단위 작업 진입
+3. Claude 세션 띄울 때마다 `/harness` 입력 → 그 세션의 단위 작업 진입
 4. 한 세션 = 한 단위 작업 (spec 갱신 / 새 plan / plan 구현 / done 작성)
 
-## 편집 규칙
+## 다이어트 사이클 (월 1회)
 
-- 본체 (`dinnno-harness/`)에서만 편집. 전역 `~/.claude/CLAUDE.md`와 `~/.claude/commands/harness.md`는 symlink — 본체 편집 후 git pull로 자동 전파.
-- 프로젝트의 `CLAUDE.md`, `docs/*.md`는 copy이므로 자유 편집. 본체 변경은 새 프로젝트부터 반영.
+1. 사용 중 거추장스러운 가이드라인/줄 발견
+2. 본체 `dinnno-harness/`에서 그 줄 삭제 → commit
+3. 다음 새 세션부터 전역 즉시 적용 / 새 프로젝트부터 templates 적용
+
+## 다중 머신 / 백업
+
+```bash
+# 본체에 GitHub remote (1회)
+gh repo create dinnno-harness --private --source=. --remote=origin --push
+
+# 다른 머신
+git clone <url> ~/Workspace/sangjun_noh/for_claude/dinnno-harness
+cd ~/Workspace/sangjun_noh/for_claude/dinnno-harness && ./apply.sh --global
+
+# 동기화
+git -C ~/Workspace/sangjun_noh/for_claude/dinnno-harness pull
+```
 
 ## vanilla 스킬 활용
 
