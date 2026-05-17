@@ -2,7 +2,21 @@
 
 로보틱스 AI 연구용 vanilla Claude Code 하네스. 전역 행동 규약 + 논문 단위 프로젝트 골격.
 
-## 설치
+## Claude Code 설치 (Ubuntu)
+
+```bash
+# Node.js 18+ 필요. 미설치 시:
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Claude Code 본체
+npm install -g @anthropic-ai/claude-code
+
+# 로그인 (브라우저 띄움)
+claude
+```
+
+## 하네스 설치
 
 ```bash
 # 1회: 전역 행동 규약과 /harness 슬래시 커맨드를 ~/.claude/에 symlink
@@ -11,6 +25,16 @@
 # 프로젝트마다: 골격을 깔기 (이미 있는 파일은 skip)
 ./apply.sh /path/to/paper-project
 ```
+
+## Claude로 한 줄 설치 (진행 중인 프로젝트에)
+
+진행 중인 프로젝트 디렉토리에서 `claude`를 띄운 뒤 다음을 입력:
+
+```
+~/Workspace/sangjun_noh/for_claude/dinnno-harness/apply.sh $(pwd) 실행하고, docs/RESEARCH_SPEC.md 작성 같이 시작하자.
+```
+
+→ Claude가 `apply.sh`로 templates를 깔고, 곧바로 RESEARCH_SPEC의 thesis 채우기로 진입.
 
 ## 무엇이 깔리는가
 
@@ -40,10 +64,33 @@
 
 ## vanilla 스킬 활용
 
-별도 스킬을 박지 않음. 다음을 활용:
-- `/simplify` — 코드 정리 (dead code, duplicate logic)
+이 하네스는 별도 스킬을 박지 않음. Claude Code 빌트인과 marketplace plugin을 활용.
+
+**빌트인 (설치 불필요)**
+- `/simplify` — 코드 정리 (dead code, duplicate logic, reuse)
 - `/init` — 새 CLAUDE.md 자동 생성
-- `/claude-md-management` — CLAUDE.md 품질 점검·개선
+- `/review`, `/security-review` — diff 리뷰
+
+**marketplace plugins (사용자가 직접 설치)**
+
+Claude Code 안에서 `/plugin` 입력 → marketplace에서 검색 → 설치, 또는 `~/.claude/settings.json`의 `enabledPlugins`에 추가:
+
+| Plugin | 용도 | 출처 |
+|--------|------|------|
+| `claude-md-management` | `/claude-md-improver` (CLAUDE.md 품질 점검), `/revise-claude-md` | `claude-plugins-official` |
+| `code-review` | `/code-review` (PR/diff 리뷰) | `claude-plugins-official` |
+| `skill-creator` | 필요한 skill을 그때그때 만들 때 | `claude-plugins-official` |
+| `claude-code-setup` | `/claude-automation-recommender` (hooks/permissions 자동화 추천) | `claude-plugins-official` |
+| `session-report` | 세션 종료 시 작업 리포트 | `claude-plugins-official` |
+
+설치 예시 (`~/.claude/settings.json`):
+```json
+"enabledPlugins": {
+  "claude-md-management@claude-plugins-official": true,
+  "code-review@claude-plugins-official": true,
+  "skill-creator@claude-plugins-official": true
+}
+```
 
 ## 작성 원칙 (CLAUDE.md / docs)
 
