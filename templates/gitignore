@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.env
+.python-version
+
+# Data & artifacts (robotics)
+data/
+ckpt/
+runs/
+outputs/
+wandb/
+logs/
+*.pt
+*.pth
+*.ckpt
+*.npz
+*.h5
+
+# Notebooks
+.ipynb_checkpoints/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
