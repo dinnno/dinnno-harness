@@ -18,6 +18,12 @@
 
 단위가 명확하면 confirm 후 진행. 단위 식별 자체가 모호하면 더 깊이 물어 명확히 한 뒤에야 dispatch — 잘못된 단위로 agent 부르는 건 가장 비싼 실수.
 
+### 권장 진입
+- (a) spec 갱신: 단순 수치/문구 수정은 직행. 비교 축/thesis 손대면 plan mode 후 진입.
+- (b) 새 plan: plan mode로 설계 논의 → 합의 후 §3에서 `plan_v{N+1}_*.md` 작성.
+- (c) plan 구현: 직행. plan과 어긋나는 결정 필요해지면 그때 plan mode.
+- (d) done 작성: 직행.
+
 ## 3. 작업
 
 - 해당 폴더(`docs/plans/`, `docs/done/`, `src/`, ...)의 CLAUDE.md 가이드를 따른다.
