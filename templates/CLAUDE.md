@@ -5,6 +5,7 @@
 `<failure mechanism> + <principled fix>` — 채워지지 않으면 spec 작성부터.
 
 전체 스펙: `docs/RESEARCH_SPEC.md`
+Agent dispatch 규칙: `docs/CLAUDE_AGENTS.md` (`/harness` 진입 시 단위별 자동 분배).
 
 ## 현재 상태
 
