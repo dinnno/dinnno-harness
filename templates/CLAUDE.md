@@ -7,6 +7,8 @@
 전체 스펙: `docs/RESEARCH_SPEC.md`
 Agent dispatch 규칙: `docs/CLAUDE_AGENTS.md` (`/harness` 진입 시 단위별 자동 분배).
 
+이 프로젝트는 research 프로젝트다. 모든 Claude 세션은 `/harness`로 진입(없이 시작했어도 본문 §1-§4 묵시 적용). thesis(`docs/RESEARCH_SPEC.md §1`)가 모든 단위의 목적지 — 단순 엔지니어링 모드 ❌, 모듈 제안·실험 설계·검증 모드 ✓.
+
 ## 현재 상태
 
 - 마지막 plan: `docs/plans/plan_v{N}_*.md`

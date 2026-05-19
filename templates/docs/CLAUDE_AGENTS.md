@@ -1,6 +1,6 @@
 # Agent dispatch 규칙
 
-`/harness` 진입 시 Claude Code가 단위 작업을 식별하고 그 단위에 맞는 agent를 자동 분배할 때 따르는 규칙. **dispatch는 자동, 단위 경계는 사람.** 단위가 끝나면 다음 단위로 자동 chain 금지.
+`/harness` 진입 시 Claude Code가 단위 작업을 식별하고 그 단위에 맞는 agent를 자동 분배할 때 따르는 규칙. **dispatch는 자동, 단위 경계는 사람.** 단위가 끝나면 사용자에게 한 줄 보고 후 GO 받기 전엔 다음 단위로 넘어가지 않는다 (자동 chain ❌, 사용자 승인 chain ✓).
 
 `AGENTS.md`가 아니라 `CLAUDE_AGENTS.md`인 이유: 전자는 OpenAI Codex CLI가 작업 디렉토리에서 자동 로드하는 컨벤션. 이 파일은 Claude Code 전용 정책이므로 분리.
 
@@ -8,6 +8,8 @@
 
 | 단위 | 자동 dispatch | 무엇을 시키나 |
 | --- | --- | --- |
+| (a₀) init | 없음 (대부분) | — |
+| (a₀) ARCHITECTURE 단계, 기존 코드 있을 때 | `Explore` ×1 | 실제 디렉토리 트리·핵심 모듈 매핑. 사용자 검증 input |
 | (a) spec 갱신 | 없음 (대부분) | — |
 | (a) numbers 정합 필요 시 | `general-purpose` ×1 | spec §thesis와 done numbers·wandb run 결론 비교, 모순 나열 |
 | (b) 새 plan 작성 | `Explore` ‖ `Plan` 항상 병렬 | Explore: 관련 함수·loss·call-graph + 이미 sweep된 `configs/exp_*` 위치. Plan: ablation 우선순위, 옵션 A/B 비교, configs-only vs 코드 변경 분기 |
@@ -15,10 +17,10 @@
 | (c) plan 구현 | 없음 (default) | — |
 | (c) broad lookup 필요 시 | `Explore` ×1 | 함수 호출 그래프 같은 한 번짜리 broad 탐색 (grep 2회로 안 풀릴 때만) |
 | (d) done 작성 | `general-purpose` ×1 (사후) | done 초안 직후, 결론과 evidence(numbers·wandb·ckpt)가 spec §thesis를 지지하는지 self-check |
-| 모든 단위, 토큰 폭발 입력 등장 시 | **`codex:rescue` 자동** | PDF·대용량 로그·configs sweep dump 요약. 본 세션은 요약만 받아 통합 |
+| 모든 단위, 토큰 폭발 입력 등장 시 | **`codex:rescue` 자동** | PDF·대용량 로그·configs sweep dump 요약. 본 세션은 요약만 받아 통합. 또한 `docs/references/_INDEX.md`의 `status: pending` entry 분석도 같은 dispatch 경로 (현재 단위와 관련 있을 때만, 사용자 보고 후) |
 | plan/done/코드 외부 검증 | **수동** (사용자가 `codex:rescue` 호출) | 독립 LLM 비판. 산출물은 `plan_v{N}_*_codex.md`·`done_v{N}_codex.md` 별 파일 |
 
-병렬 호출 규칙: 같은 단위 안에서만 병렬. 단위 경계 넘는 chain 금지. dispatch 직전 한 줄 보고 의무, 사용자 STOP 가능.
+병렬 호출 규칙: 같은 단위 안에서만 병렬. 단위 경계 넘는 **자동** chain 금지 (사용자 승인 시 chain 가능). dispatch 직전 한 줄 보고 의무, 사용자 STOP 가능.
 
 ## Built-in agents
 
@@ -43,7 +45,8 @@
 
 ## 자주 하는 실수
 
-- 단위 경계 넘는 chain (plan 작성 → 자동으로 구현 진입) ❌
+- 사용자 명시적 GO 없는 단위 경계 chain (plan 작성 → "이제 구현 시작합니다" 자동 진입) ❌
+- 사용자 명시적 GO 후 같은 세션 chain — OK
 - Explore에 코드 수정 시킴 ❌ (read-only)
 - Plan을 (a)·(d) 같은 단발 사고에 부름 ❌
 - 1회 grep으로 끝날 일에 agent 부름 ❌

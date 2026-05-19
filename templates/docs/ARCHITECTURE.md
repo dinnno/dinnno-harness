@@ -19,7 +19,7 @@ project/
 - **src/** — 모든 코드. datasets, models, training loops, eval, sim wrappers.
 - **scripts/** — 진입점 (`train.py`, `eval.py`), 테스트, 플롯, setup shell.
 - **libs/** — 참조 repo. 절대 편집 금지.
-- **docs/** — spec, plan, done. (이 폴더의 `CLAUDE.md` 참조)
+- **docs/** — spec, plan, done, progress, references. (이 폴더의 `_GUIDE.md` 참조)
 
 ## 선택사항 (필요할 때만 추가)
 

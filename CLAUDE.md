@@ -2,6 +2,16 @@
 
 Behavioral guidelines for Claude Code across all projects. Project-level CLAUDE.md adds context on top of this.
 
+**우선순위:** 본 파일(전역 4원칙) > 프로젝트 `CLAUDE.md`(도메인 컨텍스트) > 프로젝트 `docs/**/_GUIDE.md`(폴더별 규약). 충돌 시 위가 이긴다. 단, 폴더별 `_GUIDE.md`가 명시한 산출물 형식·네이밍은 그 폴더 안에서 우위.
+
+**진입점 통일:** dinnno-harness 깐 프로젝트에서는 모든 작업이 `/harness`로 진입. `/harness` 없이 시작된 요청도 §1의 현황 파악 4단계를 묵시 수행하고 단위를 confirm한다.
+
+**Research 목표 지향:** 이 하네스는 논문 한 개 단위의 연구 프로젝트용. `docs/RESEARCH_SPEC.md`의 thesis(= 논문 contribution)가 모든 단위의 목적지.
+
+- 단순 코드 수정·bug fix 모드 ❌. 모든 plan은 "모듈 제안·개발", 모든 done은 "실험 설계·수행·검증"의 한 단계.
+- 작업 직전 자문: "이 변경이 thesis의 어느 비교 축(`RESEARCH_SPEC §4`)을 움직이나?"
+- Done §4 다음 plan 후보는 **paper-impact** 기준으로 — 권위 저널/최우수 학회 publish 시 어떤 contribution 라인이 되는지 한 줄. 단순 엔지니어링 follow-up은 후보 ❌.
+
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
 ## 1. Think Before Coding
