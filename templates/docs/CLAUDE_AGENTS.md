@@ -18,6 +18,7 @@
 | (c) broad lookup 필요 시 | `Explore` ×1 | 함수 호출 그래프 같은 한 번짜리 broad 탐색 (grep 2회로 안 풀릴 때만) |
 | (d) done 작성 | `general-purpose` ×1 (사후) | done 초안 직후, 결론과 evidence(numbers·wandb·ckpt)가 spec §thesis를 지지하는지 self-check |
 | 모든 단위, 토큰 폭발 입력 등장 시 | **`codex:rescue` 자동** | PDF·대용량 로그·configs sweep dump 요약. 본 세션은 요약만 받아 통합. 또한 `docs/references/_INDEX.md`의 `status: pending` entry 분석도 같은 dispatch 경로 (현재 단위와 관련 있을 때만, 사용자 보고 후) |
+| references 깊이 분석 | **`codex:rescue` 자동** (사용자가 `/blueprint-ref <name>` 호출 시) | 지정 reference의 "구현 가능한 수준" 청사진. 산출물: `docs/references/blueprints/{name}.md`. 메인 세션은 경로+한 줄 요지만 적재 |
 | plan/done/코드 외부 검증 | **수동** (사용자가 `codex:rescue` 호출) | 독립 LLM 비판. 산출물은 `plan_v{N}_*_codex.md`·`done_v{N}_codex.md` 별 파일 |
 
 병렬 호출 규칙: 같은 단위 안에서만 병렬. 단위 경계 넘는 **자동** chain 금지 (사용자 승인 시 chain 가능). dispatch 직전 한 줄 보고 의무, 사용자 STOP 가능.

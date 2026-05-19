@@ -21,7 +21,6 @@ backup_if_exists() {
 install_global() {
   local target_md="$HOME/.claude/CLAUDE.md"
   local target_cmd_dir="$HOME/.claude/commands"
-  local target_cmd="$target_cmd_dir/harness.md"
 
   mkdir -p "$HOME/.claude" "$target_cmd_dir"
 
@@ -29,9 +28,15 @@ install_global() {
   ln -s "$HARNESS_DIR/CLAUDE.md" "$target_md"
   echo "linked: $target_md -> $HARNESS_DIR/CLAUDE.md"
 
-  backup_if_exists "$target_cmd"
-  ln -s "$HARNESS_DIR/commands/harness.md" "$target_cmd"
-  echo "linked: $target_cmd -> $HARNESS_DIR/commands/harness.md"
+  for cmd in "$HARNESS_DIR/commands/"*.md; do
+    [[ -e "$cmd" ]] || continue
+    local name
+    name="$(basename "$cmd")"
+    local target="$target_cmd_dir/$name"
+    backup_if_exists "$target"
+    ln -s "$cmd" "$target"
+    echo "linked: $target -> $cmd"
+  done
 
   echo "done. open a new Claude Code session and try /harness"
 }
