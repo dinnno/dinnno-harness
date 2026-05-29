@@ -19,12 +19,9 @@
 
 `RESEARCH_SPEC.md`는 짧고 진하게(7개 슬롯) 쓴다. 기존에 긴 design doc·논문 노트·과한 spec이 있어도 **그걸 요약해서 박지 말 것 — 무조건 reject**. 다음 순서로 사용자와 깊게 합의한 결과만 슬롯에 적는다.
 
-**Round 정의 (둘 다 만족해야 다음 슬롯으로):**
+**합의 깊이 (강제 카운터 아님, 가이드):**
 
-- **≥3 round** 의 질문-응답을 사용자와 주고받는다 (Claude 질문 1회 + 사용자 응답 1회 = 1 round).
-- **AND** 사용자가 "그만해도 됨" / "넘어가" 식으로 명시적으로 종료 의사를 발화.
-
-두 조건이 동시에 충족돼야 한 슬롯이 closed. 사용자가 3 round 안 됐는데 "넘어가" 해도 Claude는 "아직 X가 모호한데 정말 OK?"를 한 번 더 묻고 그래도 OK면 진행.
+각 슬롯은 사용자와 충분히 문답해 합의된 뒤 닫는다 — 한 번 묻고 끝내지 마라. 사용자가 "넘어가자" 하면, 아직 모호한 점이 있으면 "X가 아직 불명확한데 정말 OK?"를 한 번 더 확인하고 그래도 OK면 진행. **핵심은 round 횟수가 아니라 sleepwalking 방지** — Claude 혼자 채우지 않고 사용자 발화에서 끌어냈는가.
 
 **순서:**
 
@@ -48,10 +45,10 @@
 
 `apply.sh` 직후 또는 placeholder 남은 상태에서 `/harness` 진입 시. 5단계 순서. 모든 단계에서 **추측 박치기 reject** (사용자 발화 기반만).
 
-1. **프로젝트 루트 `CLAUDE.md`** — 도메인 컨텍스트 인터뷰. 묻기: 시뮬레이터·로봇 플랫폼·데이터셋·자주 쓰는 명령어. ≥3 round AND 사용자 종료.
-2. **`docs/ARCHITECTURE.md`** — 기존 코드 있으면 `Explore` ×1로 실제 트리 매핑 → 사용자 검증. 신규면 사용자가 계획한 구조 묻기. ≥3 round AND 사용자 종료.
+1. **프로젝트 루트 `CLAUDE.md`** — 도메인 컨텍스트 인터뷰. 묻기: 시뮬레이터·로봇 플랫폼·데이터셋·자주 쓰는 명령어. 충분히 합의될 때까지.
+2. **`docs/ARCHITECTURE.md`** — 기존 코드 있으면 `Explore` ×1로 실제 트리 매핑 → 사용자 검증. 신규면 사용자가 계획한 구조 묻기. 충분히 합의될 때까지.
 3. **`docs/RESEARCH_SPEC.md`** — §"RESEARCH_SPEC 작성/갱신 protocol" 따름 (가장 무거움).
-4. **`docs/progress.md` Phase** — RESEARCH_SPEC §6 채워진 후 Phase mile stone 정의. 한 번 합의로 OK (≥3 round 강제 X).
+4. **`docs/progress.md` Phase** — RESEARCH_SPEC §6 채워진 후 Phase mile stone 정의. 한 번 합의로 OK (가볍게).
 5. **`docs/references/_INDEX.md`** — "지금 참조하는 paper/repo 있나" 한 번 묻고 시드. 없으면 OK.
 
 **완료**: 검출된 placeholder 모두 해소 + progress.md Phase 1개 이상 + references 한 번 물어봄. 자동 chain ❌, 사용자 GO 시 (b)로 진입.

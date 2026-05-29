@@ -1,51 +1,50 @@
-이 세션은 dinnno-harness 워크플로우를 따른다. 작업의 최소 단위는 산출물 한 묶음 (spec 갱신 / 새 plan / plan 구현 / done 작성 중 하나). 기본은 한 세션 = 한 단위지만, 단위가 짧게 끝났고 사용자가 다음 단위로 명시적으로 GO 하면 같은 세션에서 이어서 한다. context 남은 토큰을 핑계로 자르지도, 자동 chain 하지도 않는다.
+이 세션은 dinnno-harness 워크플로우를 따른다. 강제 게이트가 아니라 **연구 지향 + 산출물 구조**를 주는 얇은 오리엔테이션이다. 판단은 너에게 맡긴다 — 전역 4원칙(`~/.claude/CLAUDE.md`)을 따르되 단계를 기계적으로 밟지 마라.
 
-## 1. 현황 파악
+**기본 norm:** 한 가설 = 한 세션 = 한 터미널. 가설 *내부*는 명확화(Setup) → 구현·학습(Execute) → 판정(Verdict)으로 자연스럽게 흐른다. 가설 *경계*는 사람이 긋는다 — **다음 가설로 자동 chain ❌** (새 가설은 새 터미널).
 
-- `docs/CLAUDE_AGENTS.md` 먼저 읽어 agent dispatch 매트릭스를 적재한다.
-- `docs/RESEARCH_SPEC.md` 읽고 thesis와 비교 축 확인.
-- **(a₀) init 트리거**: 프로젝트 루트 `CLAUDE.md`, `docs/RESEARCH_SPEC.md`, `docs/ARCHITECTURE.md` 중 `{...}` placeholder가 남아있거나 RESEARCH_SPEC §1 thesis가 "<failure mechanism> + <principled fix>" 형태가 아니면 (a₀) init 단위 진입. `docs/_GUIDE.md` §"Init (a₀) protocol" 따름.
-- `docs/plans/` 안의 마지막 `plan_v{N}_*.md` 확인 (밑줄 시작 `_plan_template.md`는 무시).
-- `docs/done/` 안의 마지막 `done_v{N}.md` 확인 (밑줄 시작 무시).
-- `docs/references/_INDEX.md`의 `status: pending` 행이 있고 **현재 단위와 관련 있어 보이면** 사용자에게 한 줄 보고 후 `codex:rescue`로 분석 dispatch. summary가 생기면 메인 세션은 summary만 적재.
-- 새 프로젝트거나 코드 베이스 첫 접촉이면 `Explore` 1개 자동 dispatch — `docs/CLAUDE_AGENTS.md` 매트릭스 "새 프로젝트 첫 plan_v0" 행.
+## 1. 진입 시 적재
 
-## 2. 이 세션이 할 일 판단
+- `docs/RESEARCH_SPEC.md` — thesis(§1)와 비교 축(§4) 확인. 빈 슬롯/placeholder 있으면 사용자에게 경고만.
+- `docs/progress.md` — 어디까지 왔는지. `docs/LEARNINGS.md` — 반복 실수 방지.
+- `docs/plans/`·`docs/done/`의 마지막 `v{N}` 확인 (`_template` 무시).
 
-위 현황 기준으로 다음 중 무엇인지 사용자에게 한 줄로 확인:
-- (a₀) **init** — placeholder 박힌 메타 .md를 사용자와 함께 채우기 (프로젝트 루트 CLAUDE → ARCHITECTURE → RESEARCH_SPEC → progress → references 순서)
-- (a) spec 갱신 — spec이 실험 결과와 어긋남
-- (b) 새 `plan_v{N+1}_*.md` 작성 — 마지막 plan이 닫혔고 다음 실험 시작
-- (c) 진행 중 plan 구현 — plan은 있고 done은 없음
-- (d) `done_v{N}.md` 작성 또는 외부 리뷰 반영 수정
+## 2. 이 세션이 할 일 한 줄 confirm
 
-단위가 명확하면 confirm 후 진행. 단위 식별 자체가 모호하면 더 깊이 물어 명확히 한 뒤에야 dispatch — 잘못된 단위로 agent 부르는 건 가장 비싼 실수.
+현황으로 다음 중 무엇인지 사용자에게 한 줄로 확인하고 진입:
 
-### 권장 진입
-- (a₀) init: `docs/_GUIDE.md` §"Init (a₀) protocol" 따름. 5단계 모두 사용자 발화 기반 (≥3 round per 단계 1-3, 추측 박치기 reject).
-- (a) spec 갱신: 단순 수치/문구 수정은 직행. 비교 축/thesis 손대거나 **새 spec 초안 작성**이면 plan mode 후 `docs/_GUIDE.md` §"RESEARCH_SPEC 작성/갱신 protocol"을 따른다 (사용자와 ≥3 round 인터뷰, 추측 기반 요약 박치기 reject).
-- (b) 새 plan: plan mode로 설계 논의 → 합의 후 §3에서 `plan_v{N+1}_*.md` 작성. `_plan_template.md` 복사로 시작.
-- (c) plan 구현: 직행. plan과 어긋나는 결정 필요해지면 그때 plan mode.
-- (d) done 작성: 직행. `_done_template.md` 복사로 시작.
+- **(a₀) init** — placeholder 채우기 (`docs/_GUIDE.md` §Init protocol). 루트 `CLAUDE.md`·`RESEARCH_SPEC.md`·`ARCHITECTURE.md`에 `{...}` 남았거나 thesis가 `<failure>+<fix>` 형태 아니면 여기부터.
+- **(a) spec 갱신** — thesis/비교 축 변경. 영향이 크니 plan mode 권장.
+- **(experiment v{N})** — 새 가설 또는 진행 중 가설 이어가기.
 
-## 3. 작업
+단위가 모호하면 더 물어 명확히 한 뒤 시작. **모호한데 추측으로 밀어붙이는 게 가장 비싼 실수.**
 
-- 해당 폴더(`docs/`, `docs/plans/`, `docs/done/`, `docs/references/`, ...)의 `_GUIDE.md`를 따른다 (`src/` 등 코드 폴더는 기존 `CLAUDE.md` 또는 README 따름).
-- **목표 지향 자기점검:** 작업 시작 전 한 줄로 자문 → "이 단위가 `RESEARCH_SPEC.md §1 thesis` 또는 §4 비교 축의 어디를 움직이나?" 답이 안 나오면 단위 자체를 의심하고 사용자에게 보고.
-- **(c) plan 구현 단위 진입 시**: plan §6 TODO 적재 → 첫 미체크 항목부터 시작 (사용자가 다른 항목 지정하면 그것 우선). 세션 종료 시 §6 체크 갱신 + §5 세션 로그 한 줄 추가.
-- 전역 4원칙(Think Before / Simplicity / Surgical / Goal-Driven) 준수.
-- Scope 밖 파일은 건드리지 않는다.
+## 3. 작업 흐름 (experiment)
 
-단위별 agent dispatch는 `docs/CLAUDE_AGENTS.md` 매트릭스 따름. 공통: dispatch 직전 한 줄 보고, 사용자 STOP 가능.
+Setup→Execute→Verdict는 게이트가 아니라 자연스러운 진행이다.
 
-## 4. 세션 정리
+- **Setup** — 가설 명확화. `_plan_template.md` 복사 → `plan_v{N}_*.md` 작성. 결정 무게 크면 plan mode. 끝나면 "이 plan으로 Execute 시작?" 한 번 confirm.
+- **Execute** — 구현 → 학습/평가. 학습이 길면 `run_in_background` + `Monitor`. plan §6 TODO 첫 미체크부터, 종료 시 체크 갱신 + §5 로그 한 줄. 단순 구현은 plan mode 불필요.
+- **Verdict** — `_done_template.md` 복사 → `done_v{N}.md`. negative면 "이 가설 폐기, 새 가설은 새 터미널" 안내 후 종료. positive면 §4 다음 후보 도출(paper-impact 기준).
 
-- 이번에 변경한 파일·결정 사항을 plan 또는 done 파일에 한 줄로 추가.
-- 다음 세션이 이 파일만 읽고도 이어받을 수 있게.
+**자기점검:** 각 단계 직전 한 줄 자문 — "이 작업이 `RESEARCH_SPEC §1 thesis` 또는 §4 비교 축의 어디를 움직이나?" 답 안 나오면 단위 자체를 의심.
+
+## 4. Agent 위임 (강제 아님 — 필요할 때만)
+
+- **codex:rescue** — 토큰 무거운 입력(PDF·대용량 로그·configs 다발·`libs/` 광역 scan)이나 깊은 독립 reasoning(학습 발산 진단, 예상-실제 갭). 본 세션은 요약/결론만 받는다. PDF·대용량 원본을 본 세션이 직접 Read ❌.
+- **Explore** — 넓은 코드 탐색(call-graph 등). grep 두어 번으로 풀릴 일엔 부르지 않는다.
+- **Plan** — 옵션 비교·ablation 우선순위 등 무게 있는 사고. 단발 판단엔 안 부른다.
+- **writer ≠ reviewer** — Verdict 자기점검(`general-purpose` ×1)과 외부 검증(`codex:rescue`, 수동)은 본 세션과 분리. 외부 검증 산출물은 별 파일(`done_v{N}_codex.md`).
+- `docs/references/`의 `status: pending`이 현재 단위와 관련 있으면 한 줄 보고 후 codex로 요약 dispatch. 깊이 분석은 `/blueprint-ref <name>`.
+
+dispatch 직전 한 줄 보고, 사용자 STOP 가능.
+
+## 5. 세션 정리
+
+- plan 또는 done에 이번 변경/결정 한 줄.
+- 반복 실수/교훈 발견 시 `docs/LEARNINGS.md`에 한 줄 직접 추가.
 
 ## 하지 않는 것
 
-- **자동** chain 금지: 한 단위 끝났을 때 사용자 확인 없이 다음 단위로 진입하지 않는다. plan 작성이 끝나면 "이 plan 바로 구현 시작할까, 아니면 끊을까?"를 한 줄로 묻고 응답을 기다린다.
-- 사용자가 "그대로 구현 가" / "다음 단위 ㄱ" 등 명시적 GO를 주면 같은 세션에서 다음 단위 진입 OK. 진입 직전 새 단위의 §2 확인 한 줄 다시 보고.
-- 사용자 승인 없이 git commit/push.
-- 실패 시 자동 재시도. 실패 사실을 사용자에게 보고하고 결정 받기.
+- 가설 경계 자동 chain ❌ (Verdict 끝났다고 다음 가설로 자동 진입 안 함).
+- 사용자 승인 없이 git commit/push ❌.
+- 실패 시 자동 재시도 ❌ — 실패 보고 후 결정 받기.

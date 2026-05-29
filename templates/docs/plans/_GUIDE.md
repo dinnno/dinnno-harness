@@ -2,9 +2,11 @@
 
 이 폴더는 `plan_v{N}_{short-name}.md` 형식의 실험별 plan을 담는다.
 
-## 1 plan = 1 실험 = 1~2주 = 1 PR
+## 1 plan = 1 가설 = 1 세션 = 1 터미널
 
-크기가 안 맞으면 쪼개라. 한 plan이 여러 ablation을 동시에 다루면 검증이 약해진다.
+한 가설의 풀 사이클(Setup→Execute→Verdict)이 한 세션에서 흐른다. 이 파일은 **Setup의 산출물**. Setup 끝나면 사용자 confirm 1회 후 Execute로 진입. 학습은 Execute 안. done은 Verdict 산출물.
+
+여러 ablation을 한 plan에 묶으면 검증이 약해진다 — 가설별로 쪼개고 각각 새 터미널.
 
 ## 각 plan에 들어가는 것
 
