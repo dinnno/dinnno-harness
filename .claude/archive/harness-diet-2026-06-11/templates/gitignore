@@ -19,18 +19,6 @@ logs/
 *.ckpt
 *.npz
 *.h5
-*.hdf5
-*.safetensors
-*.onnx
-*.bag
-*.mcap
-*.usd
-*.usda
-# rollout/eval videos (논문 figure 영상은 추적되게 디렉토리 스코프)
-runs/**/*.mp4
-runs/**/*.avi
-outputs/**/*.mp4
-outputs/**/*.avi
 
 # Notebooks
 .ipynb_checkpoints/

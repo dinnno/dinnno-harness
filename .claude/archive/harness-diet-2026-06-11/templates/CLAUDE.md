@@ -11,7 +11,6 @@ Agent 위임 가이드: `/harness` §4 (codex 위임 / Explore / writer≠review
 
 ## 현재 상태
 
-- 한눈에: `docs/progress.md` (cross-version 타임라인 + repro 헤더)
 - 마지막 plan: `docs/plans/plan_v{N}_*.md`
 - 마지막 done: `docs/done/done_v{N}.md`
 - 다음 실험 후보: (한 줄)
@@ -37,4 +36,4 @@ Agent 위임 가이드: `/harness` §4 (codex 위임 / Explore / writer≠review
 
 ---
 
-전역 행동 규약은 `~/.claude/CLAUDE.md` 참조.
+전역 행동 규약은 `~/.claude/CLAUDE.md` 참조. 작성 원칙: Specific / Structured / Reviewed / Concise (100줄 이하).

@@ -2,7 +2,7 @@
 
 Behavioral guidelines for Claude Code across all projects. Project-level CLAUDE.md adds context on top of this.
 
-**우선순위:** 본 파일(전역 4원칙) > 프로젝트 `CLAUDE.md`(도메인 컨텍스트) > 프로젝트 `docs/**/_GUIDE.md` 또는 폴더 `CLAUDE.md`(폴더별 규약). 충돌 시 위가 이긴다. 단, 그 폴더별 규약이 명시한 산출물 형식·네이밍은 그 폴더 안에서 우위.
+**우선순위:** 본 파일(전역 4원칙) > 프로젝트 `CLAUDE.md`(도메인 컨텍스트) > 프로젝트 `docs/**/_GUIDE.md`(폴더별 규약). 충돌 시 위가 이긴다. 단, 폴더별 `_GUIDE.md`가 명시한 산출물 형식·네이밍은 그 폴더 안에서 우위.
 
 **진입점 통일:** dinnno-harness 깐 프로젝트에서는 모든 작업이 `/harness`로 진입. `/harness` 없이 시작된 요청도 §1의 현황 적재(spec·progress·learnings)를 묵시 수행하고 단위를 confirm한다.
 
@@ -16,11 +16,25 @@ Behavioral guidelines for Claude Code across all projects. Project-level CLAUDE.
 
 ## 1. Think Before Coding
 
-**Don't assume. Surface tradeoffs.** State assumptions explicitly; if uncertain or multiple interpretations exist, ask — don't pick silently. If a simpler approach exists, say so and push back when warranted.
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
+
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them — don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
 
 ## 2. Simplicity First
 
-**Minimum code that solves the problem. Nothing speculative.** No features, abstractions, or flexibility beyond what was asked. No error handling for impossible scenarios. If you write 200 lines and it could be 50, rewrite it.
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
 ## 3. Surgical Changes
 
@@ -70,3 +84,9 @@ Conventions:
 - `libs/` is read-only (vendored third-party). Never edit.
 - Prefer Python; use shell only for thin launch scripts.
 
+## Writing guidelines for CLAUDE.md files
+
+- **Specific** — concrete tools/commands, not vague advice
+- **Structured** — headings and lists, scannable
+- **Reviewed** — diet once a month, drop stale lines
+- **Concise** — 100 lines or fewer per file

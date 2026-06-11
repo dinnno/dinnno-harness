@@ -80,9 +80,9 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 
 ## 다이어트 사이클 (월 1회)
 
-1. 거추장스러운 가이드라인/줄 발견 (또는 `/claude-md-improver`로 CLAUDE.md 감사)
-2. 본체 `dinnno-harness/`에서 삭제 → commit
-3. 다음 새 세션부터 전역 즉시 / 새 프로젝트부터 templates 적용
+1. 사용 중 거추장스러운 가이드라인/줄 발견
+2. 본체 `dinnno-harness/`에서 그 줄 삭제 → commit
+3. 다음 새 세션부터 전역 즉시 적용 / 새 프로젝트부터 templates 적용
 
 ## 다중 머신 / 백업
 
@@ -100,11 +100,33 @@ git -C ~/Workspace/sangjun_noh/for_claude/dinnno-harness pull
 
 ## vanilla 스킬 활용
 
-이 하네스는 별도 스킬을 박지 않음. Claude Code 빌트인 + marketplace plugin 활용.
+이 하네스는 별도 스킬을 박지 않음. Claude Code 빌트인과 marketplace plugin을 활용.
 
-**빌트인 (설치 불필요)**: `/simplify`(코드 정리), `/init`(CLAUDE.md 생성), `/review`·`/security-review`(diff 리뷰), `/claude-md-improver`(CLAUDE.md 품질 감사 — 월간 다이어트용).
+**빌트인 (설치 불필요)**
+- `/simplify` — 코드 정리 (dead code, duplicate logic, reuse)
+- `/init` — 새 CLAUDE.md 자동 생성
+- `/review`, `/security-review` — diff 리뷰
 
-**marketplace plugins**: Claude Code에서 `/plugin`으로 검색·설치. 현재 켠 목록은 `~/.claude/settings.json`의 `enabledPlugins` 참조(이 표를 손으로 동기화하지 않음 — 표류 방지).
+**marketplace plugins (사용자가 직접 설치)**
+
+Claude Code 안에서 `/plugin` 입력 → marketplace에서 검색 → 설치, 또는 `~/.claude/settings.json`의 `enabledPlugins`에 추가:
+
+| Plugin | 용도 | 출처 |
+|--------|------|------|
+| `claude-md-management` | `/claude-md-improver` (CLAUDE.md 품질 점검), `/revise-claude-md` | `claude-plugins-official` |
+| `code-review` | `/code-review` (PR/diff 리뷰) | `claude-plugins-official` |
+| `skill-creator` | 필요한 skill을 그때그때 만들 때 | `claude-plugins-official` |
+| `claude-code-setup` | `/claude-automation-recommender` (hooks/permissions 자동화 추천) | `claude-plugins-official` |
+| `session-report` | 세션 종료 시 작업 리포트 | `claude-plugins-official` |
+
+설치 예시 (`~/.claude/settings.json`):
+```json
+"enabledPlugins": {
+  "claude-md-management@claude-plugins-official": true,
+  "code-review@claude-plugins-official": true,
+  "skill-creator@claude-plugins-official": true
+}
+```
 
 ## 작성 원칙 (CLAUDE.md / docs)
 
