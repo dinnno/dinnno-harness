@@ -77,7 +77,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 | `/opus-guide` | 비-Fable 모델(Opus 4.8 등) 세션에서 `/harness` **직전에** 로드. 행동 보강 델타 레이어(rules-only, 워크플로 시작 ❌) |
 | `/add-ref <url>` | 논문·레포 URL을 마주친 **즉시**. `references/_INDEX.md`에 등록만 (fetch·분석 ❌) |
 | `/blueprint-ref <name>` | 등록된 자료를 **구현하기로 정했을 때**. codex:rescue로 구현 수준 청사진 생성 |
-| `/audit` | 프로젝트 전체 정기 점검·인수인계. **Fable 5 이상 전용** — 검토→FIX-NOW 수정→`HANDOFF_TO_OPUS.md` 작성, Opus가 이어받음 |
+| `/audit` | 프로젝트 전체 정기 점검·인수인계. **Fable 5 이상 전용** — 검토→인터뷰 합의→HANDOFF 골격 생성→수정(수정마다 갱신)→Opus가 이어받음(중간에 끊겨도 그 지점부터) |
 
 ## 사용 흐름
 
@@ -122,4 +122,3 @@ git -C ~/Workspace/sangjun_noh/for_claude/dinnno-harness pull
 - **Structured** — 헤딩·리스트로 스캔 가능
 - **Reviewed** — 월 1회 다이어트
 - **Concise** — 100줄 이하
-=

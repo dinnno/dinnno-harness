@@ -4,7 +4,7 @@ Behavioral guidelines for Claude Code across all projects. Project-level CLAUDE.
 
 **우선순위:** 본 파일(전역 4원칙) > 프로젝트 `CLAUDE.md`(도메인 컨텍스트) > 프로젝트 `docs/**/_GUIDE.md` 또는 폴더 `CLAUDE.md`(폴더별 규약). 충돌 시 위가 이긴다. 단, 그 폴더별 규약이 명시한 산출물 형식·네이밍은 그 폴더 안에서 우위.
 
-**진입점 통일:** dinnno-harness 깐 프로젝트에서는 모든 작업이 `/harness`로 진입. `/harness` 없이 시작된 요청도 §1의 현황 적재(spec·progress·learnings)를 묵시 수행하고 단위를 confirm한다.
+**진입점 통일:** dinnno-harness 깐 프로젝트에서는 모든 작업이 `/harness`로 진입. `/harness` 없이 시작된 요청도 §1의 현황 적재(spec·progress·learnings)를 묵시 수행하고 단위를 confirm한다. (예외: `/audit`과 그 `HANDOFF_TO_OPUS.md` 인계 세션은 해당 문서의 워크플로를 따른다.)
 
 **Research 목표 지향:** 이 하네스는 논문 한 개 단위의 연구 프로젝트용. `docs/RESEARCH_SPEC.md`의 thesis(= 논문 contribution)가 모든 단위의 목적지.
 
