@@ -60,7 +60,7 @@
 `docs/progress.md`는 한눈에 진척 보기용. 갱신 규칙:
 
 - **spec 단위 끝**: Phase 리스트와 Ablation Matrix 행 초기 생성/조정.
-- **plan 단위 끝**: 해당 ablation_id의 `plan` 컬럼에 파일명 박고 상태를 `running`.
+- **plan 단위 끝**: 타임라인에 `plan_v{N}_*` 행 추가, 해당 ablation_id 행의 상태를 `running`.
 - **done 단위 끝**: `done` 컬럼·`핵심 결론`·상태(`done`) 갱신. Phase 체크박스 충족 시 체크.
 - **done 단위 끝 (repro)**: 헤더 `last anchored commit`·seed·ckpt 경로·sim/real 태그 동시 갱신 (재현 삼각형 = seed+config+commit 완결).
 - 각 갱신은 done/plan 단위 작업 마지막 한 줄로. 별도 단위가 아니라 단위의 산출물.

@@ -19,7 +19,7 @@ claude
 ## 하네스 설치
 
 ```bash
-# 1회: 전역 행동 규약과 /harness 슬래시 커맨드를 ~/.claude/에 symlink
+# 1회: 전역 행동 규약과 커맨드 5종(/harness 등)을 ~/.claude/에 symlink
 ./apply.sh --global
 
 # 프로젝트마다: 골격을 깔기 (이미 있는 파일은 skip)
@@ -44,7 +44,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 ~/                                            # 어느 머신이든
 ├── .claude/
 │   ├── CLAUDE.md  ───────────────────┐       # symlink (4원칙 + 도메인)
-│   └── commands/harness.md  ─────────┤       # symlink (/harness)
+│   └── commands/*.md  ───────────────┤       # symlink (커맨드 5종)
 │                                      │
 └── Workspace/sangjun_noh/for_claude/  │
     ├── dinnno-harness/   ◀───────────┘       # ★ 본체 (1번 클론)
@@ -68,6 +68,16 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 |---|---|---|
 | `CLAUDE.md`, `commands/harness.md` | ✓ symlink — 새 세션부터 즉시 | n/a |
 | `templates/*` | ✗ 이미 깔린 사본은 영향 없음 | 그 프로젝트에서 `./apply.sh <경로>` 재실행 → `cp -n`이라 **새 파일만** 추가, 기존 사본은 그대로 |
+
+## 커맨드
+
+| 커맨드 | 언제 쓰나 |
+|---|---|
+| `/harness` | **모든 세션의 진입점.** 현황(spec·progress·LEARNINGS) 적재 → 단위(init/spec/experiment) confirm → Setup→Execute→Verdict |
+| `/opus-guide` | 비-Fable 모델(Opus 4.8 등) 세션에서 `/harness` **직전에** 로드. 행동 보강 델타 레이어(rules-only, 워크플로 시작 ❌) |
+| `/add-ref <url>` | 논문·레포 URL을 마주친 **즉시**. `references/_INDEX.md`에 등록만 (fetch·분석 ❌) |
+| `/blueprint-ref <name>` | 등록된 자료를 **구현하기로 정했을 때**. codex:rescue로 구현 수준 청사진 생성 |
+| `/audit` | 프로젝트 전체 정기 점검·인수인계. **Fable 5 이상 전용** — 검토→FIX-NOW 수정→`HANDOFF_TO_OPUS.md` 작성, Opus가 이어받음 |
 
 ## 사용 흐름
 
