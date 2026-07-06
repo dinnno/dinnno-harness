@@ -38,6 +38,18 @@ install_global() {
     echo "linked: $target -> $cmd"
   done
 
+  local target_agents_dir="$HOME/.claude/agents"
+  mkdir -p "$target_agents_dir"
+  for agentf in "$HARNESS_DIR/agents/"*.md; do
+    [[ -e "$agentf" ]] || continue
+    local aname
+    aname="$(basename "$agentf")"
+    local atarget="$target_agents_dir/$aname"
+    backup_if_exists "$atarget"
+    ln -s "$agentf" "$atarget"
+    echo "linked: $atarget -> $agentf"
+  done
+
   echo "done. open a new Claude Code session and try /harness"
 }
 

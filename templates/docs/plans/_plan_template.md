@@ -20,6 +20,9 @@
 - ablation: (RESEARCH_SPEC §6과 매핑)
 - metric: (RESEARCH_SPEC §4 비교 축)
 - 실행: (커맨드, 실로봇/sim, 예상 run 시간)
+- 성공 임계값: (§4 축별 비교군 대비 수치. 예: success ≥ baseline+10%p)
+- 정지 조건: (임계값 달성 / 루프 예산 소진 / experiment-level 이상 — 먼저 오는 것)
+- 루프 예산: (최대 재시도 N회 · 최대 GPU h. 이 예산 안에서는 code-level 조정→재실행 무질문 반복 인가)
 
 ## 4. 실패 시 분기
 

@@ -19,7 +19,7 @@ claude
 ## 하네스 설치
 
 ```bash
-# 1회: 전역 행동 규약과 커맨드 5종(/harness 등)을 ~/.claude/에 symlink
+# 1회: 전역 행동 규약·커맨드 5종·implementer 에이전트를 ~/.claude/에 symlink
 ./apply.sh --global
 
 # 프로젝트마다: 골격을 깔기 (이미 있는 파일은 skip)
@@ -78,6 +78,14 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 | `/add-ref <url>` | 논문·레포 URL을 마주친 **즉시**. `references/_INDEX.md`에 등록만 (fetch·분석 ❌) |
 | `/blueprint-ref <name>` | 등록된 자료를 **구현하기로 정했을 때**. codex:rescue로 구현 수준 청사진 생성 |
 | `/audit` | 프로젝트 전체 정기 점검·인수인계. **Fable 5 이상 전용** — 검토→인터뷰 합의→HANDOFF 골격 생성→수정(수정마다 갱신)→Opus가 이어받음(중간에 끊겨도 그 지점부터) |
+
+서브에이전트: `agents/implementer.md` (`model: opus`) — plan 확정 후 기계적 구현 위임용. 가이드 세션은 설계·판정만, 구현은 implementer로 (`/harness` §4).
+
+## 자리 비움 모드 (remote)
+
+- 1회 셋업: 세션에서 `/remote-control` 연결(claude.ai 웹/모바일에서 이 세션 모니터링·제어) + 모바일 Claude 앱 로그인 + `/config`에서 "Push when actions required" 토글.
+- 이후 긴 run·(sweep) 시작 시 하네스가 전환을 제안하고, opt-in하면 HARD 지점·완료·이상 발생 시 휴대폰 push로 보고받는다 (`/harness` §3).
+- 자리 비운 사이 클라우드 실행이 필요하면 `/schedule` routine(스케줄·API 트리거) — 단 로컬 파일 접근 없음(fresh clone) 주의.
 
 ## 사용 흐름
 

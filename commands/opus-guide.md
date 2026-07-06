@@ -12,9 +12,10 @@ description: Opus 4.8 등 비-Fable 모델 세션용 행동 보강 규칙(델타
 
 경계에서는 멈추고, 경계 안에서는 완주한다.
 
-- **HARD confirm — ask and wait:** unit entry confirm (`/harness` §2) · "이 plan으로 Execute 시작?" (§3 Setup) · hypothesis boundary — next hypothesis = new terminal, never auto-chain · git commit/push · irreversible deletion (rm/overwrite on data·ckpt·runs — git 밖 아티팩트는 복구 불가) · retry after an experiment-level failure (본 문서 §4) · pay-grade judgment — `RESEARCH_SPEC` §1 thesis/§4 axes를 바꾸는 판단 (본 문서 §7).
+- **HARD confirm — ask and wait:** unit entry confirm (`/harness` §2) · "이 plan으로 Execute 시작?" (§3 Setup) · hypothesis boundary — next hypothesis = new terminal, never auto-chain (exception: pre-approved rows inside an opted-in `/harness` (sweep) unit) · git commit/push · irreversible deletion (rm/overwrite on data·ckpt·runs — git 밖 아티팩트는 복구 불가) · real-robot actuation — sending commands to physical hardware (sim 제외; 충돌·파손·비가역) · retry after an experiment-level failure (본 문서 §4) · pay-grade judgment — `RESEARCH_SPEC` §1 thesis/§4 axes를 바꾸는 판단 (본 문서 §7).
 - **SOFT announce — one line, then proceed without waiting:** agent dispatch (codex:rescue/Explore/Plan) · background run start · plan §6 item transition.
 - Everything else inside Execute: run to completion, zero permission-asking. HARD 지점이 아닌 곳의 "계속 진행할까요?"는 금지 — 과잉 confirm은 과잉 자율만큼 나쁜 실패다.
+- If the user is describing a problem or asking a question (not requesting a change), the deliverable is a diagnosis — report and stop; an unrequested fix is a scope change (HARD).
 
 ## 2. Turn Completeness — 턴과 세션의 완결
 
@@ -34,7 +35,7 @@ description: Opus 4.8 등 비-Fable 모델 세션용 행동 보강 규칙(델타
 
 ## 4. State-Change Guard — 증거 없이 상태를 바꾸지 않는다
 
-- Before rm / kill / config edit / checkpoint overwrite / restart: state in one line what evidence ties THIS action to THIS cause. A familiar-looking error is not evidence — verify before acting on pattern recognition.
+- Before rm / kill / config edit / checkpoint overwrite / restart / sending a command to a real robot: state in one line what evidence ties THIS action to THIS cause. A familiar-looking error is not evidence — verify before acting on pattern recognition.
 - Failure levels — `/harness` "실패 시 자동 재시도 ❌"의 세분이다(하네스의 '실패'는 experiment-level을 뜻한다). **code-level** (import error, typo, shape mismatch; cause identified, plan unchanged) *and* rerun is cheap → fix and continue, no asking. **experiment-level** (diverging loss, hypothesis-contradicting result, second failure after one fix) → report with raw output and wait (HARD). 원인이 code-level이라도 재실행이 비싸면(수 시간 GPU 이상) 재실행 전 보고 (HARD).
 
 ## 5. Question Discipline — 묻기 전에 세 갈래
@@ -46,7 +47,8 @@ description: Opus 4.8 등 비-Fable 모델 세션용 행동 보강 규칙(델타
 ## 6. Delegation & Waiting — 위임했으면 두 번 안 하고, 기다리지 않는다
 
 - Delegation triggers: `/harness` §4를 따른다. After delegating a search, never redo it yourself. The subagent's final message is invisible to the user — carry its conclusion into your own final message.
-- A command likely to run over ~2 minutes: `run_in_background` + `Monitor`, never foreground-wait. While training runs, prepare the Verdict *inside the current hypothesis*: eval/plot scripts, done §1 skeleton, summary dispatch for related pending references (SOFT announce). 할 일이 없으면 그렇게 보고하고 대기.
+- A command likely to run over ~2 minutes: `run_in_background` + `Monitor`, never foreground-wait. While training runs, prepare the Verdict *inside the current hypothesis*: eval/plot scripts, done §1 skeleton, summary dispatch for related pending references (SOFT announce). When the monitored run completes: chain eval → compare against plan §3 성공 임계값 → draft done §1–§2. If the comparison shows an experiment-level anomaly, report raw output and wait (HARD) instead of finalizing. 할 일이 없으면 그렇게 보고하고 대기.
+- AFK mode (user opted in at run/sweep start): at every HARD stop, stop-condition hit, run completion, or anomaly, also fire PushNotification — one line, ≤200 chars, actionable fact first. Never wait silently while the user is away.
 
 ## 7. Reporting — verdict 먼저, 논문에 옮길 수 있는 형태로
 
@@ -68,6 +70,6 @@ description: Opus 4.8 등 비-Fable 모델 세션용 행동 보강 규칙(델타
 7. Experiment-level failure? Report raw output, wait. Code-level & cheap rerun? Fix, continue.
 8. About to ask? repo→read · default→pick&note · user-owned→decision card at next HARD point.
 9. Delegated? Don't redo it; carry the conclusion into your final message.
-10. Run >2 min? Background + Monitor; prepare Verdict while waiting.
+10. Run >2 min? Background + Monitor; prepare Verdict while waiting; on completion, chain eval→plan §3 threshold→done draft.
 11. First sentence = verdict with numbers; failures verbatim; no arrow chains.
 12. Thesis/axis-changing judgment? Flag for a higher-tier session and stop.

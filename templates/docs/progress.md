@@ -25,15 +25,15 @@ Stage: {예: A — PoC} | spec: {v0} | last anchored commit: {hash}({date})
 
 ## Ablation Matrix
 
-`RESEARCH_SPEC §6`과 1:1. 셀 = done 또는 '미측정'. (seed 명시. sim/real·ckpt 컬럼은 그 stage 도달 시 추가)
+`RESEARCH_SPEC §6`과 1:1. 셀 = done 또는 '미측정'. (seeds(N)·rollouts 명시, 수치는 mean±std. sim/real·ckpt 컬럼은 그 stage 도달 시 추가)
 
-| ablation_id | 구성요소 | 가설 | done | 핵심 결론 | seed | 상태 |
+| ablation_id | 구성요소 | 가설 | done | 핵심 결론 | seeds(N)/rollouts | 상태 |
 |---|---|---|---|---|---|---|
-| A1 | {module} | {제거 시 예측} | done_v? | {결론+포인터} | {42} | pending/running/done |
+| A1 | {module} | {제거 시 예측} | done_v? | {결론+포인터} | {42,43,44}×{20} | pending/running/done |
 
 ## Repro 포인터 + Open 부채
 
-- seed {42} / config `configs/exp_*.yaml` (실험1개=yaml1개) / runs `runs/*/` / env {PyTorch·CUDA·주요 lib}
+- seed {42} / config `configs/exp_*.yaml` (실험1개=yaml1개) / dataset {name}@{version 또는 manifest hash} / runs `runs/*/` / env {PyTorch·CUDA·주요 lib}
 - last anchored commit {hash} — ⚠ uncommitted 있으면 재현 삼각형(seed+config+commit) 미완결, 커밋 권장.
 - ckpt: {경로 또는 '학습 전 없음'}
 - Open 검증 부채: {예: done_v{N}_codex.md 미작성, 조건부 spec rewrite 후보}
