@@ -70,4 +70,5 @@ Conventions:
 - Real-robot actuation(물리 하드웨어로 명령 전송)은 사용자 confirm 없이 ❌ — 파일 삭제보다 높은 비가역 리스크 (sim은 해당 없음).
 - `libs/` is read-only (vendored third-party). Never edit.
 - Prefer Python; use shell only for thin launch scripts.
+- Second brain vault: `~/Workspace/sangjun_noh/oh-dinnno-opsidian` — 연구 문헌 위키(자체 CLAUDE.md 스키마, 머신당 1클론·프로젝트마다 ❌). 질의 규약은 `/harness` §4.
 

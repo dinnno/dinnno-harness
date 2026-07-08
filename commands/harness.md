@@ -51,6 +51,7 @@ Setup→Execute→Verdict는 게이트가 아니라 자연스러운 진행이다
 - **루프 도구** — (sweep)·병렬 실행에는 /loop·Workflow(worktree 격리)·Monitor 활용 가능. 구현 스테이지 agent는 model: opus(implementer 재사용), 설계·verdict 스테이지만 상위 모델. 신규 가설 생성·가설 경계 넘기에는 ❌.
 - **writer ≠ reviewer** — Verdict 자기점검(`general-purpose` ×1)과 외부 검증(`codex:rescue`, 수동)은 본 세션과 분리. 외부 검증 산출물은 별 파일(`done_v{N}_codex.md`).
 - `docs/references/`의 `status: pending`이 현재 단위와 관련 있으면 한 줄 보고 후 codex로 요약(summary) dispatch — 산출물·status 규약은 `docs/references/_GUIDE.md` 참조. 깊이 분석은 `/blueprint-ref <name>`.
+- **Second brain 질의** — 가설이 정체될 때(연속 no-improve·done §4 후보 고갈·kill 후 pivot 탐색): vault(경로: 전역 CLAUDE.md, 부재 머신은 skip)로 Explore ×1 dispatch — vault 자체 CLAUDE.md 스키마의 query 절차를 따라 현 thesis·limitation에 매핑된 방법론 힌트 2-3개만 회수 → done §4 후보 또는 결정 큐 💡로 착지. 본 세션이 vault 직접 Read ❌. web 광역 탐색(deep-research 등)은 brain이 마른 뒤 2차.
 
 dispatch 직전 한 줄 보고, 사용자 STOP 가능.
 
