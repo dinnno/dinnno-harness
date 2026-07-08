@@ -5,6 +5,7 @@
 - `RESEARCH_SPEC.md` — 프로젝트의 불변 spec (북극성). thesis · naive baseline · failure taxonomy · comparison axes · derivation · ablation plan · accepted failures
 - `ARCHITECTURE.md` — repo 디렉토리 레이아웃 (configs/src/scripts/libs/data/ckpt)
 - `progress.md` — Phase + Ablation matrix 트래킹. 한눈에 진척 보기.
+- `LOOP.md` — (autoloop) 단위 전용. Loop-Ready 체크리스트 + 루프 spec + ledger.
 - `plans/` — 실험별 `plan_v{N}_{short-name}.md`
 - `done/` — 완료 보고 `done_v{N}.md`
 - `references/` — 외부 자료(arxiv/code/homepage) 인박스. `_INDEX.md`에 URL만 박으면 `codex:rescue`가 분석해서 summary 저장.
@@ -63,4 +64,8 @@
 - **plan 단위 끝**: 타임라인에 `plan_v{N}_*` 행 추가, 해당 ablation_id 행의 상태를 `running`.
 - **done 단위 끝**: `done` 컬럼·`핵심 결론`·상태(`done`) 갱신. Phase 체크박스 충족 시 체크.
 - **done 단위 끝 (repro)**: 헤더 `last anchored commit`·seed·ckpt 경로·sim/real 태그 동시 갱신 (재현 삼각형 = seed+config+commit 완결).
+- **Matrix 셀 기입의 원천**: eval 산출물의 기계가독 요약 1개(runs/*/metrics.json 또는 eval stdout
+  규약 — 경로/형식은 프로젝트 CLAUDE.md 명령어 절에 고정). done §2 표와 Matrix 셀은 손계산 없이
+  이 원천에서 옮긴다. done에 수치가 있는데 대응 셀이 '미측정'이면 세션 종료 계약 위반.
+- **(autoloop) 단위 끝**: ledger의 keep 행들을 해당 ablation_id 셀에 일괄 반영(champion 수치 + ledger 포인터).
 - 각 갱신은 done/plan 단위 작업 마지막 한 줄로. 별도 단위가 아니라 단위의 산출물.

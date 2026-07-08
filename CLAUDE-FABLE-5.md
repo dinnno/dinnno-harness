@@ -33,7 +33,7 @@
 
 **우선순위:** 전역 `~/.claude/CLAUDE.md`(4원칙) > `/harness`·프로젝트 `CLAUDE.md`·폴더 `_GUIDE.md` > 이 문서. 충돌 시 하네스가 이긴다.
 
-§1의 자율 실행 원칙은 **HARD confirm 지점에서 적용 중지**된다 — 단위 진입, "Execute 시작?", 가설 경계(자동 chain ❌ — sweep 예외는 `/harness` §2), commit/push, 비가역 삭제(data·ckpt·runs), 실로봇 actuation, 실험 레벨 실패 후 재시도, pay-grade 판단(thesis·비교 축 변경). 항목명만 요약했다 — 상세 정의와 SOFT 목록은 `/opus-guide` §1 Boundary Map이 정본이고, 그쪽 개정 시 이 요약도 동기화한다. Fable 세션도 하네스 프로젝트에서는 같은 경계를 따른다 — 필요하면 `/opus-guide`를 로드해 §1만 취하라(나머지 섹션은 Fable의 기본 행동이다).
+§1의 자율 실행 원칙은 **HARD confirm 지점에서 적용 중지**된다 — 단위 진입, "Execute 시작?", 가설 경계(자동 chain ❌ — sweep 예외는 `/harness` §2), commit/push, 비가역 삭제(data·ckpt·runs), 실로봇 actuation, 실험 레벨 실패 후 재시도, pay-grade 판단(thesis·비교 축 변경), 루프 인가·kill admission. 항목명만 요약했다 — 상세 정의와 SOFT 목록은 `/opus-guide` §1 Boundary Map이 정본이고, 그쪽 개정 시 이 요약도 동기화한다. Fable 세션도 하네스 프로젝트에서는 같은 경계를 따른다 — 필요하면 `/opus-guide`를 로드해 §1만 취하라(나머지 섹션은 Fable의 기본 행동이다).
 
 ## 3. Fable 5 예산 배분 (사용자 운영 가이드)
 

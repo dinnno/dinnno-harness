@@ -53,7 +53,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
     │
     ├── paper-A/                               # 프로젝트 1 (자체 git)
     │   ├── CLAUDE.md, .gitignore   ← templates cp (자유 편집)
-    │   └── docs/{RESEARCH_SPEC, ARCHITECTURE, _GUIDE, progress,
+    │   └── docs/{RESEARCH_SPEC, ARCHITECTURE, _GUIDE, progress, LOOP,
     │            plans/{_GUIDE, _plan_template, ...},
     │            done/{_GUIDE, _done_template, ...},
     │            references/{_INDEX, _GUIDE, ...}}
@@ -92,6 +92,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 1. 새 논문 프로젝트 시작 → `./apply.sh /path/to/proj`
 2. `/harness` 진입 → 첫 세션은 자동으로 **(a₀) init 단계**: placeholder 박힌 메타 .md를 사용자와 함께 채움 (프로젝트 루트 `CLAUDE.md` → `ARCHITECTURE.md` → `RESEARCH_SPEC.md` → `progress.md` → `references/_INDEX.md` 순서). 추측 박치기 reject — 사용자 발화 기반만.
 3. (a₀) 후: 단위 작업 진입. 단위는 **(a) spec 갱신** 또는 **(experiment) 한 가설** — 가설 내부는 Setup(plan 작성)→Execute(구현·학습)→Verdict(done)로 자연스럽게 흐른다. **한 가설 = 한 세션 = 한 터미널**이 기본. 다음 가설로 자동 chain ❌ (새 가설은 새 터미널).
+   - baseline GO 이후 국면에서는 (autoloop) — docs/LOOP.md의 Loop-Ready 체크리스트(L1–L7)로 진단 → gap은 loop-prep으로 채우고 → loop-run(루프 인가 1회 후 밤새 trial 자동 반복, keep/rollback ledger + HTML Loop Report 누적).
 4. plan 구현 중에는 plan §6 TODO를 working checklist로. 세션 시작 시 첫 미체크 항목부터, 세션 종료 시 체크 갱신 + §5 세션 로그 한 줄.
 5. 외부 자료(arxiv/code/homepage)는 `docs/references/_INDEX.md`에 URL만 박아두면 `/harness`가 codex:rescue로 분석 → summary만 메인 세션에 적재.
 6. 진척 한눈에 보기: `docs/progress.md` (Phase + Ablation matrix).
