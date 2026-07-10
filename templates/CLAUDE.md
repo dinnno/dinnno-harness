@@ -35,6 +35,11 @@ Agent 위임 가이드: `/harness` §4 (codex 위임 / Explore / writer≠review
 # 학습 / 평가 / 플롯 / 테스트 등 자주 쓰는 커맨드
 ```
 
+## harness 싱크
+
+- last-sync: {설치일}
+- 네이밍 매핑: 본체 이름 ≠ 이 레포 이름일 때만 한 줄씩 (예: `_plan_template.md` → `plans/CLAUDE.md`). 없으면 비워둠.
+
 ---
 
 전역 행동 규약은 `~/.claude/CLAUDE.md` 참조.

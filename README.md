@@ -68,6 +68,11 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 |---|---|---|
 | `CLAUDE.md`, `commands/harness.md` | ✓ symlink — 새 세션부터 즉시 | n/a |
 | `templates/*` | ✗ 이미 깔린 사본은 영향 없음 | 그 프로젝트에서 `./apply.sh <경로>` 재실행 → `cp -n`이라 **새 파일만** 추가, 기존 사본은 그대로 |
+| templates의 **계약 표면** (커맨드가 이름으로 참조하는 파일·섹션) | ✗ | 본체 `CHANGELOG.md`에 한 줄 필수 → 프로젝트는 다음 `/harness` 세션에서 "하네스 업데이트했어" 선언 → 싱크(`/harness` §1) |
+
+싱크 정책 (전체 재정렬 ❌):
+- 계약 표면만 맞춘다 — 기본은 프로젝트 `CLAUDE.md`의 `## harness 싱크`에 네이밍 매핑 한 줄, 파일 이관은 매핑이 쌓일 때만.
+- 이력·thesis 본문 불가침 — done_v*·옛 plan·RESEARCH_SPEC 서술 재작성 ❌ (stale 배너 주석만).
 
 ## 커맨드
 
