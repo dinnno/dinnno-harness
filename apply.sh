@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# dinnno-harness installer.
-#   ./apply.sh --global             # link CLAUDE.md & commands/harness.md into ~/.claude/
-#   ./apply.sh /path/to/project     # copy templates into a project (skip existing)
+# dinnno-harness-codex installer.
+#   ./apply.sh --global          # link global AGENTS.md, skills, and custom agents
+#   ./apply.sh /path/to/project  # copy project templates without overwriting
 
 set -euo pipefail
 
@@ -9,48 +9,42 @@ HARNESS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 backup_if_exists() {
   local path="$1"
-  if [[ -e "$path" && ! -L "$path" ]]; then
+  if [[ -L "$path" ]]; then
+    rm "$path"
+  elif [[ -e "$path" ]]; then
     local bak="${path}.bak.$(date +%Y%m%d-%H%M%S)"
     mv "$path" "$bak"
     echo "backup: $path -> $bak"
-  elif [[ -L "$path" ]]; then
-    rm "$path"
   fi
 }
 
+link_path() {
+  local source="$1"
+  local target="$2"
+  backup_if_exists "$target"
+  ln -s "$source" "$target"
+  echo "linked: $target -> $source"
+}
+
 install_global() {
-  local target_md="$HOME/.claude/CLAUDE.md"
-  local target_cmd_dir="$HOME/.claude/commands"
+  mkdir -p "$HOME/.codex/agents" "$HOME/.agents/skills"
 
-  mkdir -p "$HOME/.claude" "$target_cmd_dir"
+  link_path "$HARNESS_DIR/AGENTS.md" "$HOME/.codex/AGENTS.md"
 
-  backup_if_exists "$target_md"
-  ln -s "$HARNESS_DIR/CLAUDE.md" "$target_md"
-  echo "linked: $target_md -> $HARNESS_DIR/CLAUDE.md"
-
-  for cmd in "$HARNESS_DIR/commands/"*.md; do
-    [[ -e "$cmd" ]] || continue
-    local name
-    name="$(basename "$cmd")"
-    local target="$target_cmd_dir/$name"
-    backup_if_exists "$target"
-    ln -s "$cmd" "$target"
-    echo "linked: $target -> $cmd"
+  local skill_dir name
+  for skill_dir in "$HARNESS_DIR/skills/"*; do
+    [[ -f "$skill_dir/SKILL.md" ]] || continue
+    name="$(basename "$skill_dir")"
+    link_path "$skill_dir" "$HOME/.agents/skills/$name"
   done
 
-  local target_agents_dir="$HOME/.claude/agents"
-  mkdir -p "$target_agents_dir"
-  for agentf in "$HARNESS_DIR/agents/"*.md; do
-    [[ -e "$agentf" ]] || continue
-    local aname
-    aname="$(basename "$agentf")"
-    local atarget="$target_agents_dir/$aname"
-    backup_if_exists "$atarget"
-    ln -s "$agentf" "$atarget"
-    echo "linked: $atarget -> $agentf"
+  local agent_file
+  for agent_file in "$HARNESS_DIR/agents/"*.toml; do
+    [[ -f "$agent_file" ]] || continue
+    link_path "$agent_file" "$HOME/.codex/agents/$(basename "$agent_file")"
   done
 
-  echo "done. open a new Claude Code session and try /harness"
+  echo 'done. start a new Codex session and invoke $harness'
 }
 
 install_project() {
@@ -69,7 +63,7 @@ install_project() {
   fi
 
   echo "installed into: $target"
-  echo "next: edit docs/RESEARCH_SPEC.md (fill thesis), then open a new Claude session and run /harness"
+  echo 'next: edit docs/RESEARCH_SPEC.md, start Codex, and invoke $harness'
 }
 
 case "${1:-}" in
@@ -78,8 +72,8 @@ case "${1:-}" in
     ;;
   -h|--help|"")
     echo "usage:"
-    echo "  $0 --global              # install ~/.claude/CLAUDE.md and /harness command"
-    echo "  $0 /path/to/project      # install templates into a project"
+    echo "  $0 --global              # install user guidance, skills, and agents"
+    echo "  $0 /path/to/project      # install project templates"
     exit 1
     ;;
   *)

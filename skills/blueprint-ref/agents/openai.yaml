@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dinnno Blueprint Reference"
+  short_description: "Create an implementation blueprint from a registered source"
+  default_prompt: "Use $blueprint-ref to turn a registered source into an implementation blueprint."

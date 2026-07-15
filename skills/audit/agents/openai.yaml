@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dinnno Research Audit"
+  short_description: "Audit a research project and prepare a durable handoff"
+  default_prompt: "Use $audit to review this research project and agree on a repair scope."

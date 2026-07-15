@@ -1,7 +1,13 @@
-# CHANGELOG — 계약 표면 변경 로그
+# Changelog
 
-templates의 파일명·섹션 헤더·상태값 등 **commands/*.md가 이름으로 참조하는 것**이 바뀔 때만 한 줄 기록 (일반 변경은 git log로 충분). `/harness` §1 싱크 스텝이 이 파일을 읽는다.
+프로젝트 template의 파일명·섹션·status처럼 skill이 직접 참조하는 계약 표면만 기록한다.
 
-형식: `날짜 — 무엇이 바뀜 — 기존 프로젝트 조치: 없음 | 매핑 한 줄 | 이관`
+## 2026-07-15 — Codex native port
 
-- 2026-07-10 — 하네스 싱크 도입: `templates/CLAUDE.md`에 `## harness 싱크` 섹션(last-sync 마커 + 네이밍 매핑) 신설 — 조치: 첫 싱크 때 루트 CLAUDE.md에 섹션 자동 추가
+- 전역/프로젝트 지침을 `CLAUDE.md`에서 `AGENTS.md`로 변경.
+- slash command 5종을 `skills/{name}/SKILL.md`로 변경. 호출 표면은 `/name`에서 `$name`으로 변경.
+- Claude 전용 `opus-guide`는 제거하고 핵심 경계·완결성 규칙을 전역 `AGENTS.md`와 `$harness`에 통합.
+- `codex:rescue`·Explore·implementer 위임을 Codex의 `research-reviewer`·`explorer`·`implementer` custom/built-in agent로 매핑.
+- 외부 리뷰 산출물을 `done_v{N}_codex.md`에서 `done_v{N}_review.md`로 변경.
+- audit 인계 산출물을 `HANDOFF_TO_CODEX.md`와 `CHANGELOG_AUDIT.md`로 변경.
+- 사용자 설치 경로를 `~/.codex/AGENTS.md`, `~/.agents/skills`, `~/.codex/agents`로 변경.

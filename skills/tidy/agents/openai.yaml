@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dinnno Tidy Artifacts"
+  short_description: "Archive consumed session artifacts without deleting history"
+  default_prompt: "Use $tidy to classify and archive consumed session artifacts safely."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dinnno Research Harness"
+  short_description: "Run thesis-driven robotics research sessions"
+  default_prompt: "Use $harness to orient this research session and complete one confirmed unit."

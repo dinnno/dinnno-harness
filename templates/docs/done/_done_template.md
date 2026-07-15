@@ -31,4 +31,4 @@ negative verdict면 pivot 3형(무대 교체/scope 축소/thesis 수정) 중 해
 
 ## 5. 외부 리뷰
 
-(`done_v{N}_codex.md` 또는 사람 피드백 반영 한 줄. 리뷰어가 "할 말 없다"까지 갱신)
+(`done_v{N}_review.md` 또는 사람 피드백 반영 한 줄. 리뷰어가 "할 말 없다"까지 갱신)

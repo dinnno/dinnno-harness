@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dinnno Add Reference"
+  short_description: "Register a research URL without analyzing it"
+  default_prompt: "Use $add-ref to register this URL in the project reference inbox."

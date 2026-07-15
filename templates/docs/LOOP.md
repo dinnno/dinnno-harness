@@ -39,7 +39,7 @@ plan에 적은 **우선순위 목록** 순.
 
 1. 변이 생성: allowlist 안에서 `configs/loop/trial_{k}.yaml` 직접 작성(yaml 1개는 기계적 구현 아님 —
    implementer 위임 불필요). 코드 변경이 필요한 변이는 스킵 + progress 결정 큐에 1줄.
-2. 실행: `run_in_background` + `Monitor`(완료 감지). 대기 중 다음 변이 후보·done 골격 준비.
+2. 실행: Codex의 background/process session으로 시작하고 session ID를 보존해 poll한다. 대기 중 다음 변이 후보·done 골격 준비.
 3. 판정: eval 요약 → J·guard → keep(champion 갱신) / rollback.
 4. ledger 1행 append + Loop Report(L7) 재생성(SOFT — 이 둘이 곧 보고). AFK push는 keep·이상·정지
    시에만(매 trial ❌).
@@ -48,7 +48,7 @@ plan에 적은 **우선순위 목록** 순.
 
 **Verdict**: done_v{N}에 ledger 요약(trial 수·best J·champion) + Loop Report 경로 + champion
 held-out 재검증 1회 + Matrix 셀 일괄 기입. 루프 안 kill 결론 ❌ — negative streak은 증거일 뿐(`done/_GUIDE §Kill/Pivot`).
-세션이 죽으면 ledger 마지막 행부터 재개 — 잔여 예산으로, /harness 단위 confirm이 재개 confirm.
+세션이 죽으면 ledger 마지막 행부터 재개 — 잔여 예산으로, `$harness` 단위 confirm이 재개 confirm.
 
 ## Champion
 
