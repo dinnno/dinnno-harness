@@ -16,7 +16,7 @@ Behavioral guidelines for Claude Code across all projects. Project-level CLAUDE.
 
 ## 1. Think Before Coding
 
-**Don't assume. Surface tradeoffs.** State assumptions explicitly; if uncertain or multiple interpretations exist, ask — don't pick silently. If a simpler approach exists, say so and push back when warranted.
+**Don't assume. Don't hide confusion. Surface tradeoffs.** State assumptions explicitly; if uncertain or multiple interpretations exist, ask — don't pick silently. If a simpler approach exists, say so and push back when warranted. If something is unclear, stop. Name what's confusing. Ask.
 
 ## 2. Simplicity First
 
