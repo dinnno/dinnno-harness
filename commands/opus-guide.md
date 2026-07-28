@@ -1,10 +1,12 @@
 ---
-description: Opus 4.8 등 비-Fable 모델 세션용 행동 보강 규칙(델타 레이어) — /harness 진입 전에 로드. 워크플로를 시작하지 않는다(rules-only). Fable/Mythos 세션에는 §1 Boundary Map만 의미 있다(나머지는 기본 행동).
+description: 비-Fable 모델 세션용 행동 보강 규칙(델타 레이어) — /harness 진입 전에 로드. 워크플로를 시작하지 않는다(rules-only). Fable/Mythos 세션은 §1만, Opus 5+ 세션은 §1+§1.5(Opus 5 델타)만 의미 있다(나머지는 기본 행동). §2–§8 전체 적용은 Opus 4.8 이하·Sonnet 등.
 ---
 
 # /opus-guide — 비-Fable 모델용 행동 보강
 
 시스템 프롬프트의 복사가 아니라, Fable 5는 자연히 지키지만 다른 모델은 놓치기 쉬운 행동을 "그 순간의 트리거"로 굳힌 델타 레이어다. 워크플로를 시작하지 않는다 — 로드 후 `/harness`로 진입하라 (예외: `HANDOFF_TO_OPUS.md` 인계 세션은 `/harness` 대신 그 파일의 지시를 따른다).
+
+**모델 분기:** §2–§8은 Opus 4.8 이하의 지시 추종력에 캘리브레이션됐다. **Opus 5+ 세션은 §1 + §1.5(Opus 5 델타)만 취하고 §2–§8은 기본 행동으로 간주하라** — Opus 5는 과잉 보강 지시와 충돌하며, 지시를 단순하게 둘수록 성능이 오른다.
 
 **우선순위:** 전역 `~/.claude/CLAUDE.md`(4원칙) > `/harness`·프로젝트 `CLAUDE.md`·폴더 `_GUIDE.md` > **이 문서**. 충돌 시 항상 하네스가 이긴다. 이 문서는 하네스가 침묵하거나 미분화한 영역만 채운다. 규칙 본문은 영어(비-Fable 모델의 지시 추종력·원문 대조용), 리드는 한국어.
 
@@ -16,6 +18,13 @@ description: Opus 4.8 등 비-Fable 모델 세션용 행동 보강 규칙(델타
 - **SOFT announce — one line, then proceed without waiting:** agent dispatch (codex:rescue/Explore/Plan) · background run start · plan §6 item transition · autoloop trial verdict — one ledger line per trial (id·diff·J·keep/rollback·run path); AFK push only on keep, anomaly, or stop condition — not every trial.
 - Everything else inside Execute: run to completion, zero permission-asking. HARD 지점이 아닌 곳의 "계속 진행할까요?"는 금지 — 과잉 confirm은 과잉 자율만큼 나쁜 실패다.
 - If the user is describing a problem or asking a question (not requesting a change), the deliverable is a diagnosis — report and stop; an unrequested fix is a scope change (HARD).
+
+## 1.5 Opus 5 델타 — Opus 5+는 이것만 추가로
+
+- Effort: high is the ceiling for implementation and routine verdicts; raise to xhigh/max only for spec-level judgment (measured: past high, quality drops while cost multiplies).
+- Completion claims: never report "done" without the run log or artifact path attached; a verification that did not run is reported as "미실행", never as done.
+- Factuality: numbers or claims taken from external papers/docs do not enter a done file without source-text confirmation — dispatch codex for the check.
+- Harness convention that survives the slim-down: every done §2 metric still goes in a table with seed, config path, commit hash + plot file path + one line naming the `RESEARCH_SPEC` §4 axis it supports (§7's paper-grade rule, in full).
 
 ## 2. Turn Completeness — 턴과 세션의 완결
 
@@ -29,7 +38,7 @@ description: Opus 4.8 등 비-Fable 모델 세션용 행동 보강 규칙(델타
 
 컨텍스트 낭비는 후반 턴의 지시 유지력을 직접 깎는다.
 
-- Session entry loads exactly 4 files: `RESEARCH_SPEC.md`, `progress.md`, `LEARNINGS.md`, current plan (+ `plans/`·`done/` 마지막 v{N}은 파일명 확인만 — `/harness` §1) (an (autoloop) unit additionally loads docs/LOOP.md). Past done/plan: refer via progress timeline pointers; open a specific section only when a specific number is needed.
+- Session entry loads only the `/harness` §1 list: `RESEARCH_SPEC.md`, `progress.md`, `LEARNINGS.md`, current plan (+ `plans/`·`done/` 마지막 v{N}은 파일명 확인만, 싱크·위생 체크는 §1 규정 범위만) (an (autoloop) unit additionally loads docs/LOOP.md). Past done/plan: refer via progress timeline pointers; open a specific section only when a specific number is needed.
 - Before any Read — PDF, file over ~1 MB, or log over ~500 lines: do not Read here. Dispatch codex:rescue (logs: try tail/grep first). 임계값은 초기 추정치 — 어긋난 사례는 LEARNINGS에 적고 수치만 조정.
 - Read only the range you need from large files. Never re-read a file you just edited.
 

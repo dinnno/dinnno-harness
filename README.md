@@ -19,7 +19,7 @@ claude
 ## 하네스 설치
 
 ```bash
-# 1회: 전역 행동 규약·커맨드 5종·implementer 에이전트를 ~/.claude/에 symlink
+# 1회: 전역 행동 규약·커맨드 7종·implementer 에이전트를 ~/.claude/에 symlink
 ./apply.sh --global
 
 # 프로젝트마다: 골격을 깔기 (이미 있는 파일은 skip)
@@ -44,7 +44,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 ~/                                            # 어느 머신이든
 ├── .claude/
 │   ├── CLAUDE.md  ───────────────────┐       # symlink (4원칙 + 도메인)
-│   └── commands/*.md  ───────────────┤       # symlink (커맨드 5종)
+│   └── commands/*.md  ───────────────┤       # symlink (커맨드 7종)
 │                                      │
 └── Workspace/sangjun_noh/for_claude/  │
     ├── dinnno-harness/   ◀───────────┘       # ★ 본체 (1번 클론)
@@ -68,7 +68,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 |---|---|---|
 | `CLAUDE.md`, `commands/harness.md` | ✓ symlink — 새 세션부터 즉시 | n/a |
 | `templates/*` | ✗ 이미 깔린 사본은 영향 없음 | 그 프로젝트에서 `./apply.sh <경로>` 재실행 → `cp -n`이라 **새 파일만** 추가, 기존 사본은 그대로 |
-| templates의 **계약 표면** (커맨드가 이름으로 참조하는 파일·섹션) | ✗ | 본체 `CHANGELOG.md`에 한 줄 필수 → 프로젝트는 다음 `/harness` 세션에서 "하네스 업데이트했어" 선언 → 싱크(`/harness` §1) |
+| templates의 **계약 표면** (커맨드가 이름으로 참조하는 파일·섹션) | ✗ | 본체 `CHANGELOG.md`에 한 줄 필수 → 프로젝트는 다음 `/harness` 세션 진입 시 자동 감지(`last-sync:` vs CHANGELOG 비교) → confirm 후 싱크(`/harness` §1) |
 
 싱크 정책 (전체 재정렬 ❌):
 - 계약 표면만 맞춘다 — 기본은 프로젝트 `CLAUDE.md`의 `## harness 싱크`에 네이밍 매핑 한 줄, 파일 이관은 매핑이 쌓일 때만.
@@ -79,12 +79,14 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 | 커맨드 | 언제 쓰나 |
 |---|---|
 | `/harness` | **모든 세션의 진입점.** 현황(spec·progress·LEARNINGS) 적재 → 단위(init/spec/experiment) confirm → Setup→Execute→Verdict |
-| `/opus-guide` | 비-Fable 모델(Opus 4.8 등) 세션에서 `/harness` **직전에** 로드. 행동 보강 델타 레이어(rules-only, 워크플로 시작 ❌) |
+| `/opus-guide` | 비-Fable 모델 세션에서 `/harness` **직전에** 로드. 행동 보강 델타 레이어(rules-only, 워크플로 시작 ❌). Opus 5+는 §1+§1.5 델타만, Opus 4.8 이하·Sonnet은 전체 적용 |
+| `/workflow-ops` | (sweep)·병렬 Execute에서 Workflow/루프 도구를 쓰기 **직전에** 로드. 장시간 sim·스크립트 견고성·산출물 규율(rules-only) |
 | `/add-ref <url>` | 논문·레포 URL을 마주친 **즉시**. `references/_INDEX.md`에 등록만 (fetch·분석 ❌) |
 | `/blueprint-ref <name>` | 등록된 자료를 **구현하기로 정했을 때**. codex:rescue로 구현 수준 청사진 생성 |
 | `/audit` | 프로젝트 전체 정기 점검·인수인계. **Fable 5 이상 전용** — 검토→인터뷰 합의→HANDOFF 골격 생성→수정(수정마다 갱신)→Opus가 이어받음(중간에 끊겨도 그 지점부터) |
+| `/tidy` | 소비 완료된 세션 산출물 md(날짜 suffix HANDOFF/CHANGELOG, loose docs md) 정리 — 스캔→상태분류→confirm→`docs/archive/` 이동+`_INDEX` |
 
-서브에이전트: `agents/implementer.md` (`model: opus`) — plan 확정 후 기계적 구현 위임용. 가이드 세션은 설계·판정만, 구현은 implementer로 (`/harness` §4).
+서브에이전트: `agents/implementer.md` (`model: opus`·`effort: high`) — plan 확정 후 기계적 구현 위임용. 가이드 세션은 설계·판정만, 구현은 implementer로. 단위별 모델·effort 라우팅 표(무엇을 Fable/opus/codex/deep-research에 맡기나)는 `/harness` §4가 정본 (구 `CLAUDE-FABLE-5.md`는 2026-07-27 폐기·흡수).
 
 ## 자리 비움 모드 (remote)
 

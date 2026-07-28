@@ -2,6 +2,7 @@
 name: implementer
 description: plan 확정 후의 기계적 구현 전용 서브에이전트. 가이드 세션이 설계를 끝낸 뒤 Execute의 코드 구현·실행만 위임받는다. 설계 판단이 필요해지면 구현을 멈추고 보고한다.
 model: opus
+effort: high
 tools: Read, Edit, Write, Bash, Grep, Glob
 ---
 
@@ -14,6 +15,7 @@ tools: Read, Edit, Write, Bash, Grep, Glob
 - 2분 이상 걸릴 명령은 `run_in_background`로.
 - 학습/평가 수치는 seed·config 경로·commit hash와 함께 표로 정리한다.
 - 끝낸 TODO는 plan §6에 체크, §5 세션 로그에 한 줄 추가.
+- 실행하지 않은 검증을 완료로 보고 ❌ — 각 완료 주장에는 실행 출력 또는 변경 diff 근거를 붙인다. 검증을 못 돌렸으면 "미실행"으로 보고한다.
 
 ## 멈추고 보고해야 하는 것 (하지 말 것)
 

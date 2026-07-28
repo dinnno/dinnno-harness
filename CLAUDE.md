@@ -38,6 +38,8 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
+예외 — 하네스 상태 문서(`progress.md`·`HANDOFF_*`·references `_INDEX.md`)의 stale 상태 블록 정리는 "인접 개선"이 아니라 그 문서의 본연 기능이다. 발견 시 정리를 제안·수행한다(이력 문서 done_v*·RESEARCH_SPEC 본문은 불가침 그대로).
+
 ## 4. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
