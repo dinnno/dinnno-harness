@@ -3,6 +3,18 @@
 > Rule: "X fails → we added module" = motivation. "X fails because of principle P → only form S resolves P" = novelty.
 > If you stop at the first, the method is not ready.
 
+## 0. 현재 방향 (second brain 동기용)
+
+> **이 블록만** second brain vault가 읽는다 — 여기서 논문 검색 쿼리 시드가 유도된다.
+> **현재값 스냅샷 — 누적 이력·수치·실험 경과·상태 서술 ❌.** §1과 별개다(§1은 논문용, 여기는 조준용).
+> 갱신: thesis·방법론이 움직인 단위 직후(`/harness` §5). 미확정은 `(미확정)` 표기 — 추측으로 채우지 않는다.
+> vault는 헤딩 **텍스트**로 이 블록을 찾는다 — 번호(`0.`)는 프로젝트 절 체계에 맞춰 바꾸거나 빼도 되지만 **괄호 안 문구는 그대로 둔다.**
+
+- **agenda line:** `{vault research-agenda의 대응 항목명 — 없으면 "신규"}`
+- **방향:** {무엇을 푸는가 — 120자 이내}
+- **방법론:** {어떤 형태로 푸는가 — 120자 이내}
+- **갱신:** {YYYY-MM-DD}
+
 ## 1. Thesis
 
 한 문장: `<failure mechanism> + <principled fix>`

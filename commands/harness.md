@@ -65,6 +65,7 @@ dispatch 직전 한 줄 보고, 사용자 STOP 가능.
 
 - plan 또는 done에 이번 변경/결정 한 줄.
 - done/spec 단위 끝나면 `docs/progress.md` 갱신: 타임라인 행 + Ablation 셀 + 헤더 anchored commit/Stage. 별도 단위 ❌ — done 산출물. (갱신 규칙은 progress.md 상단 주석 참조)
+- 이번 단위에서 thesis·방법론이 **움직였으면** `RESEARCH_SPEC`의 `현재 방향 (second brain 동기용)` 블록 갱신 — 단위 종류 무관(spec·experiment Verdict·audit 확정·Execute 중 사용자 override 피벗 전부). second brain은 **이 블록만** 읽고 거기서 논문 검색 쿼리 시드가 유도된다 → 수치·경과·이력 ❌, 현재값 한 줄씩. 안 움직였으면 손대지 않는다.
 - pay-grade/NEEDS-HUMAN으로 미룬 연구 결정이 있었으면 progress.md 결정 큐에 1줄 — 미룬 결정은 큐에 착지해야 미룬 것이다(허공 ❌).
 - done에 수치가 있는데 대응 Ablation 셀이 '미측정'인 채 세션을 닫지 않는다.
 - progress.md 헤더(Stage·anchored commit) 갱신 시 직전 단위는 타임라인 행으로 흡수 — 머리만 갱신하고 꼬리를 방치하지 않는다(하네스 상태 문서 정리는 Surgical 예외, 전역 CLAUDE.md §3). 루트 `HANDOFF_TO_*.md` 큐 항목을 이번 세션이 완료했으면 상태 즉시 flip.

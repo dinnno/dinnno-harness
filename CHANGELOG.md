@@ -6,3 +6,4 @@
 
 - 2026-07-10 — 하네스 싱크 도입: `templates/CLAUDE.md`에 `## harness 싱크` 섹션(last-sync 마커 + 네이밍 매핑) 신설 — 조치: 첫 싱크 때 루트 CLAUDE.md에 섹션 자동 추가
 - 2026-07-27 — Opus 5 라우팅 개편: `/harness` §1 싱크 선언식→자동 체크 + 산출물 위생 스캔, §4에 모델·effort 라우팅 표 흡수(`CLAUDE-FABLE-5.md` 폐기), `/workflow-ops` 신설, `/opus-guide`에 Opus 5 분기(§1.5 델타), implementer `effort: high` — 조치: 다음 `/harness` 진입 시 자동 싱크가 `last-sync:` 마커 신설을 제안(루트 HANDOFF·날짜 suffix 산출물이 있으면 상태 정정·`/tidy` 제안 포함); 타 머신은 pull 후 `./apply.sh --global` 재실행(신규 `/workflow-ops` 심링크)
+- 2026-07-29 — second brain 동기 슬롯: `templates/docs/RESEARCH_SPEC.md`에 `## 0. 현재 방향 (second brain 동기용)` 신설 + `/harness` §5에 "thesis 움직였으면 §0 갱신" 한 줄 — 조치: 다음 싱크 때 **빈 슬롯만** 삽입(placeholder `{...}` 포함 = §1 불가침의 '형식' 변경이라 저촉 ❌, **내용 작성은 그 프로젝트 세션 몫** — 싱크가 방향을 추측해 채우지 말 것). vault 미설치 머신은 빈 채로 두면 됨(읽는 쪽이 없을 뿐 무해)
