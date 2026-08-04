@@ -91,7 +91,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 ## 자리 비움 모드 (remote)
 
 - 1회 셋업: 세션에서 `/remote-control` 연결(claude.ai 웹/모바일에서 이 세션 모니터링·제어) + 모바일 Claude 앱 로그인 + `/config`에서 "Push when actions required" 토글.
-- 이후 긴 run·(sweep) 시작 시 하네스가 전환을 제안하고, opt-in하면 HARD 지점·완료·이상 발생 시 휴대폰 push로 보고받는다 (`/harness` §3).
+- 이후 긴 run·(sweep) 시작 시 하네스가 전환 안내를 1줄 통보하고(질문·대기 ❌), opt-in해두면 HARD 지점·완료·이상 발생 시 휴대폰 push로 보고받는다 (`/harness` §3).
 - 자리 비운 사이 클라우드 실행이 필요하면 `/schedule` routine(스케줄·API 트리거) — 단 로컬 파일 접근 없음(fresh clone) 주의.
 
 ## 사용 흐름

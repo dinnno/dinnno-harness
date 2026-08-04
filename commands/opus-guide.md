@@ -1,12 +1,12 @@
 ---
-description: 비-Fable 모델 세션용 행동 보강 규칙(델타 레이어) — /harness 진입 전에 로드. 워크플로를 시작하지 않는다(rules-only). Fable/Mythos 세션은 §1만, Opus 5+ 세션은 §1+§1.5(Opus 5 델타)만 의미 있다(나머지는 기본 행동). §2–§8 전체 적용은 Opus 4.8 이하·Sonnet 등.
+description: 비-Fable 모델 세션용 행동 보강 규칙(델타 레이어) — /harness 진입 전에 로드. 워크플로를 시작하지 않는다(rules-only). Fable/Mythos 세션은 §1만, Opus 5+ 세션은 §1+§1.5(Opus 5 델타)만 의미 있다(나머지는 기본 행동). §2–§7 전체 적용은 Opus 4.8 이하·Sonnet 등.
 ---
 
 # /opus-guide — 비-Fable 모델용 행동 보강
 
 시스템 프롬프트의 복사가 아니라, Fable 5는 자연히 지키지만 다른 모델은 놓치기 쉬운 행동을 "그 순간의 트리거"로 굳힌 델타 레이어다. 워크플로를 시작하지 않는다 — 로드 후 `/harness`로 진입하라 (예외: `HANDOFF_TO_OPUS.md` 인계 세션은 `/harness` 대신 그 파일의 지시를 따른다).
 
-**모델 분기:** §2–§8은 Opus 4.8 이하의 지시 추종력에 캘리브레이션됐다. **Opus 5+ 세션은 §1 + §1.5(Opus 5 델타)만 취하고 §2–§8은 기본 행동으로 간주하라** — Opus 5는 과잉 보강 지시와 충돌하며, 지시를 단순하게 둘수록 성능이 오른다.
+**모델 분기:** §2–§7은 Opus 4.8 이하의 지시 추종력에 캘리브레이션됐다. **Opus 5+ 세션은 §1 + §1.5(Opus 5 델타)만 취하고 §2–§7은 기본 행동으로 간주하라** — Opus 5는 과잉 보강 지시와 충돌하며, 지시를 단순하게 둘수록 성능이 오른다. 단, 세션 종료 계약·종료 보고(기승전결)·AFK push는 모델 델타가 아니라 **모델 무관 사용자 계약**이다 — 정본은 `/harness` §3·§5이고 모든 모델 세션에 적용된다(이 문서에는 없다).
 
 **우선순위:** 전역 `~/.claude/CLAUDE.md`(4원칙) > `/harness`·프로젝트 `CLAUDE.md`·폴더 `_GUIDE.md` > **이 문서**. 충돌 시 항상 하네스가 이긴다. 이 문서는 하네스가 침묵하거나 미분화한 영역만 채운다. 규칙 본문은 영어(비-Fable 모델의 지시 추종력·원문 대조용), 리드는 한국어.
 
@@ -14,7 +14,7 @@ description: 비-Fable 모델 세션용 행동 보강 규칙(델타 레이어) �
 
 경계에서는 멈추고, 경계 안에서는 완주한다.
 
-- **HARD confirm — ask and wait:** unit entry confirm (`/harness` §2) · "이 plan으로 Execute 시작?" (§3 Setup) · hypothesis boundary — next hypothesis = new terminal, never auto-chain (exception: pre-approved rows inside an opted-in `/harness` (sweep) unit) · git commit/push · irreversible deletion (rm/overwrite on data·ckpt·runs — git 밖 아티팩트는 복구 불가) · real-robot actuation — sending commands to physical hardware (sim 제외; 충돌·파손·비가역) · retry after an experiment-level failure (본 문서 §4) · pay-grade judgment — `RESEARCH_SPEC` §1 thesis/§4 axes를 바꾸는 판단 (본 문서 §7) · (autoloop) loop authorization — the Execute-start confirm of an autoloop plan authorizes unattended trial iteration strictly inside LOOP.md's L3 allowlist and L4 budget; NOT covered: fields outside the allowlist, code/design changes, real-robot trials, git commit, kill/NO-GO verdicts. Budget exhausted or resumed after a dead session → unit-entry confirm again · kill/NO-GO admission — a track/project-kill claim is admissible only after the 4 validity gates (done/_GUIDE §Kill/Pivot); even then it is pay-grade — land it in the progress decision queue and route up, never conclude it inside a loop or an Execute run.
+- **HARD confirm — ask and wait:** unit entry confirm (`/harness` §2) · "이 plan으로 Execute 시작?" (§3 Setup) · hypothesis boundary — next hypothesis = new terminal, never auto-chain (exception: pre-approved rows inside an opted-in `/harness` (sweep) unit) · git commit/push · irreversible deletion (rm/overwrite on data·ckpt·runs — git 밖 아티팩트는 복구 불가) · real-robot actuation — sending commands to physical hardware (sim 제외; 충돌·파손·비가역) · retry after an experiment-level failure (본 문서 §4) · pay-grade judgment — `RESEARCH_SPEC` §1 thesis/§4 axes를 바꾸는 판단은 "spec 수준 결정 — 상위 세션 권장" 플래그 후 정지, progress.md 결정 큐에 1줄 착지(`/harness` §5) · (autoloop) loop authorization — the Execute-start confirm of an autoloop plan authorizes unattended trial iteration strictly inside LOOP.md's L3 allowlist and L4 budget; NOT covered: fields outside the allowlist, code/design changes, real-robot trials, git commit, kill/NO-GO verdicts. Budget exhausted or resumed after a dead session → unit-entry confirm again · kill/NO-GO admission — a track/project-kill claim is admissible only after the 4 validity gates (done/_GUIDE §Kill/Pivot); even then it is pay-grade — land it in the progress decision queue and route up, never conclude it inside a loop or an Execute run.
 - **SOFT announce — one line, then proceed without waiting:** agent dispatch (codex:rescue/Explore/Plan) · background run start · plan §6 item transition · autoloop trial verdict — one ledger line per trial (id·diff·J·keep/rollback·run path); AFK push only on keep, anomaly, or stop condition — not every trial.
 - Everything else inside Execute: run to completion, zero permission-asking. HARD 지점이 아닌 곳의 "계속 진행할까요?"는 금지 — 과잉 confirm은 과잉 자율만큼 나쁜 실패다.
 - If the user is describing a problem or asking a question (not requesting a change), the deliverable is a diagnosis — report and stop; an unrequested fix is a scope change (HARD).
@@ -24,7 +24,7 @@ description: 비-Fable 모델 세션용 행동 보강 규칙(델타 레이어) �
 - Effort: high is the ceiling for implementation and routine verdicts; raise to xhigh/max only for spec-level judgment (measured: past high, quality drops while cost multiplies).
 - Completion claims: never report "done" without the run log or artifact path attached; a verification that did not run is reported as "미실행", never as done.
 - Factuality: numbers or claims taken from external papers/docs do not enter a done file without source-text confirmation — dispatch codex for the check.
-- Harness convention that survives the slim-down: every done §2 metric still goes in a table with seed, config path, commit hash + plot file path + one line naming the `RESEARCH_SPEC` §4 axis it supports (§7's paper-grade rule, in full).
+- Harness convention that survives the slim-down: every done §2 metric still goes in a table with seed, config path, commit hash + plot file path + one line naming the `RESEARCH_SPEC` §4 axis it supports (the paper-grade rule, in full). "개선됐다" 같은 산문 수치 금지.
 
 ## 2. Turn Completeness — 턴과 세션의 완결
 
@@ -32,13 +32,13 @@ description: 비-Fable 모델 세션용 행동 보강 규칙(델타 레이어) �
 - 완결성 ≠ chain: if the remaining work belongs to the *next* hypothesis, do NOT do it — write it into done §4 as a candidate. 중도 포기와 자동 chain은 둘 다 실패다.
 - Your final message must restate every deliverable of the turn: files written (paths), metrics measured, verdicts reached. Text between tool calls is invisible to the user.
 - Never wrap up because the session feels long. If context was summarized mid-session, Read the current `plan_v{N}` §6 first, then resume from the first unchecked item.
-- **세션 종료 계약:** do not write a closing message while plan §6 checks, the §5 log line, or (after a done unit) progress.md's three updates(타임라인 행·Ablation 셀·헤더 commit/Stage) are missing — plus a `LEARNINGS.md` line if a repeated mistake surfaced. "다음 세션에서"는 금지 — 다음 세션은 이 대화가 아니라 그 파일들만 읽는다.
+- 세션 종료 계약·종료 보고 형식은 `/harness` §5 (모델 무관 — 여기 아님).
 
 ## 3. Context Economy — 적재가 곧 후반 완주율
 
 컨텍스트 낭비는 후반 턴의 지시 유지력을 직접 깎는다.
 
-- Session entry loads only the `/harness` §1 list: `RESEARCH_SPEC.md`, `progress.md`, `LEARNINGS.md`, current plan (+ `plans/`·`done/` 마지막 v{N}은 파일명 확인만, 싱크·위생 체크는 §1 규정 범위만) (an (autoloop) unit additionally loads docs/LOOP.md). Past done/plan: refer via progress timeline pointers; open a specific section only when a specific number is needed.
+- Session entry loads only the `/harness` §1 list: `RESEARCH_SPEC.md`, `progress.md`, `LEARNINGS.md`, current plan (+ `plans/`·`done/` 마지막 v{N}은 파일명 확인만, 싱크 체크는 §1 규정 범위만 — 위생 스캔은 `/tidy` 몫) (an (autoloop) unit additionally loads docs/LOOP.md). Past done/plan: refer via progress timeline pointers; open a specific section only when a specific number is needed.
 - Before any Read — PDF, file over ~1 MB, or log over ~500 lines: do not Read here. Dispatch codex:rescue (logs: try tail/grep first). 임계값은 초기 추정치 — 어긋난 사례는 LEARNINGS에 적고 수치만 조정.
 - Read only the range you need from large files. Never re-read a file you just edited.
 
@@ -57,18 +57,9 @@ description: 비-Fable 모델 세션용 행동 보강 규칙(델타 레이어) �
 
 - Delegation triggers: `/harness` §4를 따른다. After delegating a search, never redo it yourself. The subagent's final message is invisible to the user — carry its conclusion into your own final message.
 - A command likely to run over ~2 minutes: `run_in_background` + `Monitor`, never foreground-wait. While training runs, prepare the Verdict *inside the current hypothesis*: eval/plot scripts, done §1 skeleton, summary dispatch for related pending references (SOFT announce). When the monitored run completes: chain eval → compare against plan §3 성공 임계값 → draft done §1–§2. In an (autoloop) unit the completion chain is eval → J·guard → keep/rollback → ledger line → next trial (LOOP.md §운영). If the comparison shows an experiment-level anomaly, report raw output and wait (HARD) instead of finalizing. 할 일이 없으면 그렇게 보고하고 대기.
-- AFK mode (user opted in at run/sweep start): at every HARD stop, stop-condition hit, run completion, or anomaly, also fire PushNotification — one line, ≤200 chars, actionable fact first. Never wait silently while the user is away.
+- AFK push 계약은 `/harness` §3 자리 비움 모드 (모델 무관 — 여기 아님).
 
-## 7. Reporting — verdict 먼저, 논문에 옮길 수 있는 형태로
-
-- First sentence after finishing = the verdict with numbers ("v3 holds: success 71%→84%"), not the process.
-- If a run failed, say "failed" and paste the relevant output — no hedging, no unverified "done". 요약은 화살표 체인(A→B→fails)·조각문·세션 내 자작 라벨 없이 완전한 문장으로.
-- **Paper-grade numbers:** every metric in done §2 goes into a table with seed, config path, commit hash + plot file path + one line naming which `RESEARCH_SPEC` §4 axis it supports. "개선됐다" 같은 산문 수치 금지.
-- Negative verdict라도 done §4를 N/A로 두지 마라: 이 negative가 배제한 가설 공간 한 줄 + 다음 후보 2–3개(done §4 형식, 추천 순서).
-- **Pay-grade flag:** a judgment that would change the thesis (§1) or comparison axes (§4) is above this session — flag "spec 수준 결정 — 상위 모델 세션 권장" and stop (HARD); when you raise the flag, also append one line to progress.md's decision queue.
-- External review: never auto-loop rounds — 2라운드 후에도 지적이 남으면 계속 여부를 사용자에게 confirm (HARD). thesis-level claim이 뒤집혔으면 즉시 1라운드 추가.
-
-## 8. 압축 체크리스트
+## 7. 압축 체크리스트
 
 1. Last paragraph a plan or promise? Do it now — unless it's the next hypothesis (→ done §4).
 2. Every deliverable restated in the final message?
