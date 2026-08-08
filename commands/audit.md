@@ -42,7 +42,7 @@ description: 프로젝트 전체 정밀 검토 → 사용자 deep interview로 �
 - `FIX-OPUS` — 방향은 명확, 시간·컨텍스트 한계로 인계
 - `NEEDS-HUMAN` — 실기 실험·데이터 재수집·연구 방향 결정 등 사람 몫
 
-## 2. Deep interview — 수정 범위 합의 (HARD — 정의: `/opus-guide` §1 Boundary Map)
+## 2. Deep interview — 수정 범위 합의 (HARD — 정의: `/harness` §경계선)
 
 분석이 끝나도 곧장 수정에 들어가지 마라. 분류는 제안일 뿐 — 확정은 인터뷰에서 사용자가 한다.
 

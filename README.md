@@ -19,7 +19,7 @@ claude
 ## 하네스 설치
 
 ```bash
-# 1회: 전역 행동 규약·커맨드 7종·implementer 에이전트를 ~/.claude/에 symlink
+# 1회: 전역 행동 규약·커맨드 8종·implementer 에이전트를 ~/.claude/에 symlink
 ./apply.sh --global
 
 # 프로젝트마다: 골격을 깔기 (이미 있는 파일은 skip)
@@ -44,7 +44,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 ~/                                            # 어느 머신이든
 ├── .claude/
 │   ├── CLAUDE.md  ───────────────────┐       # symlink (4원칙 + 도메인)
-│   └── commands/*.md  ───────────────┤       # symlink (커맨드 7종)
+│   └── commands/*.md  ───────────────┤       # symlink (커맨드 8종)
 │                                      │
 └── Workspace/sangjun_noh/for_claude/  │
     ├── dinnno-harness/   ◀───────────┘       # ★ 본체 (1번 클론)
@@ -79,12 +79,20 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 | 커맨드 | 언제 쓰나 |
 |---|---|
 | `/harness` | **모든 세션의 진입점.** 현황(spec·progress·LEARNINGS) 적재 → 단위(init/spec/experiment) confirm → Setup→Execute→Verdict |
-| `/opus-guide` | 비-Fable 모델 세션에서 `/harness` **직전에** 로드. 행동 보강 델타 레이어(rules-only, 워크플로 시작 ❌). Opus 5+는 §1+§1.5 델타만, Opus 4.8 이하·Sonnet은 전체 적용 |
+| `/opus-guide` | 비-Fable 모델 세션에서 `/harness` **직전에** 로드. 행동 보강 델타 레이어(rules-only, 워크플로 시작 ❌). Opus 5+는 §1.5 델타만, Opus 4.8 이하·Sonnet은 전체 적용. Fable 세션은 로드 불필요 |
 | `/workflow-ops` | (sweep)·병렬 Execute에서 Workflow/루프 도구를 쓰기 **직전에** 로드. 장시간 sim·스크립트 견고성·산출물 규율(rules-only) |
 | `/add-ref <url>` | 논문·레포 URL을 마주친 **즉시**. `references/_INDEX.md`에 등록만 (fetch·분석 ❌) |
 | `/blueprint-ref <name>` | 등록된 자료를 **구현하기로 정했을 때**. codex:rescue로 구현 수준 청사진 생성 |
 | `/audit` | 프로젝트 전체 정기 점검·인수인계. **Fable 5 이상 전용** — 검토→인터뷰 합의→HANDOFF 골격 생성→수정(수정마다 갱신)→Opus가 이어받음(중간에 끊겨도 그 지점부터) |
 | `/tidy` | 소비 완료된 세션 산출물 md(날짜 suffix HANDOFF/CHANGELOG, loose docs md) 정리 — 스캔→상태분류→confirm→`docs/archive/` 이동+`_INDEX` |
+| `/issue` | 연구·구현이 **뫼비우스**(같은 고민·수정 순환)에 빠졌을 때. 고민 흐름을 vault `fable/issues/`에 박제 → Fable 세션/새 터미널이 그 파일만 읽고 이어받음. 인자 없이 부르면 open issue 소비 모드 |
+
+## 경계선 (HARD/SOFT) — Claude가 멈추는 지점
+
+모든 세션·모든 모델 공통 계약. 정본은 `commands/harness.md` §경계선 — 거기 한 줄 고치면 새 세션부터 전 프로젝트 적용(symlink).
+
+- **HARD (멈추고 물어봄):** 세션 시작 "뭐 할지" 확인 · plan 완성 후 "실행 시작?" · 다음 가설 자동 진행 ❌ · git commit/push · data·ckpt·runs 삭제 · 실로봇 명령 · 실험 수준 실패 후 재시도 · thesis·비교 축을 바꾸는 판단 · autoloop 인가 밖 · kill("이 방향은 죽었다") 결론
+- **SOFT (한 줄 알리고 진행):** 에이전트 호출 · 백그라운드 학습 시작 · TODO 항목 전환 — 그 외 Execute 안은 묻지 않고 완주
 
 서브에이전트: `agents/implementer.md` (`model: opus`·`effort: high`) — plan 확정 후 기계적 구현 위임용. 가이드 세션은 설계·판정만, 구현은 implementer로. 단위별 모델·effort 라우팅 표(무엇을 Fable/opus/codex/deep-research에 맡기나)는 `/harness` §4가 정본 (구 `CLAUDE-FABLE-5.md`는 2026-07-27 폐기·흡수).
 
