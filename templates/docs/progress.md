@@ -42,7 +42,8 @@ Stage: {예: A — PoC} | spec: {v0} | last anchored commit: {hash}({date})
 
 <!-- 착지 규칙: ①pay-grade flag를 세운 세션은 그 즉시 여기 1줄 ②done §3 thesis 영향 '있음' →
      [spec-drift] ③kill admissible → [kill-candidate] ④사용자 아이디어는 지배 서사와 모순돼도
-     즉시 💡 1줄(기록≠채택, 그 자리 평가 금지). /harness §1이 매 세션 이 큐를 읽는다.
+     즉시 💡 1줄(기록≠채택, 그 자리 평가 금지) ⑤Claude 제안도 💡 — `[claude]` 태그+근거 1줄.
+     /harness §1이 매 세션 이 큐를 읽는다.
      소비: 사용자 선택 시 체크 → Phase/타임라인/Matrix로 흡수. -->
 
 - [ ] {YYYY-MM-DD} [{tag}] {결정 요지 1줄} ← {출처 done_v{N}/plan}
