@@ -1,6 +1,6 @@
 # LEARNINGS
 
-세션 중 발견한 Claude/사용자의 반복 실수·교훈을 누적. 발견 시 아래 §항목에 한 줄 직접 추가 (`- **[YYYY-MM-DD] category** — message`).
+세션 중 발견한 Claude/사용자의 반복 실수·교훈을 누적. 발견 시 아래 §항목에 한 줄 직접 추가 (`- **[YYYY-MM-DD] category** — message`). **사용자가 실수를 지적한 경우엔 그 턴에서 즉시 append + 쓴 줄을 보여줌** (`/harness` §2) — 세션 끝으로 미루지 않는다.
 
 `/harness` 진입 시 적재됨. 같은 실수 반복 방지가 목적.
 

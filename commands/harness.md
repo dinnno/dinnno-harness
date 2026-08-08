@@ -45,6 +45,8 @@ description: research(논문 단위) 프로젝트 세션 진입 오리엔테이�
 
 사용자가 막힘의 순환(뫼비우스 — 같은 고민·수정이 계속 돎)을 표하면 `/issue` 박제를 제안한다(SOFT — 규약은 그 커맨드).
 
+사용자가 Claude의 실수를 지적하거나 재발 방지를 요구하면 — **그 턴에서 즉시** `docs/LEARNINGS.md`에 1줄 append하고 쓴 줄을 그대로 보여준다(SOFT). 세션 끝으로 미루기 ❌ — 보여주지 않았으면 쓰지 않은 것이다.
+
 ## 3. 작업 흐름 (experiment)
 
 Setup→Execute→Verdict는 게이트가 아니라 자연스러운 진행이다.
