@@ -14,6 +14,8 @@ Behavioral guidelines for Claude Code across all projects. Project-level CLAUDE.
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
+**보고 스타일 (모든 모델·모든 세션):** 결론 먼저 3줄 이내, 상세는 사용자가 파고들 때. 한 번에 한 주제 — 여러 주제면 "지금은 X만" 선언. 사용자에게 요구하는 결정은 1~2개씩. 하네스 내부 용어(HARD/SOFT·pay-grade 등)는 처음 쓸 때 1줄 정의. 줄글 정보 폭탄 ❌.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.** State assumptions explicitly; if uncertain or multiple interpretations exist, ask — don't pick silently. If a simpler approach exists, say so and push back when warranted. If something is unclear, stop. Name what's confusing. Ask.
