@@ -2,11 +2,20 @@
 description: research(논문 단위) 프로젝트 세션 진입 오리엔테이션 — RESEARCH_SPEC/progress/LEARNINGS 적재 후 init/spec/experiment 단위를 confirm하고 Setup→Execute→Verdict로 진행. 일반 코딩·non-research 레포에는 쓰지 않는다.
 ---
 
-이 세션은 dinnno-harness 워크플로우를 따른다. 강제 게이트가 아니라 **연구 지향 + 산출물 구조**를 주는 얇은 오리엔테이션이다. 판단은 너에게 맡긴다 — 전역 4원칙(`~/.claude/CLAUDE.md`)을 따르되 단계를 기계적으로 밟지 마라. Fable/Mythos 세션도 같은 경계를 따른다 — HARD 지점(정본: `/opus-guide` §1 Boundary Map) 밖에서는 완주가 기본, 과잉 confirm은 과잉 자율만큼 나쁜 실패다.
+이 세션은 dinnno-harness 워크플로우를 따른다. 강제 게이트가 아니라 **연구 지향 + 산출물 구조**를 주는 얇은 오리엔테이션이다. 판단은 너에게 맡긴다 — 전역 4원칙(`~/.claude/CLAUDE.md`)을 따르되 단계를 기계적으로 밟지 마라. 모델 무관 공통 경계는 아래 §경계선 — 그 밖에서는 완주가 기본이다.
 
 **모델 self-check:** 현재 세션 모델이 Fable/Mythos 계열이 아닌데(Opus·Sonnet 등) `/opus-guide`가 아직 로드 안 됐으면 §1 적재 전에 지금 로드한다(전역 CLAUDE.md 진입점 규칙의 안전망).
 
 **기본 norm:** 한 가설 = 한 세션 = 한 터미널. 가설 *내부*는 명확화(Setup) → 구현·학습(Execute) → 판정(Verdict)으로 자연스럽게 흐른다. 가설 *경계*는 사람이 긋는다 — **다음 가설로 자동 chain ❌** (새 가설은 새 터미널).
+
+## 경계선 — 멈춤은 두 모드뿐 (HARD/SOFT, 모든 모델 공통 정본)
+
+경계에서는 멈추고, 경계 안에서는 완주한다. (2026-08-08 `/opus-guide` §1에서 이관 — 사용자용 요약은 본체 README §경계선)
+
+- **HARD — 물어보고 대기:** ① 단위 진입 confirm(§2) ② "이 plan으로 Execute 시작?"(§3) ③ 가설 경계 — 자동 chain ❌ (예외: opt-in된 (sweep)의 사전 승인 행) ④ git commit/push ⑤ data·ckpt·runs 비가역 삭제·덮어쓰기 ⑥ 실로봇 명령 전송(sim 제외) ⑦ experiment-level 실패 후 재시도 — code-level이라도 재실행이 비싸면(수 시간 GPU) 보고 먼저 ⑧ pay-grade — thesis/§4 축을 바꾸는 판단은 플래그 후 정지, 결정 큐 착지(§5) ⑨ (autoloop) 인가 밖 — allowlist 밖 변이·코드 변경·예산 소진 후 재개 ⑩ kill/NO-GO — 4게이트(`done/_GUIDE` §Kill/Pivot) 통과해도 사용자 전결.
+- **SOFT — 한 줄 알리고 진행:** agent dispatch · 백그라운드 run 시작 · plan §6 항목 전환 · (autoloop) trial 판정 ledger 1행.
+- 그 외 Execute 안은 완주 — HARD 아닌 곳의 "계속할까요?" 금지. 과잉 confirm은 과잉 자율만큼 나쁜 실패다.
+- 사용자가 문제 설명·질문 중이면(변경 요청 아님) 산출물은 진단 — 보고하고 멈춘다. 요청 없는 수정은 scope 변경(HARD).
 
 ## 1. 진입 시 적재
 
@@ -33,6 +42,8 @@ description: research(논문 단위) 프로젝트 세션 진입 오리엔테이�
 단위가 모호하면 더 물어 명확히 한 뒤 시작. **모호한데 추측으로 밀어붙이는 게 가장 비싼 실수.** confirm 때 현재 세션 모델·effort가 §4 라우팅 권장과 어긋나면 한 줄 안내: "이 단위는 {모델·effort} 권장 — `/model`·`/effort`로 전환하거나 그대로 진행"(effort는 `echo $CLAUDE_EFFORT`로 확인, 전환 실행은 사용자 몫).
 
 세션 중 사용자가 새 연구 아이디어를 발화하면 — 지배 서사와 모순되어도 — progress.md §결정 큐+아이디어 인박스에 💡 1줄 즉시 기록(SOFT). 기록 ≠ 채택 — 그 자리에서 평가·반박하지 않는다.
+
+사용자가 막힘의 순환(뫼비우스 — 같은 고민·수정이 계속 돎)을 표하면 `/issue` 박제를 제안한다(SOFT — 규약은 그 커맨드).
 
 ## 3. 작업 흐름 (experiment)
 

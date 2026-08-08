@@ -1,23 +1,18 @@
 ---
-description: 비-Fable 모델 세션용 행동 보강 규칙(델타 레이어) — /harness 진입 전에 로드. 워크플로를 시작하지 않는다(rules-only). Fable/Mythos 세션은 §1만, Opus 5+ 세션은 §1+§1.5(Opus 5 델타)만 의미 있다(나머지는 기본 행동). §2–§7 전체 적용은 Opus 4.8 이하·Sonnet 등.
+description: 비-Fable 모델 세션용 행동 보강 규칙(델타 레이어) — /harness 진입 전에 로드. 워크플로를 시작하지 않는다(rules-only). HARD/SOFT 경계선 정본은 /harness §경계선(모델 무관 — 여기 아님). Opus 5+ 세션은 §1.5(Opus 5 델타)만 의미 있다(나머지는 기본 행동), §2–§7 전체 적용은 Opus 4.8 이하·Sonnet 등. Fable/Mythos 세션은 로드 불필요.
 ---
 
 # /opus-guide — 비-Fable 모델용 행동 보강
 
 시스템 프롬프트의 복사가 아니라, Fable 5는 자연히 지키지만 다른 모델은 놓치기 쉬운 행동을 "그 순간의 트리거"로 굳힌 델타 레이어다. 워크플로를 시작하지 않는다 — 로드 후 `/harness`로 진입하라 (예외: `HANDOFF_TO_OPUS.md` 인계 세션은 `/harness` 대신 그 파일의 지시를 따른다).
 
-**모델 분기:** §2–§7은 Opus 4.8 이하의 지시 추종력에 캘리브레이션됐다. **Opus 5+ 세션은 §1 + §1.5(Opus 5 델타)만 취하고 §2–§7은 기본 행동으로 간주하라** — Opus 5는 과잉 보강 지시와 충돌하며, 지시를 단순하게 둘수록 성능이 오른다. 단, 세션 종료 계약·종료 보고(기승전결)·AFK push는 모델 델타가 아니라 **모델 무관 사용자 계약**이다 — 정본은 `/harness` §3·§5이고 모든 모델 세션에 적용된다(이 문서에는 없다).
+**모델 분기:** §2–§7은 Opus 4.8 이하의 지시 추종력에 캘리브레이션됐다. **Opus 5+ 세션은 §1.5(Opus 5 델타)만 취하고 §2–§7은 기본 행동으로 간주하라** — Opus 5는 과잉 보강 지시와 충돌하며, 지시를 단순하게 둘수록 성능이 오른다. 단, HARD/SOFT 경계선·세션 종료 계약·종료 보고(기승전결)·AFK push는 모델 델타가 아니라 **모델 무관 사용자 계약**이다 — 정본은 `/harness` §경계선·§3·§5이고 모든 모델 세션에 적용된다(이 문서에는 없다).
 
 **우선순위:** 전역 `~/.claude/CLAUDE.md`(4원칙) > `/harness`·프로젝트 `CLAUDE.md`·폴더 `_GUIDE.md` > **이 문서**. 충돌 시 항상 하네스가 이긴다. 이 문서는 하네스가 침묵하거나 미분화한 영역만 채운다. 규칙 본문은 영어(비-Fable 모델의 지시 추종력·원문 대조용), 리드는 한국어.
 
-## 1. Boundary Map — 멈춤은 두 모드뿐
+## 1. Boundary Map — `/harness` §경계선으로 이관 (2026-08-08)
 
-경계에서는 멈추고, 경계 안에서는 완주한다.
-
-- **HARD confirm — ask and wait:** unit entry confirm (`/harness` §2) · "이 plan으로 Execute 시작?" (§3 Setup) · hypothesis boundary — next hypothesis = new terminal, never auto-chain (exception: pre-approved rows inside an opted-in `/harness` (sweep) unit) · git commit/push · irreversible deletion (rm/overwrite on data·ckpt·runs — git 밖 아티팩트는 복구 불가) · real-robot actuation — sending commands to physical hardware (sim 제외; 충돌·파손·비가역) · retry after an experiment-level failure (본 문서 §4) · pay-grade judgment — `RESEARCH_SPEC` §1 thesis/§4 axes를 바꾸는 판단은 "spec 수준 결정 — 상위 세션 권장" 플래그 후 정지, progress.md 결정 큐에 1줄 착지(`/harness` §5) · (autoloop) loop authorization — the Execute-start confirm of an autoloop plan authorizes unattended trial iteration strictly inside LOOP.md's L3 allowlist and L4 budget; NOT covered: fields outside the allowlist, code/design changes, real-robot trials, git commit, kill/NO-GO verdicts. Budget exhausted or resumed after a dead session → unit-entry confirm again · kill/NO-GO admission — a track/project-kill claim is admissible only after the 4 validity gates (done/_GUIDE §Kill/Pivot); even then it is pay-grade — land it in the progress decision queue and route up, never conclude it inside a loop or an Execute run.
-- **SOFT announce — one line, then proceed without waiting:** agent dispatch (codex:rescue/Explore/Plan) · background run start · plan §6 item transition · autoloop trial verdict — one ledger line per trial (id·diff·J·keep/rollback·run path); AFK push only on keep, anomaly, or stop condition — not every trial.
-- Everything else inside Execute: run to completion, zero permission-asking. HARD 지점이 아닌 곳의 "계속 진행할까요?"는 금지 — 과잉 confirm은 과잉 자율만큼 나쁜 실패다.
-- If the user is describing a problem or asking a question (not requesting a change), the deliverable is a diagnosis — report and stop; an unrequested fix is a scope change (HARD).
+HARD/SOFT 경계선은 모델 무관 공통 계약이라 이 문서에 없다 — 정본은 `/harness` §경계선. (autoloop) 인가의 세부 범위는 `docs/LOOP.md` L3 allowlist·L4 예산, kill/NO-GO 게이트는 `done/_GUIDE` §Kill/Pivot 그대로.
 
 ## 1.5 Opus 5 델타 — Opus 5+는 이것만 추가로
 
