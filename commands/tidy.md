@@ -1,5 +1,5 @@
 ---
-description: harness 프로젝트에 쌓인 세션 산출물 md 정리 — superseded된 HANDOFF/CHANGELOG 날짜 버전, 소비 완료된 인계 문서, docs/ 직하 loose md를 스캔·분류해 사용자 confirm 후 docs/archive/YYYY-MM/로 이동하고 _INDEX.md에 1줄 요약을 남긴다. 루트에 md가 어지럽거나 "정리", "아카이브", "치워줘" 요청 시 사용. docs/plans/·done/·references/의 버전 history는 건드리지 않는다(그 인덱스는 progress.md).
+description: harness 프로젝트에 쌓인 세션 산출물 md 정리 — superseded된 HANDOFF/CHANGELOG 날짜 버전, 소비 완료된 인계 문서, docs/ 직하 loose md를 스캔·분류해 사용자 confirm 후 docs/archive/YYYY-MM/로 이동하고 _INDEX.md에 1줄 요약을 남긴다. 현행 문서(progress·CLAUDE.md) 안의 낡은 줄 정리는 §5 stale 검사 패스. 루트에 md가 어지럽거나 "정리", "아카이브", "치워줘", "낡은 기록이 새어든다" 요청 시 사용. docs/plans/·done/·references/의 버전 history는 건드리지 않는다(그 인덱스는 progress.md).
 ---
 
 # /tidy — 세션 산출물 아카이브 (스캔 → 분류 → confirm → 이동+인덱스)
@@ -42,10 +42,19 @@ description: harness 프로젝트에 쌓인 세션 산출물 md 정리 — super
 - 참조 무결성: 현행 문서가 이동한 파일을 참조하면(grep) 링크를 새 경로로 갱신. 갱신이 애매하면 고치지 말고 보고만.
 - 종료 보고 3줄 이내: 옮긴 n건 / 보류 m건 / 인덱스 경로. **commit ❌** — 커밋 여부·시점은 사용자가 정한다.
 
+## 5. Stale 검사 — 살아있는 문서 안의 낡은 줄 (선택 패스)
+
+§1–§4가 파일을 옮긴다면, 이 패스는 **현행 문서 안의 낡은 서술**을 찾는다 — 낡은 줄은 매 세션 로드되며 현재 판단에 새어든다. 사용자가 요청하거나 §4 종료 후 후보가 보이면 1줄 제안으로 발동.
+
+- **대상**: `progress.md`(헤더 Stage·anchored commit이 타임라인과 어긋남 · 소비 완료됐는데 미체크인 결정 큐 항목 · 낡은 Open 부채) · 루트 `CLAUDE.md`(`## 현재 상태` 절이 실제 최신 plan/done과 다름) · `references/_INDEX.md`(끝난 단위 전용이었는데 pending으로 남은 행).
+- **불가침**: `RESEARCH_SPEC` 본문·`done_v*`·옛 plan 서술 — spec은 stale 배너 주석 추가까지만.
+- **판정은 문서 간 대조로만**: progress 헤더 vs 타임라인 마지막 행, CLAUDE.md 상태 절 vs `plans/`·`done/` 실제 최신 v{N}, 결정 큐 항목 vs Phase/Matrix 흡수 여부. mtime·감으로 판정 ❌.
+- 표 제시(문서 / 해당 줄 / stale 근거 / 제안: 갱신·체크·삭제) → **confirm(HARD)** → 반영. 확신 없으면 "보류 제안"으로 분리 — §2와 같은 원칙.
+
 ## 하지 않는 것
 
 - 삭제 ❌ — 이동만. 실행 전후 파일 총수가 보존돼야 한다.
 - `docs/plans/`·`done/`·`references/`·`experiments/` 내부 ❌ — harness가 의도한 history 구조이고 progress.md가 그 인덱스다.
-- 정규 현행 문서(`RESEARCH_SPEC`·`progress`·`LEARNINGS`·`ARCHITECTURE`·`README`·`CLAUDE.md`) ❌.
+- 정규 현행 문서(`RESEARCH_SPEC`·`progress`·`LEARNINGS`·`ARCHITECTURE`·`README`·`CLAUDE.md`)의 **이동·아카이브** ❌ (안의 낡은 줄 정리는 §5 패스가 confirm 받아 수행).
 - git commit/push ❌.
 - 인덱스 없이 이동 ❌ — _INDEX.md에 착지하지 못한 이동은 정리가 아니라 분실이다.
