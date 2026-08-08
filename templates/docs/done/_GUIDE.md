@@ -18,7 +18,7 @@ done 작성 후 외부 리뷰어(다른 LLM 또는 사람)에게 가장 매서�
 - ablation은 실제인가, 공연인가?
 - 숨은 결합·죽은 가지·암묵적 가정?
 
-피드백 반영해서 done을 갱신. 리뷰어가 더 이상 할 말이 없을 때까지.
+피드백 반영해서 done을 갱신. 라운드 규칙은 `/harness` §4가 정본 — 자동 반복 ❌, 2라운드 후에도 지적이 남으면 계속 여부 confirm(HARD), thesis-level claim이 뒤집혔으면 즉시 1라운드 추가.
 
 ## Kill/Pivot 판정 — negative verdict의 자격 요건
 

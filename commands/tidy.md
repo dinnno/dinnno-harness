@@ -11,7 +11,7 @@ description: harness 프로젝트에 쌓인 세션 산출물 md 정리 — super
 대상은 이 두 부류만:
 
 - **루트 세션 산출물** — `HANDOFF_TO_*.md`·`CHANGELOG_*.md`와 그 날짜 suffix 버전, audit/외부 세션이 만든 산출물 폴더(예: `plans_fable/`). `README.md`·`CLAUDE.md`는 제외.
-- **docs/ 직하 loose md** — 정규 집합(`RESEARCH_SPEC`·`ARCHITECTURE`·`LEARNINGS`·`progress`·`CLAUDE.md`/`_GUIDE.md`) 밖의 md — survey, deep-dive, 설계 memo 등.
+- **docs/ 직하 loose md** — 정규 집합(`RESEARCH_SPEC`·`ARCHITECTURE`·`LEARNINGS`·`progress`·`LOOP`·`CLAUDE.md`/`_GUIDE.md`) 밖의 md — survey, deep-dive, 설계 memo 등.
 
 하위 정규 폴더(`docs/plans/`·`done/`·`references/`·`experiments/`·`archive/`)는 스캔 자체를 하지 않는다.
 
@@ -55,6 +55,6 @@ description: harness 프로젝트에 쌓인 세션 산출물 md 정리 — super
 
 - 삭제 ❌ — 이동만. 실행 전후 파일 총수가 보존돼야 한다.
 - `docs/plans/`·`done/`·`references/`·`experiments/` 내부 ❌ — harness가 의도한 history 구조이고 progress.md가 그 인덱스다.
-- 정규 현행 문서(`RESEARCH_SPEC`·`progress`·`LEARNINGS`·`ARCHITECTURE`·`README`·`CLAUDE.md`)의 **이동·아카이브** ❌ (안의 낡은 줄 정리는 §5 패스가 confirm 받아 수행).
+- 정규 현행 문서(`RESEARCH_SPEC`·`progress`·`LEARNINGS`·`ARCHITECTURE`·`LOOP`·`README`·`CLAUDE.md`)의 **이동·아카이브** ❌ (안의 낡은 줄 정리는 §5 패스가 confirm 받아 수행).
 - git commit/push ❌.
 - 인덱스 없이 이동 ❌ — _INDEX.md에 착지하지 못한 이동은 정리가 아니라 분실이다.
