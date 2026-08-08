@@ -52,7 +52,7 @@
 4. **`docs/progress.md` Phase** — RESEARCH_SPEC §6 채워진 후 Phase mile stone 정의. 한 번 합의로 OK (가볍게).
 5. **`docs/references/_INDEX.md`** — "지금 참조하는 paper/repo 있나" 한 번 묻고 시드. 없으면 OK.
 
-**완료**: 검출된 placeholder 모두 해소 + progress.md Phase 1개 이상 + references 한 번 물어봄. 자동 chain ❌, 사용자 GO 시 (b)로 진입.
+**완료**: 검출된 placeholder 모두 해소 + progress.md Phase 1개 이상 + references 한 번 물어봄. 자동 chain ❌, 사용자 GO 시 (a)/(experiment) 단위로 진입.
 
 **Anti-pattern**: 5개 질문 한 번에 폭격 / 코드 보고 도메인 추측 후 사용자에게 확인만 / Explore 결과를 사용자 검증 없이 박기.
 

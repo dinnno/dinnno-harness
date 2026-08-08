@@ -7,7 +7,7 @@
 전체 스펙: `docs/RESEARCH_SPEC.md`
 Agent 위임 가이드: `/harness` §4 (codex 위임 / Explore / writer≠reviewer).
 
-이 프로젝트는 research 프로젝트다. 모든 Claude 세션은 `/harness`로 진입(없이 시작했어도 본문 §1-§4 묵시 적용). thesis(`docs/RESEARCH_SPEC.md §1`)가 모든 단위의 목적지 — 단순 엔지니어링 모드 ❌, 모듈 제안·실험 설계·검증 모드 ✓.
+이 프로젝트는 research 프로젝트다. 모든 Claude 세션은 `/harness`로 진입(없이 시작했어도 본문 전체(§경계선 포함) 묵시 적용 — 종료 계약 포함). thesis(`docs/RESEARCH_SPEC.md §1`)가 모든 단위의 목적지 — 단순 엔지니어링 모드 ❌, 모듈 제안·실험 설계·검증 모드 ✓.
 
 ## 현재 상태
 
@@ -37,7 +37,7 @@ Agent 위임 가이드: `/harness` §4 (codex 위임 / Explore / writer≠review
 
 ## harness 싱크
 
-- last-sync: {설치일}
+- last-sync: {마지막 반영 CHANGELOG 항목 — 날짜 + 요지 몇 단어. 설치 직후엔 본체 CHANGELOG 마지막 항목}
 - 네이밍 매핑: 본체 이름 ≠ 이 레포 이름일 때만 한 줄씩 (예: `_plan_template.md` → `plans/CLAUDE.md`). 없으면 비워둠.
 
 ---

@@ -19,7 +19,7 @@ claude
 ## 하네스 설치
 
 ```bash
-# 1회: 전역 행동 규약·커맨드 8종·implementer 에이전트를 ~/.claude/에 symlink
+# 1회: 전역 행동 규약·커맨드 9종·implementer 에이전트를 ~/.claude/에 symlink
 ./apply.sh --global
 
 # 프로젝트마다: 골격을 깔기 (이미 있는 파일은 skip)
@@ -44,7 +44,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 ~/                                            # 어느 머신이든
 ├── .claude/
 │   ├── CLAUDE.md  ───────────────────┐       # symlink (4원칙 + 도메인)
-│   └── commands/*.md  ───────────────┤       # symlink (커맨드 8종)
+│   └── commands/*.md  ───────────────┤       # symlink (커맨드 9종)
 │                                      │
 └── Workspace/sangjun_noh/for_claude/  │
     ├── dinnno-harness/   ◀───────────┘       # ★ 본체 (1번 클론)
@@ -86,6 +86,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 | `/audit` | 프로젝트 전체 정기 점검·인수인계. **Fable 5 이상 전용** — 검토→인터뷰 합의→HANDOFF 골격 생성→수정(수정마다 갱신)→Opus가 이어받음(중간에 끊겨도 그 지점부터) |
 | `/tidy` | 소비 완료된 세션 산출물 md(날짜 suffix HANDOFF/CHANGELOG, loose docs md) 정리 — 스캔→상태분류→confirm→`docs/archive/` 이동+`_INDEX` |
 | `/issue` | 연구·구현이 **뫼비우스**(같은 고민·수정 순환)에 빠졌을 때. 고민 흐름을 vault `fable/issues/`에 박제 → Fable 세션/새 터미널이 그 파일만 읽고 이어받음. 인자 없이 부르면 open issue 소비 모드 |
+| `/close` | **"세션 close하자"** 선언 시. 이 대화를 모르는 fresh 에이전트가 "목표한 걸 실제 했는가"를 적대 검토(수치 vs 근거, TODO vs diff, 미검증 완료 주장) → 반영 → §5 세션 정리 |
 
 ## 경계선 (HARD/SOFT) — Claude가 멈추는 지점
 
