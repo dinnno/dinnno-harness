@@ -36,6 +36,8 @@ description: 외부 자료 URL을 docs/references/_INDEX.md 인박스에 한 줄
 | {name} | {url} | pending | — | — | {YYYY-MM-DD} |
 ```
 
+위 칸 배치는 템플릿 컬럼(`name|url|status|summary_path|blueprint_path|added`) 기준 — append 전 그 표의 헤더 컬럼명을 확인하고, 다르면 컬럼 이름에 맞춰 값을 놓는다(대응 없는 칸은 `—`).
+
 날짜는 시스템의 오늘 날짜 (UTC 무관, 로컬). placeholder 행 (`{paper-slug}`, `{repo-slug}`, `...`)은 건드리지 않음 — 새 행은 그 아래에 append.
 
 ### 4. 보고

@@ -24,7 +24,8 @@ description: research(논문 단위) 프로젝트 세션 진입 오리엔테이�
 - progress.md 하단 결정 큐 확인 — 미결 [spec-drift]·[kill-candidate]가 있으면 단위 confirm 때 (a) spec 단위를 첫 후보로 제시. 💡 인박스 항목이 현 단위와 겹치면 한 줄 언급.
 - `docs/plans/`·`docs/done/`의 마지막 `v{N}` 확인 (`_template` 무시). 진행 중 단위를 이어가는 세션이면 해당 `plan_v{N}` 적재.
 - `docs/references/_INDEX.md`의 `status: pending` 행 스캔 — 현재 단위와 관련 있으면 처리 규약은 §4.
-- **하네스 싱크 (조건부)** — 루트 `CLAUDE.md`의 `last-sync:` 마커(= 마지막 반영 CHANGELOG 항목: 날짜+요지)가 가리키는 항목 **뒤에** 본체 `CHANGELOG.md` 항목이 있을 때만 발동 — append-only·날짜순이라 위치 비교로 충분(마커가 날짜뿐인 구형식이면 그 날짜 포함 이후 항목 전부 후보) (본체 루트 = `dirname`×2 of `readlink ~/.claude/commands/harness.md` — 심링크가 아니거나 결과가 현재 레포 자신이면 skip; 마커 부재·placeholder(`{설치일}` 등)면 발동). 발동 시: 미반영 항목의 계약 표면 불일치·깨진 포인터만 수술적으로 목록화(첫 싱크면 `## harness 싱크` 섹션 신설) → 항목별 적용(confirm)/보류 확정 → 어느 결말이든 `last-sync:`를 마지막 반영 항목(날짜 + 요지 몇 단어)으로 갱신, 보류분만 `- 보류: {항목} — {사유}` 한 줄. 기본 = 네이밍 매핑 한 줄, 파일 이관은 매핑이 쌓일 때만 제안. **불가침:** RESEARCH_SPEC·plans·done 본문 서술 변경 ❌ (형식·이름·포인터만), 대응이 불확실하면 추측 ❌ 질문 ✓ (thesis 방향 변경은 (a) spec 단위로만). 산출물 위생(날짜 suffix HANDOFF·loose md 정리)은 진입 시 스캔하지 않는다 — `/tidy` 몫.
+- 이 커맨드가 이름으로 참조하는 섹션·파일(`done/_GUIDE` §Kill/Pivot, progress.md §결정 큐+아이디어 인박스, `docs/LOOP.md` 등)이 프로젝트에 없으면 조용히 건너뛰지 말고 신설을 제안한다.
+- **하네스 싱크 (조건부)** — 루트 `CLAUDE.md`의 `last-sync:` 마커(= 마지막 반영 CHANGELOG 항목: 날짜+요지)가 가리키는 항목 **뒤에** 본체 `CHANGELOG.md` 항목이 있을 때만 발동 — append-only·날짜순이라 위치 비교로 충분(마커가 날짜뿐인 구형식이면 그 날짜 포함 이후 항목 전부 후보) (본체 루트 = `dirname`×2 of `readlink ~/.claude/commands/harness.md` — 심링크가 아니거나 결과가 현재 레포 자신이면 skip; 마커 부재·placeholder(`{설치일}` 등)면 발동). 발동 시: 미반영 항목의 계약 표면 불일치·깨진 포인터만 수술적으로 목록화(첫 싱크면 `## harness 싱크` 섹션 신설) → 항목별 적용(confirm)/보류 확정 → 어느 결말이든 `last-sync:`를 마지막 반영 항목(날짜 + 요지 몇 단어)으로 갱신, 보류분만 `- 보류: {항목} — {사유}` 한 줄. 기본 = 네이밍 매핑 한 줄, 파일 이관은 매핑이 쌓일 때만 제안. **불가침:** RESEARCH_SPEC·plans·done 본문 서술 변경 ❌ (= plan_v{N}·done_v{N} 산출물 문서 본문 — 폴더 가이드 `_GUIDE.md`·폴더 `CLAUDE.md`는 싱크 대상 ✓; 허용 범위는 형식·이름·포인터만), 대응이 불확실하면 추측 ❌ 질문 ✓ (thesis 방향 변경은 (a) spec 단위로만). 산출물 위생(날짜 suffix HANDOFF·loose md 정리)은 진입 시 스캔하지 않는다 — `/tidy` 몫.
 
 ## 2. 이 세션이 할 일 한 줄 confirm
 
@@ -52,7 +53,7 @@ description: research(논문 단위) 프로젝트 세션 진입 오리엔테이�
 
 Setup→Execute→Verdict는 게이트가 아니라 자연스러운 진행이다.
 
-- **Setup** — 가설 명확화. `_plan_template.md` 복사(부재 시 프로젝트 CLAUDE.md 네이밍 매핑 또는 직전 plan_v{N-1} 골격 재사용) → `plan_v{N}_*.md` 작성. 결정 무게 크면 plan mode. 끝나면 "이 plan으로 Execute 시작?" 한 번 confirm — 추천안 + **최강 대안 1개**(채택 안 한 이유 1줄)를 같이 내민다.
+- **Setup** — 가설 명확화. `_plan_template.md` 복사(부재 시 프로젝트 CLAUDE.md 네이밍 매핑 또는 직전 plan_v{N-1} 골격 재사용) → `plan_v{N}_*.md` 작성. plan의 절 구성이 템플릿과 다르면 커맨드의 `plan §번호` 참조는 절 **이름**(TODO·세션 로그·성공 임계값 등)으로 대응한다 — 번호는 템플릿 기준 보조 표기. 결정 무게 크면 plan mode. 끝나면 "이 plan으로 Execute 시작?" 한 번 confirm — 추천안 + **최강 대안 1개**(채택 안 한 이유 1줄)를 같이 내민다.
 - **Execute** — 구현 → 학습/평가. 학습이 길면 `run_in_background` + `Monitor`. plan §3에 성공 임계값·루프 예산이 있으면 그 예산 안에서 train→eval→조정(code-level만)→재실행을 무질문 반복 — "Execute 시작?" confirm이 곧 루프 인가다. plan §6 TODO 첫 미체크부터, 종료 시 체크 갱신 + §5 로그 한 줄. 단순 구현은 plan mode 불필요.
 - **Verdict** — `_done_template.md` 복사(부재 시 동일 fallback) → `done_v{N}.md`. negative면 "이 가설 폐기, 새 가설은 새 터미널" 안내 후 종료. positive면 §4 다음 후보 도출(paper-impact 기준).
 - **자리 비움 모드** — (sweep)·(autoloop) 진입 또는 ~30분 넘는 run 시작 시 1회 통보(질문·답 대기 ❌): "긴 run 시작 — 자리 비우실 거면 `/remote-control`로 remote 전환". opt-in돼 있으면 HARD 지점·정지 조건 도달·run 완료·이상 발생마다 PushNotification 한 줄(≤200자, actionable fact 먼저; (autoloop) trial 단위는 예외 — `LOOP.md` §운영대로 keep·이상·정지 시에만; 사용자가 터미널 주시 중이면 자동 생략됨) — 자리 비운 사용자를 침묵 속에 기다리게 하지 않는다.
