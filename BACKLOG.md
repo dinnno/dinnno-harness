@@ -19,3 +19,4 @@ fresh agent 적대 리뷰(2026-08-08)에서 나온 소형 발견 중 보류분. 
 - [ ] README 자동 반영 표가 `commands/harness.md`만 표기 — 실제는 커맨드 9종 전체 + agents/.
 - [ ] 전역 Surgical 예외 목록에 루트 CLAUDE.md "현재 상태" 절 누락 — /tidy §5 대상과 불일치.
 - [ ] RESEARCH_SPEC §0 슬롯의 init 시 해소 주체·시점 침묵 — init protocol 3단계에 "§0은 §1 확정 직후 현재값으로 시드" 1줄.
+- [ ] 호스트 RAM 가드를 PreToolUse 훅으로 기계적 강제 검토 — 문서 규칙은 서브에이전트 경계를 못 넘는 게 실측(2026-08-10 OOM). 단 정당한 대형 학습을 죽이지 않는 판별식 + `.claude/settings.json` 템플릿 신설(= apply.sh 표면 증가)이 비용.
