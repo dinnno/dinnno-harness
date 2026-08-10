@@ -72,6 +72,8 @@ Conventions:
 - One experiment = one `configs/*.yaml`. Code does not encode experiment params.
 - Reproducibility = fixed seed + config file + git commit hash + dataset snapshot (git 밖 `data/`는 name@version 또는 manifest hash로 고정).
 - Real-robot actuation(물리 하드웨어로 명령 전송)은 사용자 confirm 없이 ❌ — 파일 삭제보다 높은 비가역 리스크 (sim은 해당 없음).
+- **GPU-first**: 텐서 연산은 GPU 경로로 작성. CPU 폴백은 GPU 커널 부재를 확인한 뒤 명시적 선택일 때만 — 라이브러리 CPU 커널은 대개 청킹이 없어 (N×M) 중간 텐서를 호스트 RAM에 통째로 만든다.
+- **호스트 RAM은 이웃 세션과 공유**: 한 프로세스의 OOM이 같은 데스크톱 스코프의 다른 프로젝트 세션을 전부 끌고 내려간다. 처음 돌리는 스크립트·벤치·전처리는 `systemd-run --user --scope -p MemoryMax=8G -- python x.py`, 그 외엔 실행 전 peak RSS 한 줄 추정(`--workers` 기본값 + `mp.spawn` Pool은 부모 데이터를 worker 수만큼 복사).
 - `libs/` is read-only (vendored third-party). Never edit.
 - Prefer Python; use shell only for thin launch scripts.
 - Second brain vault: `<wrapper>/tools/oh-dinnno-opsidian` (dinnno-research-wrapper 안, 예: `~/Workspace/dinnno-research-wrapper/tools/oh-dinnno-opsidian`) — 연구 문헌 위키(자체 CLAUDE.md 스키마, 머신당 1클론·프로젝트마다 ❌). wrapper 미배치 머신은 `~/Workspace/sangjun_noh/oh-dinnno-opsidian`이 fallback. 질의 규약은 `/harness` §4.

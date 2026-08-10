@@ -13,7 +13,7 @@ description: research(논문 단위) 프로젝트 세션 진입 오리엔테이�
 경계에서는 멈추고, 경계 안에서는 완주한다. (2026-08-08 `/opus-guide` §1에서 이관 — 사용자용 요약은 본체 README §경계선)
 
 - **HARD — 물어보고 대기:** ① 단위 진입 confirm(§2) ② "이 plan으로 Execute 시작?"(§3) ③ 가설 경계 — 자동 chain ❌ (예외: opt-in된 (sweep)의 사전 승인 행) ④ git commit/push ⑤ data·ckpt·runs 비가역 삭제·덮어쓰기 ⑥ 실로봇 명령 전송(sim 제외) ⑦ experiment-level 실패(발산 loss·가설 반증 결과·1회 수정 후 재실패) 후 재시도 — code-level(원인 규명된 오류, plan 불변)이라도 재실행이 비싸면(수 시간 GPU) 보고 먼저 ⑧ pay-grade — thesis/§4 축을 바꾸는 판단은 플래그 후 정지, 결정 큐 착지(§5) ⑨ (autoloop) 인가 밖 — allowlist 밖 변이·코드 변경·예산 소진 후 재개 ⑩ kill/NO-GO — 4게이트(`done/_GUIDE` §Kill/Pivot) 통과해도 사용자 전결.
-- **SOFT — 한 줄 알리고 진행:** agent dispatch · 백그라운드 run 시작 · plan §6 항목 전환 · (autoloop) trial 판정 ledger 1행.
+- **SOFT — 한 줄 알리고 진행:** agent dispatch · 백그라운드 run 시작(메모리 상한값 동봉 — 전역 CLAUDE.md 호스트 RAM 규약) · plan §6 항목 전환 · (autoloop) trial 판정 ledger 1행.
 - 그 외 Execute 안은 완주 — HARD 아닌 곳의 "계속할까요?" 금지. 과잉 confirm은 과잉 자율만큼 나쁜 실패다.
 - 사용자가 문제 설명·질문 중이면(변경 요청 아님) 산출물은 진단 — 보고하고 멈춘다. 요청 없는 수정은 scope 변경(HARD).
 
