@@ -5,6 +5,7 @@
 - `RESEARCH_SPEC.md` — 프로젝트의 불변 spec (북극성). thesis · naive baseline · failure taxonomy · comparison axes · derivation · ablation plan · accepted failures
 - `ARCHITECTURE.md` — repo 디렉토리 레이아웃 (configs/src/scripts/libs/data/ckpt)
 - `progress.md` — Phase + Ablation matrix 트래킹. 한눈에 진척 보기.
+- `LEARNINGS.md` — 반복 실수·교훈 누적. `/harness`가 매 세션 적재, 발견 즉시 한 줄 append.
 - `LOOP.md` — (autoloop) 단위 전용. Loop-Ready 체크리스트 + 루프 spec + ledger.
 - `plans/` — 실험별 `plan_v{N}_{short-name}.md`
 - `done/` — 완료 보고 `done_v{N}.md`

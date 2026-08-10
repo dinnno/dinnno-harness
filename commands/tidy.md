@@ -46,7 +46,7 @@ description: harness 프로젝트에 쌓인 세션 산출물 md 정리 — super
 
 §1–§4가 파일을 옮긴다면, 이 패스는 **현행 문서 안의 낡은 서술**을 찾는다 — 낡은 줄은 매 세션 로드되며 현재 판단에 새어든다. 사용자가 요청하거나 §4 종료 후 후보가 보이면 1줄 제안으로 발동.
 
-- **대상**: `progress.md`(헤더 Stage·anchored commit이 타임라인과 어긋남 · 소비 완료됐는데 미체크인 결정 큐 항목 · 낡은 Open 부채) · 루트 `CLAUDE.md`(`## 현재 상태` 절이 실제 최신 plan/done과 다름) · `references/_INDEX.md`(끝난 단위 전용이었는데 pending으로 남은 행).
+- **대상**: `progress.md`(헤더 Stage·anchored commit이 타임라인과 어긋남 · 소비 완료됐는데 미체크인 결정 큐 항목 · 낡은 Open 부채) · 루트 `CLAUDE.md`(`## 현재 상태` 절이 실제 최신 plan/done과 다름) · `references/_INDEX.md`(끝난 단위 전용이었는데 pending으로 남은 행) · `docs/**/_GUIDE.md`·폴더 `CLAUDE.md`(커맨드 정본과 어긋난 규칙 줄 — 판정은 `/harness` 해당 절과 대조).
 - **불가침**: `RESEARCH_SPEC` 본문·`done_v*`·옛 plan 서술 — spec은 stale 배너 주석 추가까지만.
 - **판정은 문서 간 대조로만**: progress 헤더 vs 타임라인 마지막 행, CLAUDE.md 상태 절 vs `plans/`·`done/` 실제 최신 v{N}, 결정 큐 항목 vs Phase/Matrix 흡수 여부. mtime·감으로 판정 ❌.
 - 표 제시(문서 / 해당 줄 / stale 근거 / 제안: 갱신·체크·삭제) → **confirm(HARD)** → 반영. 확신 없으면 "보류 제안"으로 분리 — §2와 같은 원칙.
@@ -54,7 +54,7 @@ description: harness 프로젝트에 쌓인 세션 산출물 md 정리 — super
 ## 하지 않는 것
 
 - 삭제 ❌ — 이동만. 실행 전후 파일 총수가 보존돼야 한다.
-- `docs/plans/`·`done/`·`references/`·`experiments/` 내부 ❌ — harness가 의도한 history 구조이고 progress.md가 그 인덱스다.
+- `docs/plans/`·`done/`·`references/`·`experiments/` 내부 ❌ — harness가 의도한 history 구조이고 progress.md가 그 인덱스다 (폴더 가이드의 낡은 규칙 줄 정리만 §5 패스가 confirm 받아 수행).
 - 정규 현행 문서(`RESEARCH_SPEC`·`progress`·`LEARNINGS`·`ARCHITECTURE`·`LOOP`·`README`·`CLAUDE.md`)의 **이동·아카이브** ❌ (안의 낡은 줄 정리는 §5 패스가 confirm 받아 수행).
 - git commit/push ❌.
 - 인덱스 없이 이동 ❌ — _INDEX.md에 착지하지 못한 이동은 정리가 아니라 분실이다.
