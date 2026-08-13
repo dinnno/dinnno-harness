@@ -19,7 +19,7 @@ claude
 ## 하네스 설치
 
 ```bash
-# 1회: 전역 행동 규약·커맨드 9종·implementer 에이전트를 ~/.claude/에 symlink
+# 1회: 전역 행동 규약·커맨드 9종·implementer 에이전트·vendored 스킬을 ~/.claude/에 symlink
 ./apply.sh --global
 
 # 프로젝트마다: 골격을 깔기 (이미 있는 파일은 skip)
@@ -133,13 +133,19 @@ cd ~/Workspace/sangjun_noh/for_claude/dinnno-harness && ./apply.sh --global
 git -C ~/Workspace/sangjun_noh/for_claude/dinnno-harness pull
 ```
 
-## vanilla 스킬 활용
+## 외부 스킬·도구
 
-이 하네스는 별도 스킬을 박지 않음. Claude Code 빌트인 + marketplace plugin 활용.
+기본은 vanilla — Claude Code 빌트인 + marketplace plugin. 어우러짐이 확인된 것만 최소 통합(현재 3종).
 
 **빌트인 (설치 불필요)**: `/simplify`(코드 정리), `/init`(CLAUDE.md 생성), `/review`·`/security-review`(diff 리뷰), `/claude-md-improver`(CLAUDE.md 품질 감사 — 월간 다이어트용).
 
 **marketplace plugins**: Claude Code에서 `/plugin`으로 검색·설치. 현재 켠 목록은 `~/.claude/settings.json`의 `enabledPlugins` 참조(이 표를 손으로 동기화하지 않음 — 표류 방지).
+
+**vendored: ponytail** (`skills/ponytail/`) — 최소 코드 사다리(YAGNI→기존 재사용→stdlib→네이티브→기존 의존성→최소 구현). `apply.sh --global`이 `~/.claude/skills/`로 링크, 코딩 작업에서 자동 트리거. 재현성 규약(configs·seed)이 사다리보다 우위(`agents/implementer.md`·`/harness` §3). 원본 [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) (MIT) — 커밋 핀·갱신 절차는 SKILL.md 상단 주석.
+
+**CLI 스킬: graphify** — 코드베이스·문서·논문을 지식 그래프로, grep 대신 query(`/graphify`). 머신당 1회: `uv tool install graphifyy && graphify install`. 쓰는 곳: 큰 repo 구조 질의(`/harness` §4 — `graphify-out/` 있으면 Explore 전에 query), repo형 reference 분석(`/blueprint-ref`). 큰 repo 첫 빌드는 전역 RAM 규약(systemd-run 상한) 적용.
+
+**opt-in 런타임: headroom (실험 중)** — 컨텍스트 압축 프록시(스킬 아님). 대용량 로그·긴 세션에서만 세션 단위로 `headroom wrap claude --code-memory none`(플래그 없으면 Serena MCP가 user scope에 자동 설치됨 — 회피 필수). 입·출력 토큰 절감용이지 보고 스타일 강제 도구 아님. `headroom learn` 산출물은 `CLAUDE.local.md` ❌ → 검토 후 `docs/LEARNINGS.md`로 손 이관. 실험 판정 후 안 맞으면 `uv tool uninstall headroom-ai`.
 
 ## 작성 원칙 (CLAUDE.md / docs)
 

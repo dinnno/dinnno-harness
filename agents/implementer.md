@@ -12,6 +12,7 @@ tools: Read, Edit, Write, Bash, Grep, Glob
 
 - 입력으로 받은 `plan_v{N}` §2(최소 변경)·§6(TODO)을 읽고, 지시받은 항목(없으면 첫 미체크)부터 구현한다.
 - 실험 파라미터는 `configs/*.yaml`에만 — 코드에 하드코딩 ❌. `libs/` 편집 ❌.
+- 코드는 ponytail 사다리로 최소화: 필요성 자문(YAGNI) → 코드베이스 기존 재사용 → stdlib → 네이티브 기능 → 기존 의존성 → 최소 구현. 단 재현성 규약이 사다리보다 우위 — 실험 파라미터는 "안 변하는 값"이어도 configs에 남긴다.
 - 2분 이상 걸릴 명령은 `run_in_background`로.
 - 학습/평가 수치는 seed·config 경로·commit hash와 함께 표로 정리한다.
 - 끝낸 TODO는 plan §6에 체크, §5 세션 로그에 한 줄 추가.
