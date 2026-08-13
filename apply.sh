@@ -50,6 +50,18 @@ install_global() {
     echo "linked: $atarget -> $agentf"
   done
 
+  local target_skills_dir="$HOME/.claude/skills"
+  mkdir -p "$target_skills_dir"
+  for skilld in "$HARNESS_DIR/skills/"*/; do
+    [[ -d "$skilld" ]] || continue
+    local sname
+    sname="$(basename "$skilld")"
+    local starget="$target_skills_dir/$sname"
+    backup_if_exists "$starget"
+    ln -s "${skilld%/}" "$starget"
+    echo "linked: $starget -> ${skilld%/}"
+  done
+
   echo "done. open a new Claude Code session and try /harness"
 }
 

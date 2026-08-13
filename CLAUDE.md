@@ -77,4 +77,3 @@ Conventions:
 - `libs/` is read-only (vendored third-party). Never edit.
 - Prefer Python; use shell only for thin launch scripts.
 - Second brain vault: `<wrapper>/tools/oh-dinnno-opsidian` (dinnno-research-wrapper 안, 예: `~/Workspace/dinnno-research-wrapper/tools/oh-dinnno-opsidian`) — 연구 문헌 위키(자체 CLAUDE.md 스키마, 머신당 1클론·프로젝트마다 ❌). wrapper 미배치 머신은 `~/Workspace/sangjun_noh/oh-dinnno-opsidian`이 fallback. 질의 규약은 `/harness` §4.
-

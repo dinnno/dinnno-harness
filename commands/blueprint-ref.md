@@ -30,6 +30,7 @@ References 인박스의 특정 entry를 "구현 가능한 수준"으로 깊이 �
 - URL, type, name
 - `docs/RESEARCH_SPEC.md` 본문 (thesis 매핑용)
 - 기존 `summary_path` 파일이 있으면 그것도 (요약 위에 청사진 쌓기)
+- type=code이고 graphify 설치 머신이면(선택): dispatch 전에 repo clone → `/graphify <path> --no-viz`로 구조 맵 생성, `graphify-out/GRAPH_REPORT.md`를 입력에 동봉(아키텍처 절 품질↑). 미설치면 생략.
 
 **codex:rescue 출력 사양 (type별)**:
 
