@@ -5,6 +5,7 @@
 - `RESEARCH_SPEC.md` — 프로젝트의 불변 spec (북극성). thesis · naive baseline · failure taxonomy · comparison axes · derivation · ablation plan · accepted failures
 - `ARCHITECTURE.md` — repo 디렉토리 레이아웃 (configs/src/scripts/libs/data/ckpt)
 - `progress.md` — Phase + Ablation matrix 트래킹. 한눈에 진척 보기.
+- `LEARNINGS.md` — 반복 실수·교훈 누적. `$harness`가 매 세션 적재하고 사용자 지적은 즉시 append.
 - `LOOP.md` — (autoloop) 단위 전용. Loop-Ready 체크리스트 + 루프 spec + ledger.
 - `plans/` — 실험별 `plan_v{N}_{short-name}.md`
 - `done/` — 완료 보고 `done_v{N}.md`
@@ -48,11 +49,11 @@
 
 1. **프로젝트 루트 `AGENTS.md`** — 도메인 컨텍스트 인터뷰. 묻기: 시뮬레이터·로봇 플랫폼·데이터셋·자주 쓰는 명령어. 충분히 합의될 때까지.
 2. **`docs/ARCHITECTURE.md`** — 기존 코드 있으면 built-in `explorer` ×1로 실제 트리 매핑 → 사용자 검증. 신규면 사용자가 계획한 구조 묻기. 충분히 합의될 때까지.
-3. **`docs/RESEARCH_SPEC.md`** — §"RESEARCH_SPEC 작성/갱신 protocol" 따름 (가장 무거움).
+3. **`docs/RESEARCH_SPEC.md`** — §"RESEARCH_SPEC 작성/갱신 protocol" 따름 (가장 무거움). §1 확정 직후 §0 현재 방향 블록을 같은 현재값으로 시드한다.
 4. **`docs/progress.md` Phase** — RESEARCH_SPEC §6 채워진 후 Phase mile stone 정의. 한 번 합의로 OK (가볍게).
 5. **`docs/references/_INDEX.md`** — "지금 참조하는 paper/repo 있나" 한 번 묻고 시드. 없으면 OK.
 
-**완료**: 검출된 placeholder 모두 해소 + progress.md Phase 1개 이상 + references 한 번 물어봄. 자동 chain ❌, 사용자 GO 시 (b)로 진입.
+**완료**: 루트 `AGENTS.md`·`RESEARCH_SPEC.md`·`ARCHITECTURE.md`에서 검출된 placeholder 해소 + progress.md Phase 1개 이상 + references 한 번 물어봄. 자동 chain ❌, 사용자 GO 시 (spec)/(experiment) 단위로 진입.
 
 **Anti-pattern**: 5개 질문 한 번에 폭격 / 코드 보고 도메인 추측 후 사용자에게 확인만 / explorer 결과를 사용자 검증 없이 박기.
 

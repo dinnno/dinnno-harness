@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dinnno Preserve Issue"
+  short_description: "Record and hand off a looping research deadlock"
+  default_prompt: "Use $issue to preserve this looping concern and define the next fresh attempt."

@@ -55,7 +55,16 @@ install_project() {
   fi
   target="$(cd "$target" && pwd)"
 
+  local had_agents=0
+  [[ -e "$target/AGENTS.md" ]] && had_agents=1
   cp -rn "$HARNESS_DIR/templates/." "$target/"
+  if [[ "$had_agents" -eq 0 && -f "$target/AGENTS.md" ]]; then
+    local sync_marker
+    sync_marker="$(grep '^## [0-9][0-9][0-9][0-9]-' "$HARNESS_DIR/CHANGELOG.md" | head -n 1 | sed 's/^## //' | tr -d '\r')"
+    if [[ -n "$sync_marker" ]]; then
+      sed -i "s|{마지막 반영 CHANGELOG 항목 — 날짜 + 요지 몇 단어}|$sync_marker|" "$target/AGENTS.md"
+    fi
+  fi
   if [[ -e "$target/gitignore" && ! -e "$target/.gitignore" ]]; then
     mv "$target/gitignore" "$target/.gitignore"
   elif [[ -e "$target/gitignore" ]]; then

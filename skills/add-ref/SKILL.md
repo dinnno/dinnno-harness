@@ -38,6 +38,8 @@ Append beneath the relevant `## Papers`, `## Code`, or `## Homepages / Misc` tab
 | {name} | {url} | pending | — | — | {YYYY-MM-DD} |
 ```
 
+Before appending, read that table's actual header. Map values by column name (`name`, `url`, `status`, `summary_path`, `blueprint_path`, `added`); use `—` for columns without a value and stop for clarification if a required mapping is ambiguous.
+
 Use the system's local date. Keep placeholder rows unchanged. Modify no file other than `_INDEX.md`.
 
 Return `added: {name} ({type}, pending)`. Do not access the URL or create summaries/blueprints.

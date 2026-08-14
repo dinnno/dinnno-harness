@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dinnno Workflow Operations"
+  short_description: "Bound and monitor parallel or long research runs"
+  default_prompt: "Use $workflow-ops to configure safe execution and monitoring for this long or parallel research run."

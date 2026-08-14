@@ -1,6 +1,6 @@
 # LEARNINGS
 
-세션 중 발견한 Codex/사용자의 반복 실수·교훈을 누적. 발견 시 아래 §항목에 한 줄 직접 추가 (`- **[YYYY-MM-DD] category** — message`).
+세션 중 발견한 Codex/사용자의 반복 실수·교훈을 누적. 발견 시 아래 §항목에 한 줄 직접 추가 (`- **[YYYY-MM-DD] category** — message`). 사용자가 Codex의 실수를 지적하거나 재발 방지를 요구하면 그 턴에 즉시 append하고 쓴 줄을 그대로 보여준다(`$harness` §2).
 
 `$harness` 진입 시 적재됨. 같은 실수 반복 방지가 목적.
 

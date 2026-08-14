@@ -5,7 +5,7 @@
 > 분석 산출물: 가벼운 카드는 `docs/references/{name}_summary.md`, 구현용 청사진은 `docs/references/blueprints/{name}.md`.
 > 메인 세션은 산출물만 적재(원본 PDF·repo 등은 메인 컨텍스트 안 가져옴).
 >
-> status 값: `pending` → `summarized` → `blueprinted` (누적).
+> status 값: `pending` → `summarized` → `blueprinted` (누적) — 정의 정본은 `_GUIDE.md` §status 값.
 
 ## Papers
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dinnno Close Session"
+  short_description: "Freshly verify and close a research session"
+  default_prompt: "Use $close to verify this research session against its artifacts before closing."

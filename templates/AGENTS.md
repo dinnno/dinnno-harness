@@ -6,8 +6,9 @@
 
 전체 스펙: `docs/RESEARCH_SPEC.md`
 Research workflow: `$harness`
+Agent delegation guide: `$harness` §4
 
-이 프로젝트는 논문 단위 research 프로젝트다. 모든 Codex 세션은 `$harness`로 진입한다. 직접 호출되지 않았더라도 research 작업이면 해당 스킬의 진입 적재와 단위 확인을 묵시 수행한다. thesis(`docs/RESEARCH_SPEC.md §1`)가 모든 단위의 목적지다.
+이 프로젝트는 논문 단위 research 프로젝트다. 모든 Codex 세션은 `$harness`로 진입한다. 직접 호출되지 않았더라도 research 작업이면 해당 스킬 본문 전체(경계와 종료 계약 포함)를 묵시 적용한다. `$audit`, `$issue`, `$tidy`, `$close`가 소유하는 세션은 각 skill의 워크플로를 따른다. thesis(`docs/RESEARCH_SPEC.md §1`)가 모든 단위의 목적지다.
 
 ## 현재 상태
 
@@ -38,7 +39,7 @@ Research workflow: `$harness`
 
 ## harness 싱크
 
-- last-sync: {설치일}
+- last-sync: {마지막 반영 CHANGELOG 항목 — 날짜 + 요지 몇 단어}
 - 네이밍 매핑: 본체 이름과 이 저장소 이름이 다를 때만 한 줄씩 기록한다.
 
 ---

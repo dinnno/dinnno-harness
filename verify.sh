@@ -8,6 +8,7 @@ bash -n "$ROOT/apply.sh"
 
 required=(
   "$ROOT/AGENTS.md"
+  "$ROOT/apply.ps1"
   "$ROOT/templates/AGENTS.md"
   "$ROOT/templates/docs/RESEARCH_SPEC.md"
   "$ROOT/templates/docs/ARCHITECTURE.md"
@@ -19,20 +20,26 @@ required=(
   "$ROOT/templates/docs/references/_INDEX.md"
   "$ROOT/agents/implementer.toml"
   "$ROOT/agents/research-reviewer.toml"
+  "$ROOT/CHANGELOG.md"
 )
 
 for path in "${required[@]}"; do
   [[ -f "$path" ]] || { echo "missing: $path" >&2; exit 1; }
 done
 
-for skill in harness audit add-ref blueprint-ref tidy; do
+skills=(harness audit add-ref blueprint-ref tidy issue close workflow-ops)
+
+for skill in "${skills[@]}"; do
   file="$ROOT/skills/$skill/SKILL.md"
   metadata="$ROOT/skills/$skill/agents/openai.yaml"
   [[ -f "$file" ]] || { echo "missing: $file" >&2; exit 1; }
   [[ -f "$metadata" ]] || { echo "missing: $metadata" >&2; exit 1; }
-  grep -qx "name: $skill" "$file" || { echo "bad skill name: $file" >&2; exit 1; }
+  grep -Eq "^name: ${skill}[[:space:]]*$" "$file" || { echo "bad skill name: $file" >&2; exit 1; }
   grep -q '^description: .' "$file" || { echo "missing description: $file" >&2; exit 1; }
-  if grep -q 'TODO' "$file"; then
+  grep -q '^  display_name: ".' "$metadata" || { echo "missing display_name: $metadata" >&2; exit 1; }
+  grep -q '^  short_description: ".' "$metadata" || { echo "missing short_description: $metadata" >&2; exit 1; }
+  grep -Fq "\$$skill" "$metadata" || { echo "default prompt must mention \$$skill: $metadata" >&2; exit 1; }
+  if grep -Eq '\{TODO\}|TODO:[[:space:]]*(fill|write|implement)' "$file"; then
     echo "unfinished skill: $file" >&2
     exit 1
   fi
@@ -51,10 +58,16 @@ for path in sorted((root / "agents").glob("*.toml")):
         raise SystemExit(f"{path}: missing {sorted(missing)}")
 PY
 
-if rg -n 'CLAUDE\.md|codex:rescue|Fable|Opus|run_in_background|PushNotification' \
+if command -v rg >/dev/null 2>&1 && rg --version >/dev/null 2>&1; then
+  scanner=(rg -n)
+else
+  scanner=(grep -RInE)
+fi
+
+if "${scanner[@]}" 'CLAUDE\.md|codex:rescue|Fable|Opus|run_in_background|PushNotification' \
   "$ROOT/AGENTS.md" "$ROOT/apply.sh" "$ROOT/skills" "$ROOT/agents" "$ROOT/templates"; then
   echo "Claude-specific active reference found" >&2
   exit 1
 fi
 
-echo "verified: 5 skills, 2 custom agents, installer syntax, and active references"
+echo "verified: ${#skills[@]} skills, 2 custom agents, installer syntax, and active references"

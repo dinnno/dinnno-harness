@@ -1,8 +1,8 @@
 # dinnno-harness-codex
 
-로보틱스 AI 연구용 Codex-native 개인 하네스. 전역 행동 규약, 재사용 skill 5종, custom agent 2종, 논문 단위 프로젝트 골격을 제공한다.
+로보틱스 AI 연구용 Codex-native 개인 하네스. 전역 행동 규약, 재사용 skill 8종, custom agent 2종, 논문 단위 프로젝트 골격을 제공한다.
 
-이 저장소는 기존 `dinnno-harness`의 독립 복사본에서 변환됐다. 원본 Claude 하네스는 수정하지 않았고, 이 복사본에는 remote도 연결하지 않았다.
+이 저장소는 `dinnno-harness`의 Codex 포트다. 2026-08-10 원본의 경계·문서 위생·issue/close·장시간 실행·GPU/RAM 규율까지 Codex 방식으로 동기화했다.
 
 ## 설치
 
@@ -20,6 +20,15 @@ codex login
 ./verify.sh
 ```
 
+Windows Codex에서는 PowerShell 설치기를 쓴다.
+
+```powershell
+./apply.ps1 -Global
+bash ./verify.sh
+```
+
+PowerShell 설치기는 symbolic link를 먼저 시도하고, 권한이 없으면 skill 디렉터리는 junction, 단일 파일은 hardlink로 연결한다.
+
 `--global`은 다음 symlink를 만든다. 기존 일반 파일·디렉토리는 timestamp backup 후 보존한다.
 
 ```text
@@ -28,7 +37,7 @@ codex login
 ~/.codex/agents/{name}.toml     -> agents/{name}.toml
 ```
 
-Codex는 시작할 때 `AGENTS.md` instruction chain을 구성한다. 설치나 갱신 뒤에는 새 Codex 세션을 시작한다.
+Codex는 시작할 때 `AGENTS.md` instruction chain을 구성한다. skill 변경은 자동 감지되지만 목록에 안 보이면 새 Codex 세션을 시작한다.
 
 ## 프로젝트에 골격 설치
 
@@ -43,7 +52,7 @@ codex
 진행 중인 프로젝트에서는 Codex에 다음처럼 요청해도 된다.
 
 ```text
-~/Workspace/sangjun_noh/for_claude/dinnno-harness-codex/apply.sh $(pwd) 실행하고, $harness로 init을 시작해.
+~/Workspace/dinnno-research-wrapper/tools/dinnno-harness-codex/apply.sh $(pwd) 실행하고, $harness로 init을 시작해.
 ```
 
 ## Codex 구조
@@ -56,7 +65,10 @@ dinnno-harness-codex/
 │   ├── audit/
 │   ├── add-ref/
 │   ├── blueprint-ref/
-│   └── tidy/
+│   ├── tidy/
+│   ├── issue/
+│   ├── close/
+│   └── workflow-ops/
 ├── agents/
 │   ├── implementer.toml       # 확정 plan의 기계적 구현
 │   └── research-reviewer.toml # read-only 독립 검토·대용량 분석
@@ -64,6 +76,7 @@ dinnno-harness-codex/
 │   ├── AGENTS.md
 │   └── docs/...
 ├── apply.sh
+├── apply.ps1                    # Windows 사용자 범위 설치
 └── verify.sh
 ```
 
@@ -78,8 +91,11 @@ Codex CLI/IDE에서 `$`로 명시 호출하거나, 요청이 description과 맞�
 | `$blueprint-ref` | 등록 자료를 구현 수준 청사진으로 분석 |
 | `$audit` | 프로젝트 전체 감사 → 사용자 합의 → 수정 → durable handoff |
 | `$tidy` | 소비 완료된 세션 산출물을 삭제 없이 archive |
+| `$issue` | 반복되는 막힘을 second-brain vault에 박제하고 fresh context로 인계 |
+| `$close` | fresh read-only subagent가 목표 대비 산출물을 검증한 뒤 세션 종료 계약 수행 |
+| `$workflow-ops` | sweep·병렬 Execute·장시간 run의 메모리 상한·모니터링·영구 산출물 규율 |
 
-Claude custom slash command를 Codex custom prompt로 그대로 옮기지 않았다. custom prompt는 deprecated이므로 공유·암묵 호출·progressive disclosure가 가능한 skill로 변환했다.
+Claude custom slash command를 Codex custom prompt로 그대로 옮기지 않았다. 공유·암묵 호출·progressive disclosure가 가능한 skill로 변환했다. Codex의 skill 위치와 custom-agent TOML 형식은 공식 문서의 현재 규약을 따른다: [Build skills](https://learn.chatgpt.com/docs/build-skills), [Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents), [AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md).
 
 ## 기본 연구 흐름
 
@@ -101,10 +117,11 @@ working baseline 이후에는 `docs/LOOP.md`의 L1–L7을 채운 뒤, 승인된
 | `codex:rescue` 외부 위임 | read-only `research-reviewer` subagent |
 | Fable/Opus 모델 델타 | 모델명 비종속 경계 규칙 + Codex native delegation |
 | `done_vN_codex.md` | `done_vN_review.md` |
+| `/issue`, `/close`, `/workflow-ops` | `$issue`, `$close`, `$workflow-ops` |
 
 ## 업데이트와 검증
 
-전역 파일과 skill/custom agent는 symlink이므로 이 저장소의 변경이 새 세션부터 반영된다. 프로젝트 template는 복사본이므로 재실행해도 새 파일만 추가된다. 계약 표면 변경은 `CHANGELOG.md`에 기록하고, 프로젝트에서 `$harness` 실행 시 사용자가 "하네스 업데이트했어"라고 선언해 sync한다.
+전역 파일과 skill/custom agent는 symlink이므로 이 저장소의 변경이 반영된다. 프로젝트 template는 복사본이므로 재실행해도 새 파일만 추가된다. 계약 표면 변경은 `CHANGELOG.md`에 기록하고, 프로젝트의 `$harness`는 `AGENTS.md` `last-sync:`보다 새 항목이 있을 때만 구조·포인터 차이를 자동 제안한다. thesis와 과거 plan/done 본문은 동기화 대상이 아니다.
 
 ```bash
 ./verify.sh

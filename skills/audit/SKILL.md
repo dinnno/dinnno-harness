@@ -57,6 +57,10 @@ The handoff must start with:
 
 Include sections: context map, completed changes and rationale, repair queue, NEEDS-HUMAN questions with answer branches, and traps/implicit facts. Every repair item needs priority, original class, `pending|done` status, exact location, problem, repair, completion criteria, and protected adjacent scope.
 
+If the audit produces experiment plans, place them in the canonical `docs/plans/plan_v{N}_{slug}.md` sequence and close each with `docs/done/done_v{N}.md`. Keep `progress.md` as the only experiment index; do not create a second numbering or status system.
+
+Never cite `/tmp`, a session directory, or another ephemeral path in the handoff. Copy required evidence to a durable project or run path first.
+
 ## 3. Apply only agreed FIX-NOW work
 
 Define each repair at diff-level, then dispatch bounded mechanical edits to `implementer`. Do not duplicate the edit in the parent thread. The parent reviews the diff and verification.
