@@ -24,6 +24,8 @@
 
 short-name은 kebab-case slug. 핵심 모듈/작업을 한두 단어로 (`tactile-encoder`, `retarget-hand`, `multi-step-rollout`).
 
+이 폴더에는 `plan_v{N}_*.md`(+ `_plan_template.md`·`_GUIDE.md`)만 둔다. 리뷰는 `plan_v{N}_codex.md` **한 파일**에 라운드를 이어 쓴다 — 라운드마다 새 파일 ❌ (`codex`는 리뷰 파일 예약어 — plan short-name으로 사용 ❌). 서베이·audit 등 일회성 산출물은 `docs/notes/`로(`/harness` §4).
+
 ## 자기완결성
 
 각 plan 파일은 독립된 Claude 세션에서 실행될 수 있어야 한다. "이전 대화에서" 같은 외부 참조 금지. 필요한 파일 경로·문맥은 plan 안에 다 적는다.

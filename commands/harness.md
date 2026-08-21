@@ -20,7 +20,7 @@ description: research(논문 단위) 프로젝트 세션 진입 오리엔테이�
 ## 1. 진입 시 적재
 
 - `docs/RESEARCH_SPEC.md` — thesis(§1)와 비교 축(§4) 확인. 빈 슬롯/placeholder 있으면 사용자에게 경고만.
-- `docs/progress.md` — 어디까지 왔는지. `docs/LEARNINGS.md` — 반복 실수 방지. 둘 중 없는 게 있으면 조용히 건너뛰지 말고 "progress/LEARNINGS 부재 → init/backfill 필요" 한 줄 경고(위 SPEC placeholder 경고와 대칭).
+- `docs/progress.md` — 어디까지 왔는지. `docs/LEARNINGS.md` — 반복 실수 방지. 둘 중 없는 게 있으면 조용히 건너뛰지 말고 "progress/LEARNINGS 부재 → init/backfill 필요" 한 줄 경고(위 SPEC placeholder 경고와 대칭). 적재한 정본이 50K를 넘으면 1줄 경고(진입 차단 ❌) — progress·LEARNINGS는 "`/tidy` §6 다이어트 권장", SPEC은 "(a) spec 단위에서 재슬라이싱 검토 권장"(§6 불가침이라 tidy로 못 푼다).
 - progress.md 하단 결정 큐 확인 — 미결 [spec-drift]·[kill-candidate]가 있으면 단위 confirm 때 (a) spec 단위를 첫 후보로 제시. 💡 인박스 항목이 현 단위와 겹치면 한 줄 언급.
 - `docs/plans/`·`docs/done/`의 마지막 `v{N}` 확인 (`_template` 무시). 진행 중 단위를 이어가는 세션이면 해당 `plan_v{N}` 적재.
 - `docs/references/_INDEX.md`의 `status: pending` 행 스캔 — 현재 단위와 관련 있으면 처리 규약은 §4.
@@ -62,16 +62,18 @@ Setup→Execute→Verdict는 게이트가 아니라 자연스러운 진행이다
 
 ## 4. Agent 위임 + 모델·effort 라우팅 (강제 아님 — 필요할 때만)
 
-**라우팅 원칙:** 모델·effort는 토큰 단가가 아니라 "단위의 오판 손실 × 빈도"로 고른다 — init/spec·thesis 수준 verdict·kill 판정 = Fable/Mythos 세션(effort xhigh, 전역 기본) · experiment Setup·Verdict = 가이드 세션(현재 세션 — Fable이든 Opus 5+`/opus-guide`든 OK, 미스매치 안내 대상 아님) · 기계적 구현 = implementer(opus·effort high) · 독립 검증·대용량 입력·깊은 web 조사 = codex:rescue(gpt-5.6-sol) · web 광역 리서치 = deep-research류 스킬(부재 머신은 general-purpose + WebSearch fan-out, 산출물은 `docs/references/` 등록 또는 done §4 후보로 착지). Opus 계열 세션·에이전트의 effort는 **high가 상한** — xhigh/max는 spec-수준 판단만(그 위로는 성능 하락 + 비용 급증). (sweep)·병렬화 가능한 Execute(다중 파일 구현·검증 fan-out)는 세션 모델 무관 **Workflow 사용을 기본 고려** — 이 커맨드 로드가 그 opt-in을 구성하며, 운영 규칙은 그때 `/workflow-ops`를 로드(lazy).
+**라우팅 원칙:** 모델·effort는 토큰 단가가 아니라 "단위의 오판 손실 × 빈도"로 고른다 — init/spec·thesis 수준 verdict·kill 판정 = Fable/Mythos 세션(effort xhigh, 전역 기본) · experiment Setup·Verdict = 가이드 세션(현재 세션 — Fable이든 Opus 5+`/opus-guide`든 OK, 미스매치 안내 대상 아님) · 기계적 구현 = implementer(opus·effort high) · 독립 검증·대용량 입력·깊은 web 조사 = codex:rescue(gpt-5.6-sol) · web 광역 리서치 = deep-research류 스킬(부재 머신은 general-purpose + WebSearch fan-out, 산출물 파일은 `docs/notes/`로 착지 + references 등록 또는 done §4 후보로 표면화). Opus 계열 세션·에이전트의 effort는 **high가 상한** — xhigh/max는 spec-수준 판단만(그 위로는 성능 하락 + 비용 급증). (sweep)·병렬화 가능한 Execute(다중 파일 구현·검증 fan-out)는 세션 모델 무관 **Workflow 사용을 기본 고려** — 이 커맨드 로드가 그 opt-in을 구성하며, 운영 규칙은 그때 `/workflow-ops`를 로드(lazy).
 
 - **codex:rescue** (gpt-5.6-sol) — 토큰 무거운 입력(PDF·대용량 로그·configs 다발·`libs/` 광역 scan)이나 깊은 독립 reasoning(학습 발산 진단, 예상-실제 갭, 광역 repo audit, spec↔코드 diff). 본 세션은 요약/결론만 받는다. PDF·대용량 원본을 본 세션이 직접 Read ❌.
 - **Explore** — 넓은 코드 탐색(call-graph 등). grep 두어 번으로 풀릴 일엔 부르지 않는다. `graphify-out/` 그래프가 있는 repo는 Explore 전에 `/graphify query`가 먼저다(스킬·CLI 설치 머신 한정 — 미설치면 무시).
 - **Plan** — 옵션 비교·ablation 우선순위 등 무게 있는 사고. 단발 판단엔 안 부른다.
 - **implementer** (`model: opus`·effort high) — plan 확정 후의 기계적 구현. 가이드 세션(Fable/Opus 무관)은 설계·판정만 하고 구현은 SOFT dispatch로 내린다. 위임 후 중복 구현 ❌ — diff·결과 수치만 회수.
 - **루프 도구** — (sweep)·병렬 실행에는 /loop·Workflow(worktree 격리) 활용 — 장시간 실행·스크립트 견고성 규칙은 `/workflow-ops`. 구현 스테이지 agent는 implementer 재사용, 설계·verdict 스테이지만 상위 모델(effort는 위 라우팅 상한 준수). 신규 가설 생성·가설 경계 넘기에는 ❌.
-- **writer ≠ reviewer** — Verdict 자기점검(`general-purpose` ×1)과 외부 검증(`codex:rescue`, 수동)은 본 세션과 분리. 외부 검증 산출물은 별 파일(`done_v{N}_codex.md`). 리뷰 라운드 자동 반복 ❌ — 2라운드 후에도 지적이 남으면 계속 여부를 confirm (HARD), thesis-level claim이 뒤집혔으면 즉시 1라운드 추가.
+- **writer ≠ reviewer** — Verdict 자기점검(`general-purpose` ×1)과 외부 검증(`codex:rescue`, 수동)은 본 세션과 분리. 외부 검증 산출물은 별 파일(`done_v{N}_codex.md`) — 리뷰 라운드는 그 **한 파일에 이어 쓴다**, 라운드마다 새 파일 ❌ (plan 리뷰도 동일: `plan_v{N}_codex.md` 하나). 리뷰 라운드 자동 반복 ❌ — 2라운드 후에도 지적이 남으면 계속 여부를 confirm (HARD), thesis-level claim이 뒤집혔으면 즉시 1라운드 추가.
 - `docs/references/`의 `status: pending`이 현재 단위와 관련 있으면 한 줄 보고 후 codex로 요약(summary) dispatch — 산출물·status 규약은 `docs/references/_GUIDE.md` 참조. 깊이 분석은 `/blueprint-ref <name>`.
 - **Second brain 질의** — 가설이 정체될 때(연속 no-improve·done §4 후보 고갈·kill 후 pivot 탐색): vault(경로: 전역 CLAUDE.md, 부재 머신은 skip)로 Explore ×1 dispatch — vault 자체 CLAUDE.md 스키마의 query 절차를 따라 현 thesis·limitation에 매핑된 방법론 힌트 2-3개만 회수 → done §4 후보 또는 결정 큐 💡로 착지. 본 세션이 vault 직접 Read ❌. web 광역 탐색(deep-research 등)은 brain이 마른 뒤 2차.
+
+- **일회성 산출물 착지** — 서베이·분석 memo 등 단위 산출물(plan/done)이 아닌 파일은 `docs/notes/YYYY-MM-DD_{slug}.md`(폴더 부재 시 생성). plans/·docs 직하 착지 ❌ — notes/는 소비 후 `/tidy`가 자유롭게 아카이브하는 방이다(`notes/_GUIDE.md`). 정규 홈이 있는 산출물은 제 경로 유지(references 요약·`blueprints/`, `/audit`의 루트 HANDOFF/CHANGELOG) — notes 대상 아님.
 
 dispatch 직전 한 줄 보고, 사용자 STOP 가능.
 
@@ -96,6 +98,7 @@ dispatch 직전 한 줄 보고, 사용자 STOP 가능.
 - done에 수치가 있는데 대응 Ablation 셀이 '미측정'인 채 세션을 닫지 않는다.
 - progress.md 헤더(Stage·anchored commit) 갱신 시 직전 단위는 타임라인 행으로 흡수 — 머리만 갱신하고 꼬리를 방치하지 않는다(하네스 상태 문서 정리는 Surgical 예외, 전역 CLAUDE.md §3). 루트 `HANDOFF_TO_*.md` 큐 항목을 이번 세션이 완료했으면 상태 즉시 flip.
 - 반복 실수/교훈 발견 시 `docs/LEARNINGS.md`에 한 줄 직접 추가.
+- 정리 임계 신호(루트 세션 산출물 ≥2 · docs 직하 loose md ≥3 · notes/에 소비 완료 후보)가 보이면 `/tidy`를 1줄 제안(SOFT — 실행은 수락 후).
 
 ## 하지 않는 것
 
