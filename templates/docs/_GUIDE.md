@@ -10,12 +10,14 @@
 - `plans/` — 실험별 `plan_v{N}_{short-name}.md`
 - `done/` — 완료 보고 `done_v{N}.md`
 - `references/` — 외부 자료(arxiv/code/homepage) 인박스. `_INDEX.md`에 URL만 박으면 `codex:rescue`가 분석해서 summary 저장.
+- `notes/` — 일회성 세션 산출물(서베이·리뷰 원문·분석 memo) 방, `YYYY-MM-DD_{slug}.md`. 태어날 때부터 아카이브 후보 — 소비되면 `/tidy`가 `archive/`로 보낸다.
 
 ## 작성 규약
 
 - RESEARCH_SPEC.md는 실험 결과로 인해 어긋나기 전에는 건드리지 않는다. 어긋나면 spec부터 고치고 plan을 다시 슬라이싱한다 (코드로 패치 금지).
 - ARCHITECTURE.md는 새 디렉토리/규칙이 생길 때만 갱신.
 - 각 plan/done은 자기완결적이어야 한다. "이전에 논의한 바와 같이" 같은 외부 참조 금지.
+- 일회성 산출물은 `notes/`에만 착지 — plans/·docs 직하 ❌ (`/harness` §4). progress·LEARNINGS가 50K를 넘으면 `/tidy` §6 다이어트.
 
 ## RESEARCH_SPEC 작성/갱신 protocol
 

@@ -4,7 +4,7 @@ Behavioral guidelines for Claude Code across all projects. Project-level CLAUDE.
 
 **우선순위:** 본 파일(전역 4원칙) > 커맨드 문서(`/harness` 등 — 세션 워크플로 정본) > 프로젝트 `CLAUDE.md`(도메인 컨텍스트) > 프로젝트 `docs/**/_GUIDE.md` 또는 폴더 `CLAUDE.md`(폴더별 규약). 충돌 시 위가 이긴다. 단, 그 폴더별 규약이 명시한 산출물 형식·네이밍은 그 폴더 안에서 우위.
 
-**진입점 통일:** dinnno-harness 깐 프로젝트에서는 모든 작업이 `/harness`로 진입. `/harness` 없이 시작된 요청도 본문 전체(§경계선 포함 §1–§5)를 묵시 적용한다(현황 적재·단위 confirm·세션 종료 계약 포함). (예외: `/audit`과 그 `HANDOFF_TO_OPUS.md` 인계 세션, `/issue` 파일만 읽고 재시도하는 세션은 해당 문서의 워크플로를 따른다.) 현재 세션 모델이 Fable/Mythos 계열이 아니면(Opus·Sonnet 등) 다른 작업을 시작하기 전에 `/opus-guide`를 먼저 로드한다.
+**진입점 통일:** dinnno-harness 깐 프로젝트에서는 모든 작업이 `/harness`로 진입. `/harness` 없이 시작된 요청도 본문 전체(§경계선 포함 §1–§5)를 묵시 적용한다(현황 적재·단위 confirm·세션 종료 계약 포함). (예외: `/audit`과 그 `HANDOFF_TO_OPUS.md` 인계 세션, `/issue` 파일만 읽고 재시도하는 세션, `/deep-clean` 대청소 세션은 해당 문서의 워크플로를 따른다.) 현재 세션 모델이 Fable/Mythos 계열이 아니면(Opus·Sonnet 등) 다른 작업을 시작하기 전에 `/opus-guide`를 먼저 로드한다.
 
 **Research 목표 지향:** 이 하네스는 논문 한 개 단위의 연구 프로젝트용. `docs/RESEARCH_SPEC.md`의 thesis(= 논문 contribution)가 모든 단위의 목적지.
 

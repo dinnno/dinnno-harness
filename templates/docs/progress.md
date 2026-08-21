@@ -2,6 +2,7 @@
 
 <!-- 자기완결 갱신 규칙: done/spec 단위 끝에 한 줄 — 타임라인 행 + Ablation 셀 + 헤더(anchored commit/Stage).
      이 파일은 "여러 done에 흩어진 cross-version 상태의 인덱스"다. done 수치를 복제하지 말고 결론+포인터만(done보다 짧게).
+     헤더 Stage 줄은 현재 상태만 — 이력 서술 축적 ❌(이력은 타임라인 행으로). 파일이 50K를 넘으면 /tidy §6 롤링.
      상세 규칙: docs/_GUIDE.md(또는 폴더 CLAUDE.md) §progress.md 갱신 protocol. -->
 
 Thesis → `RESEARCH_SPEC.md §1` ({한 줄})

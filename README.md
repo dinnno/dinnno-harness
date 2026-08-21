@@ -19,7 +19,7 @@ claude
 ## 하네스 설치
 
 ```bash
-# 1회: 전역 행동 규약·커맨드 9종·implementer 에이전트·vendored 스킬을 ~/.claude/에 symlink
+# 1회: 전역 행동 규약·커맨드 10종·implementer 에이전트·vendored 스킬을 ~/.claude/에 symlink
 ./apply.sh --global
 
 # 프로젝트마다: 골격을 깔기 (이미 있는 파일은 skip)
@@ -44,7 +44,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 ~/                                            # 어느 머신이든
 ├── .claude/
 │   ├── CLAUDE.md  ───────────────────┐       # symlink (4원칙 + 도메인)
-│   └── commands/*.md  ───────────────┤       # symlink (커맨드 9종)
+│   └── commands/*.md  ───────────────┤       # symlink (커맨드 10종)
 │                                      │
 └── Workspace/sangjun_noh/for_claude/  │
     ├── dinnno-harness/   ◀───────────┘       # ★ 본체 (1번 클론)
@@ -84,7 +84,8 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 | `/add-ref <url>` | 논문·레포 URL을 마주친 **즉시**. `references/_INDEX.md`에 등록만 (fetch·분석 ❌) |
 | `/blueprint-ref <name>` | 등록된 자료를 **구현하기로 정했을 때**. codex:rescue로 구현 수준 청사진 생성 |
 | `/audit` | 프로젝트 전체 정기 점검·인수인계. **Fable 5 이상 전용** — 검토→인터뷰 합의→HANDOFF 골격 생성→수정(수정마다 갱신)→Opus가 이어받음(중간에 끊겨도 그 지점부터) |
-| `/tidy` | 소비 완료된 세션 산출물 md(날짜 suffix HANDOFF/CHANGELOG, loose docs md) 정리 — 스캔→상태분류→confirm→`docs/archive/` 이동+`_INDEX` |
+| `/tidy` | 소비 완료된 세션 산출물 md(날짜 suffix HANDOFF/CHANGELOG, loose docs md, notes/, 비정규 폴더) 정리 — 스캔→상태분류→confirm→`docs/archive/` 이동+`_INDEX`. §6 다이어트 패스가 50K 넘은 progress/LEARNINGS를 롤링 |
+| `/deep-clean` | 축적이 /tidy 범위를 넘은 프로젝트의 **1회성 대청소** — 사체 폴더·plans 고아·md5 중복·done 결번 소급 회수·정본 다이어트. 프로젝트당 별도 세션 1회 |
 | `/issue` | 연구·구현이 **뫼비우스**(같은 고민·수정 순환)에 빠졌을 때. 고민 흐름을 vault `fable/issues/`에 박제 → Fable 세션/새 터미널이 그 파일만 읽고 이어받음. 인자 없이 부르면 open issue 소비 모드 |
 | `/close` | **"세션 close하자"** 선언 시. 이 대화를 모르는 fresh 에이전트가 "목표한 걸 실제 했는가"를 적대 검토(수치 vs 근거, TODO vs diff, 미검증 완료 주장) → 반영 → §5 세션 정리 |
 
