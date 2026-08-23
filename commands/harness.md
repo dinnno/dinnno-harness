@@ -1,18 +1,18 @@
 ---
-description: research(논문 단위) 프로젝트 세션 진입 오리엔테이션 — RESEARCH_SPEC/progress/LEARNINGS 적재 후 init/spec/experiment 단위를 confirm하고 Setup→Execute→Verdict로 진행. 일반 코딩·non-research 레포에는 쓰지 않는다.
+description: research(논문 단위) 프로젝트 세션 진입 오리엔테이션 — RESEARCH_SPEC/progress/LEARNINGS 적재 후 init/spec/experiment 또는 opt-in research-loop 단위를 confirm하고 Setup→Execute→Verdict로 진행. 일반 코딩·non-research 레포에는 쓰지 않는다.
 ---
 
 이 세션은 dinnno-harness 워크플로우를 따른다. 강제 게이트가 아니라 **연구 지향 + 산출물 구조**를 주는 얇은 오리엔테이션이다. 판단은 너에게 맡긴다 — 전역 4원칙(`~/.claude/CLAUDE.md`)을 따르되 단계를 기계적으로 밟지 마라. 모델 무관 공통 경계는 아래 §경계선 — 그 밖에서는 완주가 기본이다.
 
 **모델 self-check:** 현재 세션 모델이 Fable/Mythos 계열이 아닌데(Opus·Sonnet 등) `/opus-guide`가 아직 로드 안 됐으면 §1 적재 전에 지금 로드한다(전역 CLAUDE.md 진입점 규칙의 안전망).
 
-**기본 norm:** 한 가설 = 한 세션 = 한 터미널. 가설 *내부*는 명확화(Setup) → 구현·학습(Execute) → 판정(Verdict)으로 자연스럽게 흐른다. 가설 *경계*는 사람이 긋는다 — **다음 가설로 자동 chain ❌** (새 가설은 새 터미널).
+**기본 norm:** 한 가설 = 한 세션 = 한 터미널. 가설 *내부*는 명확화(Setup) → 구현·학습(Execute) → 판정(Verdict)으로 자연스럽게 흐른다. 가설 *경계*는 사람이 긋는다 — **다음 가설로 자동 chain ❌** (새 가설은 새 터미널). 유일한 추가 예외는 사용자가 `/research-loop`의 boundary·총예산을 명시 승인한 opt-in 세션이며, 그 안에서도 한 번에 활성 가설 하나와 plan→Execute→Verdict 짝을 유지한다.
 
 ## 경계선 — 멈춤은 두 모드뿐 (HARD/SOFT, 모든 모델 공통 정본)
 
 경계에서는 멈추고, 경계 안에서는 완주한다. (2026-08-08 `/opus-guide` §1에서 이관 — 사용자용 요약은 본체 README §경계선)
 
-- **HARD — 물어보고 대기:** ① 단위 진입 confirm(§2) ② "이 plan으로 Execute 시작?"(§3) ③ 가설 경계 — 자동 chain ❌ (예외: opt-in된 (sweep)의 사전 승인 행) ④ git commit/push ⑤ data·ckpt·runs 비가역 삭제·덮어쓰기 ⑥ 실로봇 명령 전송(sim 제외) ⑦ experiment-level 실패(발산 loss·가설 반증 결과·1회 수정 후 재실패) 후 재시도 — code-level(원인 규명된 오류, plan 불변)이라도 재실행이 비싸면(수 시간 GPU) 보고 먼저 ⑧ pay-grade — thesis/§4 축을 바꾸는 판단은 플래그 후 정지, 결정 큐 착지(§5) ⑨ (autoloop) 인가 밖 — allowlist 밖 변이·코드 변경·예산 소진 후 재개 ⑩ kill/NO-GO — 4게이트(`done/_GUIDE` §Kill/Pivot) 통과해도 사용자 전결.
+- **HARD — 물어보고 대기:** ① 단위 진입 confirm(§2) ② "이 plan으로 Execute 시작?"(§3 — opt-in research-loop는 boundary·총예산 승인 1회가 그 안의 local plan Execute를 인가) ③ 가설 경계 — 자동 chain ❌ (예외: opt-in된 (sweep)의 사전 승인 행 · `/research-loop`의 승인 boundary 안 local hypothesis) ④ git commit/push ⑤ data·ckpt·runs 비가역 삭제·덮어쓰기 ⑥ 실로봇 명령 전송(sim 제외) ⑦ experiment-level 실패(발산 loss·가설 반증 결과·1회 수정 후 재실패) 후 재시도 — code-level(원인 규명된 오류, plan 불변)이라도 재실행이 비싸면(수 시간 GPU) 보고 먼저 ⑧ pay-grade — thesis/§4 축을 바꾸는 판단은 플래그 후 정지, 결정 큐 착지(§5) ⑨ (autoloop) 인가 밖 — allowlist 밖 변이·코드 변경·예산 소진 후 재개 ⑩ `/research-loop` 인가 밖 — boundary 밖 architecture/code surface·총예산 소진·raw fact disagreement ⑪ kill/NO-GO — 4게이트(`done/_GUIDE` §Kill/Pivot) 통과해도 사용자 전결.
 - **SOFT — 한 줄 알리고 진행:** agent dispatch · 백그라운드 run 시작(메모리 상한값 동봉 — 전역 CLAUDE.md 호스트 RAM 규약) · plan §6 항목 전환 · (autoloop) trial 판정 ledger 1행.
 - 그 외 Execute 안은 완주 — HARD 아닌 곳의 "계속할까요?" 금지. 과잉 confirm은 과잉 자율만큼 나쁜 실패다.
 - 사용자가 문제 설명·질문 중이면(변경 요청 아님) 산출물은 진단 — 보고하고 멈춘다. 요청 없는 수정은 scope 변경(HARD).
@@ -40,6 +40,7 @@ description: research(논문 단위) 프로젝트 세션 진입 오리엔테이�
   L{k} 채우기), 전부 충족이면 **loop-run** — 얇은 plan(변이 우선순위·예산·정지 조건) 작성 후 "Execute
   시작?" confirm이 곧 **루프 인가**(HARD 1회), 이후 allowlist·예산 안 trial 반복은 무질문(`docs/LOOP.md
   §운영`). 루프 안 kill/NO-GO 결론 ❌(`done/_GUIDE §Kill/Pivot`). 예산 소진 후 재인가 = 새 HARD.
+- **(research-loop)** — evidence acquisition→competing hypothesis→판별 experiment의 optional outer loop. 사용자가 명시 opt-in했을 때만 `/research-loop`를 로드해 boundary·총예산을 1회 승인한다. 각 iteration은 기존 plan→Execute→Verdict와 한 change axis를 그대로 유지하고, experiment-level anomaly·thesis/축·boundary 밖·예산 초과·kill은 계속 HARD. 미선택 시 기존 workflow 변화 없음.
 
 단위가 모호하면 더 물어 명확히 한 뒤 시작. **모호한데 추측으로 밀어붙이는 게 가장 비싼 실수.** confirm 때 현재 세션 모델·effort가 §4 라우팅 권장과 어긋나면 한 줄 안내: "이 단위는 {모델·effort} 권장 — `/model`·`/effort`로 전환하거나 그대로 진행"(effort는 `echo $CLAUDE_EFFORT`로 확인, 전환 실행은 사용자 몫).
 
@@ -102,6 +103,6 @@ dispatch 직전 한 줄 보고, 사용자 STOP 가능.
 
 ## 하지 않는 것
 
-- 가설 경계 자동 chain ❌ (Verdict 끝났다고 다음 가설로 자동 진입 안 함. 예외: opt-in된 (sweep) 단위 안의 사전 승인 행 간 진행).
+- 가설 경계 자동 chain ❌ (Verdict 끝났다고 다음 가설로 자동 진입 안 함. 예외: opt-in된 (sweep)의 사전 승인 행 또는 활성 `/research-loop` authorization의 boundary·budget 안 local hypothesis).
 - 사용자 승인 없이 git commit/push ❌.
 - 실패 시 자동 재시도 ❌ — 실패 보고 후 결정 받기 (experiment-level 기준. code-level 조정은 §3 Execute 루프 인가 안에서 OK).

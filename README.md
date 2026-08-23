@@ -19,7 +19,7 @@ claude
 ## 하네스 설치
 
 ```bash
-# 1회: 전역 행동 규약·커맨드 10종·implementer 에이전트·vendored 스킬을 ~/.claude/에 symlink
+# 1회: 전역 행동 규약·커맨드 11종·에이전트·vendored 스킬을 ~/.claude/에 symlink
 ./apply.sh --global
 
 # 프로젝트마다: 골격을 깔기 (이미 있는 파일은 skip)
@@ -44,7 +44,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 ~/                                            # 어느 머신이든
 ├── .claude/
 │   ├── CLAUDE.md  ───────────────────┐       # symlink (4원칙 + 도메인)
-│   └── commands/*.md  ───────────────┤       # symlink (커맨드 10종)
+│   └── commands/*.md  ───────────────┤       # symlink (커맨드 11종)
 │                                      │
 └── Workspace/sangjun_noh/for_claude/  │
     ├── dinnno-harness/   ◀───────────┘       # ★ 본체 (1번 클론)
@@ -79,6 +79,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 | 커맨드 | 언제 쓰나 |
 |---|---|
 | `/harness` | **모든 세션의 진입점.** 현황(spec·progress·LEARNINGS) 적재 → 단위(init/spec/experiment) confirm → Setup→Execute→Verdict |
+| `/research-loop` | **명시 opt-in한 evidence-driven outer loop.** 기존 plan→Execute→Verdict를 유지하며 current evidence→Second Brain→필요시 external research→fresh Claude/Codex 독립 해석→가장 싼 판별 실험을 승인 boundary·예산 안에서 반복 |
 | `/opus-guide` | 비-Fable 모델 세션에서 `/harness` **직전에** 로드. 행동 보강 델타 레이어(rules-only, 워크플로 시작 ❌). Opus 5+는 §1.5 델타만, Opus 4.8 이하·Sonnet은 전체 적용. Fable 세션은 로드 불필요 |
 | `/workflow-ops` | (sweep)·병렬 Execute에서 Workflow/루프 도구를 쓰기 **직전에** 로드. 장시간 sim·스크립트 견고성·산출물 규율(rules-only) |
 | `/add-ref <url>` | 논문·레포 URL을 마주친 **즉시**. `references/_INDEX.md`에 등록만 (fetch·분석 ❌) |
@@ -110,6 +111,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 2. `/harness` 진입 → 첫 세션은 자동으로 **(a₀) init 단계**: placeholder 박힌 메타 .md를 사용자와 함께 채움 (프로젝트 루트 `CLAUDE.md` → `ARCHITECTURE.md` → `RESEARCH_SPEC.md` → `progress.md` → `references/_INDEX.md` 순서). 추측 박치기 reject — 사용자 발화 기반만.
 3. (a₀) 후: 단위 작업 진입. 단위는 **(a) spec 갱신** 또는 **(experiment) 한 가설** — 가설 내부는 Setup(plan 작성)→Execute(구현·학습)→Verdict(done)로 자연스럽게 흐른다. **한 가설 = 한 세션 = 한 터미널**이 기본. 다음 가설로 자동 chain ❌ (새 가설은 새 터미널).
    - baseline GO 이후 국면에서는 (autoloop) — docs/LOOP.md의 Loop-Ready 체크리스트(L1–L7)로 진단 → gap은 loop-prep으로 채우고 → loop-run(루프 인가 1회 후 밤새 trial 자동 반복, keep/rollback ledger + HTML Loop Report 누적).
+   - 사람이 local research boundary·총예산을 한 번 승인해 hypothesis 생성까지 위임하려면 (research-loop) — 기존 plan/done/progress를 그대로 쓰고, 중요한 결과만 fresh Claude/Codex가 같은 raw evidence를 독립 해석한다. 사용하지 않으면 위 기본 흐름은 변하지 않는다.
 4. plan 구현 중에는 plan §6 TODO를 working checklist로. 세션 시작 시 첫 미체크 항목부터, 세션 종료 시 체크 갱신 + §5 세션 로그 한 줄.
 5. 외부 자료(arxiv/code/homepage)는 `docs/references/_INDEX.md`에 URL만 박아두면 `/harness`가 codex:rescue로 분석 → summary만 메인 세션에 적재.
 6. 진척 한눈에 보기: `docs/progress.md` (Phase + Ablation matrix).
