@@ -2,7 +2,7 @@
 
 이 폴더는 plan별 완료 보고 `done_v{N}.md`를 담는다. 짝: `plans/plan_v{N}_*.md`.
 
-**Verdict의 산출물.** Execute 끝(학습/평가 완료) 시 진입. 이 파일 §3에서 가설이 **negative로 판정**되면 세션 종료 안내 — "이 가설 폐기. 새 가설은 새 터미널 + `/harness`". positive면 §4 다음 후보 도출 후 세션 종료. 어느 쪽이든 **다음 가설로 자동 chain ❌**.
+**Verdict의 산출물.** Execute 끝(학습/평가 완료) 시 진입. 기본 experiment는 §3 판정과 §4 후보를 남기고 현재 `/harness` 단위를 종료한다. **`/harness` 자체의 다음 가설/task 자동 chain ❌**. 단, 명시 승인된 research-bootstrap/research-loop 상위 orchestrator는 현재 plan/done closure 뒤 boundary·budget 안의 새 독립 단위를 선택할 수 있다.
 
 ## 각 done에 들어가는 것
 

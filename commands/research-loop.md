@@ -10,10 +10,11 @@ description: optional evidence-driven outer research loop — 기존 /harness의
 
 ## 0. Loop authorization (HARD 1회)
 
-먼저 `/harness` §1 상태를 적재한다. `active` 또는 `stopped` research-loop note가 있으면 새로 만들지 않는다. `active`는 재개 여부를 묻고, `stopped`는 멈춘 gate·남은 boundary/budget을 다시 보여 준 뒤 사용자의 명시적 재승인을 note에 기록하고 `active`로 바꿀 때만 재개한다. 새 loop면 `docs/notes/YYYY-MM-DD_research-loop-{slug}.md` 하나에 아래만 기록한다. Metrics·실험 서사는 복제하지 않고 plan/done/run 포인터만 둔다.
+먼저 `/harness` §1 상태를 적재하고 `docs/notes/*research-loop*.md`의 non-consumed note를 스캔한다. 같은 `loop-id` 또는 같은 question+axis의 `proposed|active|stopped`가 있으면 새 note를 만들지 않는다. `active`가 둘 이상이면 어느 것도 실행하지 말고 하나를 남길 사용자 결정을 받는다. 새 loop는 관련 non-consumed note가 없을 때만 `docs/notes/YYYY-MM-DD_research-loop-{slug}.md` 하나에 아래를 기록한다. Metrics·실험 서사는 복제하지 않고 plan/done/run 포인터만 둔다.
 
 ```markdown
 # research-loop: {question}
+- loop-id: {YYYYMMDD-{slug}}
 - status: proposed | active | stopped | consumed
 - thesis/axis boundary: {RESEARCH_SPEC line/axis}
 - allowed change surface: {config/code/module 범위}
@@ -21,11 +22,22 @@ description: optional evidence-driven outer research loop — 기존 /harness의
 - cross-model policy: {trigger 목록, periodic interval 또는 none}
 - stop: {no-improve, anomaly, confidence, budget 조건}
 - approved: {YYYY-MM-DD 사용자 승인 원문 또는 pending}
-- current: {plan/done pointer, open uncertainty 1줄}
+- current: idle | in-flight | terminal-uncollected
+- in-flight: {experiment-id, stage, process/session/run id, start time, reserved/remaining budget, stdout, stderr, metrics/result, success marker, failure marker, paired plan/config; idle이면 N/A}
+- open uncertainty: {1줄}
 
 | k | evidence/analysis | plan | done | terminal | budget used | next/gate |
 |---|---|---|---|---|---|---|
 ```
+
+상태 의미와 허용 전이는 다음뿐이다.
+
+- `proposed`: 승인 대기, 실행 금지 → 다른 `active` note가 없음을 확인하고 승인 시 `active`, 거절·폐기 시 사유를 남기고 `consumed`
+- `active`: 정확히 하나만 허용, 승인 boundary 안 실행 가능 → gate·일시중단 시 `stopped`, 정상 종료·폐기 시 `consumed`
+- `stopped`: 실행 금지 → gate와 남은 budget을 다시 보여 주고 명시 재승인 시 `active`, 종료·폐기 시 사유를 남기고 `consumed`
+- `consumed`: terminal history, 재활성화 금지
+
+`proposed` 또는 `stopped`를 발견하면 사용자의 승인·재승인·폐기 중 하나를 받기 전 새 loop나 experiment를 시작하지 않는다. `active` authorization만 기존 done template의 “다음 plan 자동 chain 금지”에 대한 예외이며, 그 예외도 note의 boundary·budget 안에서만 유효하다.
 
 사용자에게 추천 boundary와 최강 대안 하나를 제시하고 승인받는다. 승인 한 번은 **그 boundary·총예산 안의 local hypothesis iteration**만 허가한다. 각 iteration은 여전히 `plan_vN → Execute → done_vN`으로 닫고 한 번에 활성 가설 하나만 둔다.
 
@@ -42,7 +54,9 @@ description: optional evidence-driven outer research loop — 기존 /harness의
 - baseline과 관련 이전 done/ablation 포인터
 - Second Brain citation과 external citation(있을 때)
 
-예정했던 stage마다 terminal row가 있어야 한다. Process handle/session ID를 보존해 같은 run을 polling 중 다시 시작하지 않는다. 빈 agent 결과·누락 stage·structured output만 있는 상태는 성공이 아니라 explicit failed stage다.
+예정했던 stage마다 terminal row가 있어야 한다. 빈 agent 결과·누락 stage·structured output만 있는 상태는 성공이 아니라 explicit failed stage다.
+
+장시간 run은 run ID와 artifact/marker 경로를 먼저 할당하고 launch **직전** note의 `current: in-flight`와 `in-flight` 필드를 모두 durable하게 기록한다. Budget은 reserved를 먼저 차감해 중복 소비를 막고, launch가 반환한 process/session handle은 즉시 같은 record에 보강한다. 재개 시에는 새 launch 전에 순서대로 ① in-flight record 확인 ② success/failure marker 확인 ③ 기존 process/session 상태 확인 ④ 종료됐으면 `current: terminal-uncollected`로 바꾸고 기록된 artifact에서 결과 회수 ⑤ 실행 중이면 같은 handle만 polling하고 duplicate launch 금지 ⑥ 상태를 판별할 수 없으면 HARD로 보고한다. Verdict closure에서 terminal ledger를 정확히 한 행 append한 뒤에만 `current: idle`, `in-flight: N/A`로 비운다. 기존 `/workflow-ops`의 marker·liveness·bounded monitoring을 재사용하며 별도 process manager를 만들지 않는다.
 
 ## 2. ACQUIRE EVIDENCE — hypothesis보다 먼저
 
@@ -102,13 +116,13 @@ Synthesis는 voting이 아니다.
 - confidence만 다름 → 더 약한 claim
 - thesis/axis/architecture 영향 → HARD
 
-새 hypothesis에는 최소한 H1, 연결 evidence, mechanism reasoning, strongest alternative H2, 해결할 uncertainty/information gain, 가장 싼 판별 test, H1/H2별 expected outcome이 있어야 한다. Eureka·researcher intuition도 허용하지만 출발 observation을 citation/pointer로 남긴다.
+새 hypothesis에는 최소한 H1, 연결 evidence, mechanism reasoning, strongest alternative H2, 해결할 uncertainty/information gain, 가장 싼 판별 test, H1/H2별 expected outcome이 있어야 한다. Eureka·researcher intuition도 허용하지만 출발 observation을 citation/pointer로 남긴다. Adaptive loop가 이미 본 evaluation evidence는 다음 hypothesis를 고르는 탐색 근거이지 confirmatory evidence가 아니다.
 
 ## 4. DESIGN → EXECUTE — 기존 lifecycle 재사용
 
 새 schema를 만들지 않는다.
 
-- `plan §1`: H1, evidence pointer, mechanism, H2, information gain
+- `plan §1`: 기존 RESEARCH_SPEC failure-taxonomy의 target limitation 인용을 그대로 보존한 뒤 H1, evidence pointer, mechanism, H2, information gain을 추가
 - `plan §2`: 한 change axis의 최소 변경
 - `plan §3`: 가장 싼 discriminator, H1/H2 expected outcome, metric, threshold, budget, stop
 - `plan §4`: 결과별 branch
@@ -119,14 +133,20 @@ Loop authorization 안에서는 매 local plan마다 별도 Execute confirm을 �
 
 ## 5. INTERPRET → UPDATE → NEXT
 
-기존 `_done_template.md`로 Verdict를 작성한다.
+기존 `_done_template.md`로 Verdict를 작성한다. Adaptive research-loop 내부 결과의 기본 판정어는 `exploratory support | exploratory contradiction | insufficient evidence`뿐이다. Loop 결과만으로 thesis-level `confirmed` 또는 동등한 강한 표현을 쓰지 않는다.
 
 - §2: raw result와 provenance
-- §3: `supported | contradicted | insufficient evidence`, 예상–실제 gap, confounder
+- §3: `exploratory support | exploratory contradiction | insufficient evidence`, 예상–실제 gap, confounder
 - §4: competing hypothesis, 다음 discriminator 후보, 필요시 independent analysis/synthesis pointer
 - §5: 기존 `/harness` 규약의 별도 Verdict 외부 리뷰
 
 기존 `/harness` §5대로 progress timeline·Matrix·Stage/repro pointer와 plan TODO/log를 같은 iteration에서 닫는다. Runtime note ledger에는 상세를 복제하지 않고 plan/done/evidence pointer, terminal state, 소비 budget, next/gate만 한 행 append한다.
+
+### Thesis-level claim 전 confirmatory evaluation
+
+Promising exploratory result를 thesis-level evidence로 승격하기 전, hypothesis 선택·튜닝에 쓰지 않은 **fresh locked confirmatory evaluation**을 한 번 수행한다. 새 framework나 문서를 만들지 않고 paired plan §3에 실행 전에 다음을 잠근다: primary metric, success/failure criterion, fresh evaluation set 또는 seed/rollout policy, seed × rollout count, 필요할 때 최소 power/effect-size target. 결과를 본 뒤 protocol을 바꾸면 해당 결과는 다시 exploratory다. 이 locked evaluation을 통과하고 기존 independent Verdict review까지 끝난 뒤에만 stronger claim 후보가 되며, thesis 반영은 기존 human gate를 유지한다.
+
+여러 결과가 hypothesis가 아니라 **evaluation validity, task formulation, data acquisition assumption, instrumentation adequacy** 같은 foundational setup 문제를 가리키면 local hypothesis를 억지로 만들지 않는다. Note를 `stopped`로 바꾸고 `RE-BOOTSTRAP RECOMMENDED`와 raw evidence, 영향 surface, 가장 싼 bootstrap check를 제시한다. 사용자가 승인할 때만 `/research-bootstrap`으로 돌아가며, 이후 Loop 2 재개/재설정도 human transition gate다.
 
 다음 조건을 모두 만족할 때만 다음 local hypothesis로 이동한다.
 
@@ -148,6 +168,7 @@ Loop authorization 안에서는 매 local plan마다 별도 Execute confirm을 �
 - real robot, destructive action, git commit/push
 - final kill/NO-GO
 - raw fact에 대한 independent reviewer disagreement
+- `RE-BOOTSTRAP RECOMMENDED` 전환
 
 ## 하지 않는 것
 

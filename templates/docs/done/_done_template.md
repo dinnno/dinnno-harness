@@ -24,10 +24,10 @@
 negative verdict면 pivot 3형(무대 교체/scope 축소/thesis 수정) 중 해당 옵션을 후보에 포함.
 
 - **후보 이름**: 무엇을 하는 plan인지 (≤1줄)
-- **Paper impact**: `RESEARCH_SPEC §1 thesis` 또는 §4 비교 축의 어디를 움직이나
+- **Paper impact**: `RESEARCH_SPEC §1 thesis`/§4 비교 축 또는 active bootstrap readiness gap의 어디를 움직이나
 - **예상 소요**: 1-2주 단위 추정 (선택)
 
-> 자동 chain 금지. 후보 제시 후 사용자 선택 대기. 사용자가 "1번 가" 또는 다른 plan을 직접 지정해야 plan_v{N+1} 작성 진입.
+> 기본 `/harness`는 자동 chain 금지: 후보 제시 후 현재 단위 종료. 새 plan은 사용자 선택 또는 명시 승인된 research-bootstrap/research-loop 상위 orchestrator가 현재 closure 뒤 boundary·budget 안에서 선택할 때만 진입.
 
 ## 5. 외부 리뷰
 

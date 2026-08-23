@@ -1,16 +1,16 @@
 # docs/plans/
 
-이 폴더는 `plan_v{N}_{short-name}.md` 형식의 실험별 plan을 담는다.
+이 폴더는 `plan_v{N}_{short-name}.md` 형식의 독립 research/engineering unit별 plan을 담는다. 기본 experiment에서는 한 가설, 명시 승인된 `/research-bootstrap`에서는 한 bootstrap task다.
 
-## 1 plan = 1 가설 = 1 세션 = 1 터미널
+## 1 plan = 1 독립 단위 = 1 세션 = 1 터미널
 
-한 가설의 풀 사이클(Setup→Execute→Verdict)이 한 세션에서 흐른다. 이 파일은 **Setup의 산출물**. Setup 끝나면 사용자 confirm 1회 후 Execute로 진입. 학습은 Execute 안. done은 Verdict 산출물.
+한 가설 또는 승인된 bootstrap task의 풀 사이클(Setup→Execute→Verdict)이 한 세션에서 흐른다. 이 파일은 **Setup의 산출물**. Setup 끝나면 사용자 confirm 1회 후 Execute로 진입(상위 loop가 boundary·budget을 승인했다면 그 authorization 적용). 학습은 Execute 안. done은 Verdict 산출물.
 
-여러 ablation을 한 plan에 묶으면 검증이 약해진다 — 가설별로 쪼개고 각각 새 터미널.
+여러 ablation/독립 task를 한 plan에 묶지 않는다 — 단위별로 쪼개고 각각 새 터미널. Bootstrap task 안의 data/model/eval co-design과 cheap diagnostics는 하나의 system-discovery 단위일 수 있다.
 
 ## 각 plan에 들어가는 것
 
-1. **타겟 limitation** — `docs/RESEARCH_SPEC.md`의 해당 줄을 그대로 인용
+1. **타겟 limitation** — `docs/RESEARCH_SPEC.md`의 해당 줄을 그대로 인용. Bootstrap에서 taxonomy가 아직 discovery 대상이면 `N/A — bootstrap system-discovery task` + active readiness gap/evidence
 2. **최소 모듈/변경** — 무엇을 추가/수정하는지, 시그니처 수준
 3. **검증** — ablation, metric, 실로봇 run 등 구체적인 검증 방법
 4. **실패 시 분기** — 검증이 실패하면 무엇을 다음으로 시도할지

@@ -30,7 +30,7 @@
 **순서:**
 
 1. **인풋 적재** — 사용자에게 "참고할 기존 문서/논문 경로" 묻고 1개씩 적재. PDF·1MB 이상이면 `codex:rescue` 자동 dispatch (요약만 받음).
-2. **§1 thesis** — "<failure mechanism> + <principled fix>" 한 문장을 **사용자가 직접 발화**할 때까지 묻는다. Claude는 초안 제시 OK지만 사용자 발화로 확정. 매 round에서 failure mechanism과 "왜 이 형태여야만 하는가" 둘 다 있는지 점검.
+2. **§1 thesis** — "<failure mechanism> + <principled fix>" 한 문장을 **사용자가 직접 발화**할 때까지 묻는다. Claude는 초안 제시 OK지만 사용자 발화로 확정. 매 round에서 failure mechanism과 "왜 이 형태여야만 하는가" 둘 다 있는지 점검. **명시 opt-in research-bootstrap 예외:** thesis 자체가 discovery 대상이면 §0에 provisional intent, §1에 `(미확정 — bootstrap)`을 쓰고 Loop 1을 시작할 수 있다. 이 예외로 Loop 2에 진입할 수는 없으며 handoff 전 사용자 발화로 확정한다.
 3. **§2 naive baseline 가용성** — "1주 안에 돌릴 수 있나?"를 묻고 No면 §1로 회귀해서 좁힘.
 4. **§3 failure taxonomy** — 미실행이면 비워두고 "naive baseline 돌린 후 채울 것" 메모.
 5. **§4 비교 축** — "벤치마크 X 정확도만" 패턴 검출되면 reject.
@@ -55,7 +55,7 @@
 4. **`docs/progress.md` Phase** — RESEARCH_SPEC §6 채워진 후 Phase mile stone 정의. 한 번 합의로 OK (가볍게).
 5. **`docs/references/_INDEX.md`** — "지금 참조하는 paper/repo 있나" 한 번 묻고 시드. 없으면 OK.
 
-**완료**: 검출된 placeholder 모두 해소 + progress.md Phase 1개 이상 + references 한 번 물어봄. 자동 chain ❌, 사용자 GO 시 (a)/(experiment) 단위로 진입.
+**완료**: 검출된 placeholder 모두 해소 + progress.md Phase 1개 이상 + references 한 번 물어봄. 자동 chain ❌, 사용자 GO 시 (a)/(experiment) 단위로 진입. 명시 opt-in research-bootstrap에서는 domain/architecture/실행 필수 context를 해소한 뒤 RESEARCH_SPEC discovery 슬롯의 `(미확정 — bootstrap)`을 bootstrap용 resolved marker로 인정한다(일반 init·Loop 2에는 미해결 상태).
 
 **Anti-pattern**: 5개 질문 한 번에 폭격 / 코드 보고 도메인 추측 후 사용자에게 확인만 / Explore 결과를 사용자 검증 없이 박기.
 
@@ -67,6 +67,7 @@
 - **plan 단위 끝**: 타임라인에 `plan_v{N}_*` 행 추가, 해당 ablation_id 행의 상태를 `running`.
 - **done 단위 끝**: `done` 컬럼·`핵심 결론`·상태(`done`) 갱신. Phase 체크박스 충족 시 체크.
 - **done 단위 끝 (repro)**: 헤더 `last anchored commit`·seed·ckpt 경로·sim/real 태그 동시 갱신 (재현 삼각형 = seed+config+commit 완결).
+- **(research-bootstrap) done**: 타임라인·Phase 0·헤더·repro/open debt를 갱신. 선언된 ablation과 대응하지 않는 instrumentation/prototype task에 Matrix 행을 억지로 만들지 않는다.
 - **Matrix 셀 기입의 원천**: eval 산출물의 기계가독 요약 1개(runs/*/metrics.json 또는 eval stdout
   규약 — 경로/형식은 프로젝트 CLAUDE.md 명령어 절에 고정). done §2 표와 Matrix 셀은 손계산 없이
   이 원천에서 옮긴다. done에 수치가 있는데 대응 셀이 '미측정'이면 세션 종료 계약 위반.

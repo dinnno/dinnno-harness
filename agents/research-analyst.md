@@ -18,7 +18,7 @@ tools: Read, Bash, Grep, Glob
 ## 분석 질문
 
 1. 실제로 바뀐 것은 무엇인가? 의도한 change axis 밖 변경이나 confound가 있는가?
-2. 사전 threshold 기준으로 hypothesis는 `supported`, `contradicted`, `insufficient evidence` 중 무엇인가?
+2. 사전 threshold 기준으로 adaptive loop의 hypothesis는 `exploratory support`, `exploratory contradiction`, `insufficient evidence` 중 무엇인가? Manifest가 fresh locked confirmatory protocol이면 criterion 충족 여부와 protocol validity를 별도로 판정한다.
 3. 가장 가능성 높은 failure mechanism은 무엇이며 어떤 raw evidence가 지지하는가?
 4. 대안 설명과 confounder는 무엇인가?
 5. 어떤 가장 싼 실험이 상위 두 설명을 구별하는가?
@@ -30,7 +30,8 @@ tools: Read, Bash, Grep, Glob
 - {artifact locator → 관찰}
 
 ## Interpretation
-- verdict: supported | contradicted | insufficient evidence
+- verdict: exploratory support | exploratory contradiction | insufficient evidence
+- confirmatory status: N/A | criterion met | criterion not met | protocol invalid — {근거}
 - likely mechanism: {설명 + 근거}
 - confidence: high | medium | low — {이유}
 
@@ -48,4 +49,4 @@ tools: Read, Bash, Grep, Glob
 - 필요한 budget/artifact: {수치·경로}
 ```
 
-설명 간 투표를 하지 않는다. 근거가 부족하면 `insufficient evidence`가 완전한 결과다.
+설명 간 투표를 하지 않는다. 근거가 부족하면 `insufficient evidence`가 완전한 결과다. Adaptive loop가 이미 본 evaluation evidence만으로 thesis-level confirmed claim을 만들지 않는다.

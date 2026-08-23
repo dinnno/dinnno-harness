@@ -19,7 +19,7 @@
 
 한 문장: `<failure mechanism> + <principled fix>`
 
-채울 수 없으면 중단하고 논문 더 읽기.
+채울 수 없으면 중단하고 논문 더 읽기. 단, 명시 opt-in research-bootstrap에서 thesis 자체가 discovery 대상이면 `(미확정 — bootstrap)`으로 두고 Loop 1을 진행할 수 있다. Loop 2 handoff 전에는 사용자 발화로 확정해야 한다.
 
 ## 2. Naive baseline
 
