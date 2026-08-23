@@ -1,0 +1,16 @@
+# Vendored skill provenance
+
+This manifest covers the optional specialist set below; ponytail keeps its earlier pin inline in `skills/ponytail/SKILL.md`. External skills are pinned snapshots. They never auto-update or auto-merge; review the upstream diff and selectively update only after confirming that the harness lifecycle and authority boundaries remain unchanged.
+
+| Local skill | Source | Pinned revision | License | Local modifications |
+|---|---|---|---|---|
+| `diagnosing-bugs` | [`mattpocock/skills`](https://github.com/mattpocock/skills/tree/5b15a47f2d7150f545fbcacbfe381787fc0230dc/skills/engineering/diagnosing-bugs) | `5b15a47f2d7150f545fbcacbfe381787fc0230dc` (2026-08-21) | MIT | Narrowed implicit trigger; added diagnosis-only and research-axis boundary. |
+| `codebase-design` | [`mattpocock/skills`](https://github.com/mattpocock/skills/tree/5b15a47f2d7150f545fbcacbfe381787fc0230dc/skills/engineering/codebase-design) | `5b15a47f2d7150f545fbcacbfe381787fc0230dc` (2026-08-21) | MIT | Narrowed trigger; made reference-only role explicit. |
+| `improve-codebase-architecture` | [`mattpocock/skills`](https://github.com/mattpocock/skills/tree/5b15a47f2d7150f545fbcacbfe381787fc0230dc/skills/engineering/improve-codebase-architecture) | `5b15a47f2d7150f545fbcacbfe381787fc0230dc` (2026-08-21) | MIT | Enabled optional implicit discovery; made cross-skill calls host-neutral and companions/HTML optional; kept in-scope advice inside the active unit; added evidence and research-authority boundary. |
+| `thermo-nuclear-code-quality-review` | [`cursor/plugins`](https://github.com/cursor/plugins/tree/46125561306434d8a1d7745d540d8932ab0cd2a2/cursor-team-kit/skills/thermo-nuclear-code-quality-review) | `46125561306434d8a1d7745d540d8932ab0cd2a2` (2026-08-20) | MIT | Enabled narrowly-scoped optional discovery; separated review from refactor and scientific verdict. |
+| `improve` | [`shadcn/improve`](https://github.com/shadcn/improve/tree/03369ee6d7cafbfcecc4346539b05b3dc0a603bb/skills/improve) | `03369ee6d7cafbfcecc4346539b05b3dc0a603bb` (2026-06-15) | MIT | Narrowed to engineering friction; in dinnno projects stop after evidence vetting and return selected work to `/harness`. |
+| `bro` | [`luchasarie/bro-skill`](https://github.com/luchasarie/bro-skill/blob/01e51f8092973be58eff3b7271282bd8488a02ae/SKILL.md) | `01e51f8092973be58eff3b7271282bd8488a02ae` (2026-07-25) | MIT | None; examples and installer omitted. |
+
+The [AI Hero architecture page](https://www.aihero.dev/skills-improve-codebase-architecture) is the human-facing documentation for the canonical `mattpocock/skills` copy and is not separately vendored. Matt Pocock's other engineering skills were intentionally excluded because they duplicate the research lifecycle/reviewer/implementer, assume an issue tracker or automatic commit, or are UI/TDD workflows that are too rigid for general robotics research.
+
+Full license texts are under `skills/licenses/`. To update: fetch the pinned repository, compare the selected directory with its local copy, preserve only justified adapters, update the revision and modification note above, then rerun skill discovery and lifecycle dry-runs. Do not implement automatic sync.

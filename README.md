@@ -19,7 +19,7 @@ claude
 ## 하네스 설치
 
 ```bash
-# 1회: 전역 행동 규약·커맨드 12종·에이전트·vendored 스킬을 ~/.claude/에 symlink
+# 1회: Claude 전역 규약·커맨드·에이전트와 Claude/Codex 공용 specialist skill을 symlink
 ./apply.sh --global
 
 # 프로젝트마다: 골격을 깔기 (이미 있는 파일은 skip)
@@ -140,13 +140,15 @@ git -C ~/Workspace/sangjun_noh/for_claude/dinnno-harness pull
 
 ## 외부 스킬·도구
 
-기본은 vanilla — Claude Code 빌트인 + marketplace plugin. 어우러짐이 확인된 것만 최소 통합(현재 3종).
+기본은 vanilla — Claude Code/Codex 빌트인과 어우러짐이 확인된 capability만 선택 통합한다.
 
 **빌트인 (설치 불필요)**: `/simplify`(코드 정리), `/init`(CLAUDE.md 생성), `/review`·`/security-review`(diff 리뷰), `/claude-md-improver`(CLAUDE.md 품질 감사 — 월간 다이어트용).
 
 **marketplace plugins**: Claude Code에서 `/plugin`으로 검색·설치. 현재 켠 목록은 `~/.claude/settings.json`의 `enabledPlugins` 참조(이 표를 손으로 동기화하지 않음 — 표류 방지).
 
 **vendored: ponytail** (`skills/ponytail/`) — 최소 코드 사다리(YAGNI→기존 재사용→stdlib→네이티브→기존 의존성→최소 구현). `apply.sh --global`이 `~/.claude/skills/`로 링크, 코딩 작업에서 자동 트리거. 재현성 규약(configs·seed)이 사다리보다 우위(`agents/implementer.md`·`/harness` §3). 원본 [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) (MIT) — 커밋 핀·갱신 절차는 SKILL.md 상단 주석.
+
+**optional specialist engineering skills** (`skills/`) — hard bug feedback loop(`diagnosing-bugs`), deep-module vocabulary와 architecture survey(`codebase-design`, `improve-codebase-architecture`), aggressive structural review(`thermo-nuclear-code-quality-review`), broad read-only engineering audit(`improve`), 설명 재표현(`bro`: Claude `/bro`, Codex `$bro`). 존재한다는 이유로 자동 pipeline이 되지 않으며, 작은 정상 작업은 아무 skill 없이 진행한다. `apply.sh --global`은 이 6종을 Claude의 `~/.claude/skills/`와 Codex의 `~/.agents/skills/`에 링크한다([Codex 공식 local skill 경로](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills)); 기존 always-on ponytail은 Claude에만 유지한다. Pin·license·local adapter는 `skills/UPSTREAM.md`가 정본이다.
 
 **CLI 스킬: graphify** — 코드베이스·문서·논문을 지식 그래프로, grep 대신 query(`/graphify`). 머신당 1회: `uv tool install graphifyy && graphify install`. 쓰는 곳: 큰 repo 구조 질의(`/harness` §4 — `graphify-out/` 있으면 Explore 전에 query), repo형 reference 분석(`/blueprint-ref`). 큰 repo 첫 빌드는 전역 RAM 규약(systemd-run 상한) 적용.
 

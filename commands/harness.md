@@ -95,6 +95,8 @@ Setup→Execute→Verdict는 게이트가 아니라 자연스러운 진행이다
 
 **라우팅 원칙:** 모델·effort는 토큰 단가가 아니라 "단위의 오판 손실 × 빈도"로 고른다 — init/spec·thesis 수준 verdict·kill 판정 = Fable/Mythos 세션(effort xhigh, 전역 기본) · experiment Setup·Verdict = 가이드 세션(현재 세션 — Fable이든 Opus 5+`/opus-guide`든 OK, 미스매치 안내 대상 아님) · 기계적 구현 = implementer(opus·effort high) · 독립 검증·대용량 입력·깊은 web 조사 = codex:rescue(gpt-5.6-sol) · web 광역 리서치 = deep-research류 스킬(부재 머신은 general-purpose + WebSearch fan-out, 산출물 파일은 `docs/notes/`로 착지 + references 등록 또는 done §4 후보로 표면화). Opus 계열 세션·에이전트의 effort는 **high가 상한** — xhigh/max는 spec-수준 판단만(그 위로는 성능 하락 + 비용 급증). (sweep)·병렬화 가능한 Execute(다중 파일 구현·검증 fan-out)는 세션 모델 무관 **Workflow 사용을 기본 고려** — 이 커맨드 로드가 그 opt-in을 구성하며, 운영 규칙은 그때 `/workflow-ops`를 로드(lazy).
 
+**Specialist engineering skills:** 설치된 skill은 optional tool이다. Primary agent가 현재 단위에 실질적 가치가 있을 때만 자율 선택하며, 작은 config 수정·명확한 bugfix에는 호출하지 않는다. 현재 승인 범위 안의 진단·설계·review는 그 Setup/Execute/Verdict 안에서 계속하고, 새롭거나 범위 밖 follow-up만 별도 bounded `/harness` task로 돌린다. Skill/subagent finding은 evidence가 아니라 lead이므로 원문을 재확인한다. 외부 skill은 thesis·비교 축·evaluation·Loop 전환·예산·kill/NO-GO 권한을 갖지 않는다.
+
 - **codex:rescue** (gpt-5.6-sol) — 토큰 무거운 입력(PDF·대용량 로그·configs 다발·`libs/` 광역 scan)이나 깊은 독립 reasoning(학습 발산 진단, 예상-실제 갭, 광역 repo audit, spec↔코드 diff). 본 세션은 요약/결론만 받는다. PDF·대용량 원본을 본 세션이 직접 Read ❌.
 - **Explore** — 넓은 코드 탐색(call-graph 등). grep 두어 번으로 풀릴 일엔 부르지 않는다. `graphify-out/` 그래프가 있는 repo는 Explore 전에 `/graphify query`가 먼저다(스킬·CLI 설치 머신 한정 — 미설치면 무시).
 - **Plan** — 옵션 비교·ablation 우선순위 등 무게 있는 사고. 단발 판단엔 안 부른다.

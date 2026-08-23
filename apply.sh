@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # dinnno-harness installer.
-#   ./apply.sh --global             # link CLAUDE.md & commands/harness.md into ~/.claude/
+#   ./apply.sh --global             # link Claude core + shared skills for Claude/Codex
 #   ./apply.sh /path/to/project     # copy templates into a project (skip existing)
 
 set -euo pipefail
@@ -16,6 +16,22 @@ backup_if_exists() {
   elif [[ -L "$path" ]]; then
     rm "$path"
   fi
+}
+
+link_skills() {
+  local target_skills_dir="$1"
+  local excluded_skill="${2:-}"
+  mkdir -p "$target_skills_dir"
+  for skilld in "$HARNESS_DIR/skills/"*/; do
+    [[ -f "$skilld/SKILL.md" ]] || continue
+    local sname
+    sname="$(basename "$skilld")"
+    [[ "$sname" == "$excluded_skill" ]] && continue
+    local starget="$target_skills_dir/$sname"
+    backup_if_exists "$starget"
+    ln -s "${skilld%/}" "$starget"
+    echo "linked: $starget -> ${skilld%/}"
+  done
 }
 
 install_global() {
@@ -50,19 +66,10 @@ install_global() {
     echo "linked: $atarget -> $agentf"
   done
 
-  local target_skills_dir="$HOME/.claude/skills"
-  mkdir -p "$target_skills_dir"
-  for skilld in "$HARNESS_DIR/skills/"*/; do
-    [[ -d "$skilld" ]] || continue
-    local sname
-    sname="$(basename "$skilld")"
-    local starget="$target_skills_dir/$sname"
-    backup_if_exists "$starget"
-    ln -s "${skilld%/}" "$starget"
-    echo "linked: $starget -> ${skilld%/}"
-  done
+  link_skills "$HOME/.claude/skills"
+  link_skills "$HOME/.agents/skills" ponytail
 
-  echo "done. open a new Claude Code session and try /harness"
+  echo "done. open a new Claude Code or Codex session"
 }
 
 install_project() {
@@ -90,7 +97,7 @@ case "${1:-}" in
     ;;
   -h|--help|"")
     echo "usage:"
-    echo "  $0 --global              # install ~/.claude/CLAUDE.md and /harness command"
+    echo "  $0 --global              # install Claude core and shared Claude/Codex skills"
     echo "  $0 /path/to/project      # install templates into a project"
     exit 1
     ;;
