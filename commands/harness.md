@@ -98,6 +98,7 @@ Setup→Execute→Verdict는 게이트가 아니라 자연스러운 진행이다
 **Specialist engineering skills:** 설치된 skill은 optional tool이다. Primary agent가 현재 단위에 실질적 가치가 있을 때만 자율 선택하며, 작은 config 수정·명확한 bugfix에는 호출하지 않는다. 현재 승인 범위 안의 진단·설계·review는 그 Setup/Execute/Verdict 안에서 계속하고, 새롭거나 범위 밖 follow-up만 별도 bounded `/harness` task로 돌린다. Skill/subagent finding은 evidence가 아니라 lead이므로 원문을 재확인한다. 외부 skill은 thesis·비교 축·evaluation·Loop 전환·예산·kill/NO-GO 권한을 갖지 않는다.
 
 - **codex:rescue** (gpt-5.6-sol) — 토큰 무거운 입력(PDF·대용량 로그·configs 다발·`libs/` 광역 scan)이나 깊은 독립 reasoning(학습 발산 진단, 예상-실제 갭, 광역 repo audit, spec↔코드 diff). 본 세션은 요약/결론만 받는다. PDF·대용량 원본을 본 세션이 직접 Read ❌.
+- **Codex host adapter** — 항상 정상 sandbox path부터 호출한다. 현재 host에서 그 path가 sandbox/file-access 문제로 재현 가능하게 실패할 때만 원문 오류와 이유를 남기고 **해당 invocation 하나에만** local fallback을 허용한다. Read-only/source 수정 금지 계약을 prompt에 유지하고 종료 후 `git status`/`git diff`를 확인한다. unsafe access mode를 기본값으로 저장하지 않는다.
 - **Explore** — 넓은 코드 탐색(call-graph 등). grep 두어 번으로 풀릴 일엔 부르지 않는다. `graphify-out/` 그래프가 있는 repo는 Explore 전에 `/graphify query`가 먼저다(스킬·CLI 설치 머신 한정 — 미설치면 무시).
 - **Plan** — 옵션 비교·ablation 우선순위 등 무게 있는 사고. 단발 판단엔 안 부른다.
 - **implementer** (`model: opus`·effort high) — plan 확정 후의 기계적 구현. 가이드 세션(Fable/Opus 무관)은 설계·판정만 하고 구현은 SOFT dispatch로 내린다. 위임 후 중복 구현 ❌ — diff·결과 수치만 회수.

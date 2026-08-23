@@ -105,6 +105,8 @@ CLI 부재, nonzero exit, malformed JSON, unsupported schema면 note에 `second-
 - 첫 iteration과 authorization에서 정한 periodic sanity interval
 - GPU experiment 비용에 비해 분석 비용이 무시 가능한 경우
 
+Codex channel 성공은 `process exit success AND output non-empty AND manifest가 요구한 evidence/file access 확인 AND unauthorized source mutation 없음`을 모두 만족해야 한다. 하나라도 실패하면 `CODEX CHANNEL FAILED`이며 다른 모델이 Codex 결론을 흉내 내서 채우지 않는다.
+
 두 결과를 `docs/notes/YYYY-MM-DD_rl-v{N}-analysis.md` 한 파일에 source manifest → Claude 분석 → Codex 분석 → synthesis 순으로 보존하고 `done §3` 또는 §4에서 evidence pointer로 가리킨다. 이 분석은 기존 `done §5`의 Verdict 외부 리뷰를 대체하지 않는다. Trigger가 없으면 primary 해석을 `done §3`에 쓰고 별도 파일을 만들지 않는다.
 
 한 분석 channel이 unavailable/error면 그 사실을 analysis note에 남기고 다른 모델의 흉내로 채우지 않는다. Raw fact disagreement·architecture/thesis 영향·kill 후보처럼 독립성이 판정의 전제인 경우는 HARD로 반환한다. 그보다 낮은 위험의 iteration은 claim을 한 단계 낮추고 진행할 수 있다.

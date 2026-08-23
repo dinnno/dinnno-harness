@@ -115,7 +115,7 @@ Runnable 또는 Evaluable에서 멈추면 readiness가 아니다. 관찰이 부�
 
 ## 5. Bootstrap Readiness Review
 
-First Meaningful Baseline 후보가 생기면 대화를 모르는 fresh read-only reviewer에게 intent, canonical docs, paired baseline plan/done, raw evidence와 provenance pointer만 보낸다. Writer의 자평은 보내지 않는다. 다음을 검토한다.
+First Meaningful Baseline 후보가 생기면 기본 reviewer인 fresh `research-analyst`에게 intent, canonical docs, paired baseline plan/done, raw evidence와 provenance pointer만 보낸다. Bootstrap implementation session의 conversation context와 writer 자평은 공유하지 않으며 reviewer가 raw evidence와 canonical artifact를 직접 읽는다. 다음을 검토한다.
 
 1. Research question이 충분히 구체적인가?
 2. Task/environment가 실제 실행 가능한가?
@@ -127,7 +127,9 @@ First Meaningful Baseline 후보가 생기면 대화를 모르는 fresh read-onl
 8. First Meaningful Baseline 결과가 존재하는가?
 9. Loop 2에서 test 가능한 open uncertainty/hypothesis가 최소 하나 있는가?
 
-Verdict는 `READY | READY WITH RISKS | NOT READY` 중 하나이며 evidence, uncertainty, Loop 2 risk, 남은 bootstrap task를 짧게 반환한다. Reviewer 결과와 artifact locator는 같은 bootstrap note에 append한다. `NOT READY`면 가장 큰 readiness gap을 다음 task로 선택한다. `READY WITH RISKS`는 risk를 숨기지 않고 human gate에 올린다.
+Verdict는 `READY | READY WITH RISKS | NOT READY` 중 하나이며 evidence, uncertainty, Loop 2 risk, 남은 bootstrap task를 짧게 반환한다. 이는 scientific readiness recommendation일 뿐 transition 권한이 아니다. Reviewer 결과와 artifact locator는 같은 bootstrap note에 append한다. `NOT READY`면 가장 큰 readiness gap을 다음 task로 선택한다. `READY WITH RISKS`는 risk를 숨기지 않고 human gate에 올린다.
+
+Readiness가 borderline이거나 evaluation validity가 불확실하거나 architecture/thesis 영향이 크거나 reviewer confidence가 낮거나 human이 요청하면 Codex second opinion을 추가할 수 있다. 매 transition의 mandatory dual-model review는 아니다.
 
 ## 6. Loop 1 → Loop 2 handoff (HARD)
 
