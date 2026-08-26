@@ -44,7 +44,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 ~/                                            # 어느 머신이든
 ├── .claude/
 │   ├── CLAUDE.md  ───────────────────┐       # symlink (4원칙 + 도메인)
-│   └── commands/*.md  ───────────────┤       # symlink (커맨드 12종)
+│   └── commands/*.md  ───────────────┤       # symlink (커맨드 13종)
 │                                      │
 └── Workspace/sangjun_noh/for_claude/  │
     ├── dinnno-harness/   ◀───────────┘       # ★ 본체 (1번 클론)
@@ -90,6 +90,7 @@ dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 
 | `/deep-clean` | 축적이 /tidy 범위를 넘은 프로젝트의 **1회성 대청소** — 사체 폴더·plans 고아·md5 중복·done 결번 소급 회수·정본 다이어트. 프로젝트당 별도 세션 1회 |
 | `/issue` | 연구·구현이 **뫼비우스**(같은 고민·수정 순환)에 빠졌을 때. 고민 흐름을 vault `fable/issues/`에 박제 → Fable 세션/새 터미널이 그 파일만 읽고 이어받음. 인자 없이 부르면 open issue 소비 모드 |
 | `/close` | **"세션 close하자"** 선언 시. 이 대화를 모르는 fresh 에이전트가 "목표한 걸 실제 했는가"를 적대 검토(수치 vs 근거, TODO vs diff, 미검증 완료 주장) → 반영 → §5 세션 정리 |
+| `/plan-redteam` | plan 완성 후 **"Execute 시작?" 전**. 이 대화를 모르는 fresh Codex(gpt-5.6-sol·xhigh)가 plan을 격추 시도 — thesis 정합·설계·학습·평가·인과 귀속을 CRITICAL/HARD/SOFT로. 파일 무수정, 결과는 대화 + `plan_v{N}_codex.md` append |
 
 ## 경계선 (HARD/SOFT) — Claude가 멈추는 지점
 

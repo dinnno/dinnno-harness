@@ -103,7 +103,7 @@ Setup→Execute→Verdict는 게이트가 아니라 자연스러운 진행이다
 - **Plan** — 옵션 비교·ablation 우선순위 등 무게 있는 사고. 단발 판단엔 안 부른다.
 - **implementer** (`model: opus`·effort high) — plan 확정 후의 기계적 구현. 가이드 세션(Fable/Opus 무관)은 설계·판정만 하고 구현은 SOFT dispatch로 내린다. 위임 후 중복 구현 ❌ — diff·결과 수치만 회수.
 - **루프 도구** — (sweep)·병렬 실행에는 /loop·Workflow(worktree 격리) 활용 — 장시간 실행·스크립트 견고성 규칙은 `/workflow-ops`. 구현 스테이지 agent는 implementer 재사용, 설계·verdict 스테이지만 상위 모델(effort는 위 라우팅 상한 준수). 신규 가설 생성·가설 경계 넘기에는 ❌.
-- **writer ≠ reviewer** — Verdict 자기점검(`general-purpose` ×1)과 외부 검증(`codex:rescue`, 수동)은 본 세션과 분리. 외부 검증 산출물은 별 파일(`done_v{N}_codex.md`) — 리뷰 라운드는 그 **한 파일에 이어 쓴다**, 라운드마다 새 파일 ❌ (plan 리뷰도 동일: `plan_v{N}_codex.md` 하나). 리뷰 라운드 자동 반복 ❌ — 2라운드 후에도 지적이 남으면 계속 여부를 confirm (HARD), thesis-level claim이 뒤집혔으면 즉시 1라운드 추가.
+- **writer ≠ reviewer** — Verdict 자기점검(`general-purpose` ×1)과 외부 검증(`codex:rescue`, 수동)은 본 세션과 분리. 외부 검증 산출물은 별 파일(`done_v{N}_codex.md`) — 리뷰 라운드는 그 **한 파일에 이어 쓴다**, 라운드마다 새 파일 ❌ (plan 리뷰도 동일: `plan_v{N}_codex.md` 하나 — 전용 커맨드 `/plan-redteam`). 리뷰 라운드 자동 반복 ❌ — 2라운드 후에도 지적이 남으면 계속 여부를 confirm (HARD), thesis-level claim이 뒤집혔으면 즉시 1라운드 추가.
 - `docs/references/`의 `status: pending`이 현재 단위와 관련 있으면 한 줄 보고 후 codex로 요약(summary) dispatch — 산출물·status 규약은 `docs/references/_GUIDE.md` 참조. 깊이 분석은 `/blueprint-ref <name>`.
 - **Second brain 질의** — 가설이 정체될 때(연속 no-improve·done §4 후보 고갈·kill 후 pivot 탐색): vault(경로: 전역 CLAUDE.md, 부재 머신은 skip)로 Explore ×1 dispatch — vault 자체 CLAUDE.md 스키마의 query 절차를 따라 현 thesis·limitation에 매핑된 방법론 힌트 2-3개만 회수 → done §4 후보 또는 결정 큐 💡로 착지. 본 세션이 vault 직접 Read ❌. web 광역 탐색(deep-research 등)은 brain이 마른 뒤 2차.
 
