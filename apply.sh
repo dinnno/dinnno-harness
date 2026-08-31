@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # dinnno-harness installer.
-#   ./apply.sh --global             # link Claude core + shared skills for Claude/Codex
+#   ./apply.sh --global             # link Claude core + shared skills for Codex + native Grok adapters
 #   ./apply.sh /path/to/project     # copy templates into a project (skip existing)
 
 set -euo pipefail
@@ -31,6 +31,31 @@ link_skills() {
     backup_if_exists "$starget"
     ln -s "${skilld%/}" "$starget"
     echo "linked: $starget -> ${skilld%/}"
+  done
+}
+
+link_grok_adapters() {
+  local target_skill_dir="$HOME/.grok/skills"
+  local target_agent_dir="$HOME/.grok/agents"
+  mkdir -p "$target_skill_dir" "$target_agent_dir"
+
+  local skilld sname starget
+  for skilld in "$HARNESS_DIR/grok/skills/"*/; do
+    [[ -f "$skilld/SKILL.md" ]] || continue
+    sname="$(basename "$skilld")"
+    starget="$target_skill_dir/$sname"
+    backup_if_exists "$starget"
+    ln -s "${skilld%/}" "$starget"
+    echo "linked: $starget -> ${skilld%/}"
+  done
+
+  local agentf atarget
+  for agentf in "$HARNESS_DIR/grok/agents/"*.md; do
+    [[ -f "$agentf" ]] || continue
+    atarget="$target_agent_dir/$(basename "$agentf")"
+    backup_if_exists "$atarget"
+    ln -s "$agentf" "$atarget"
+    echo "linked: $atarget -> $agentf"
   done
 }
 
@@ -68,8 +93,10 @@ install_global() {
 
   link_skills "$HOME/.claude/skills"
   link_skills "$HOME/.agents/skills" ponytail
+  link_grok_adapters
 
-  echo "done. open a new Claude Code or Codex session"
+  echo "done. open a new Claude Code, Codex, or Grok session"
+  echo "grok: verify /harness source path with 'grok inspect --json'; see README if another user-level harness wins"
 }
 
 install_project() {
@@ -88,7 +115,7 @@ install_project() {
   fi
 
   echo "installed into: $target"
-  echo "next: edit docs/RESEARCH_SPEC.md (fill thesis), then open a new Claude session and run /harness"
+  echo "next: edit docs/RESEARCH_SPEC.md, then start Claude or Grok with /harness (Codex: \$harness)"
 }
 
 case "${1:-}" in
@@ -97,7 +124,7 @@ case "${1:-}" in
     ;;
   -h|--help|"")
     echo "usage:"
-    echo "  $0 --global              # install Claude core and shared Claude/Codex skills"
+    echo "  $0 --global              # install Claude core, shared Codex skills, and native Grok adapters"
     echo "  $0 /path/to/project      # install templates into a project"
     exit 1
     ;;

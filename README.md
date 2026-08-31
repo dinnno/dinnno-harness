@@ -1,6 +1,6 @@
 # dinnno-harness
 
-로보틱스 AI 연구용 vanilla Claude Code 하네스. 전역 행동 규약 + 논문 단위 프로젝트 골격.
+로보틱스 AI 연구용 vanilla Claude Code 하네스. 전역 행동 규약 + 논문 단위 프로젝트 골격. Codex 공용 specialist skill과 Grok experiment/coding adapter도 함께 설치한다.
 
 ## Claude Code 설치 (Ubuntu)
 
@@ -19,12 +19,42 @@ claude
 ## 하네스 설치
 
 ```bash
-# 1회: Claude 전역 규약·커맨드·에이전트와 Claude/Codex 공용 specialist skill을 symlink
+# 1회: Claude 전역 규약·커맨드·에이전트, Codex 공용 specialist skill, Grok adapter를 symlink
 ./apply.sh --global
 
 # 프로젝트마다: 골격을 깔기 (이미 있는 파일은 skip)
 ./apply.sh /path/to/paper-project
 ```
+
+## Grok 4.6로 사용
+
+Grok Build 설치·로그인 후 같은 전역 설치를 실행한다.
+
+```bash
+curl -fsSL https://x.ai/cli/install.sh | bash
+grok login
+./apply.sh --global
+```
+
+설치기는 Grok 전용 `/harness`와 충돌 없는 `dinnno-implementer`·`dinnno-research-analyst` agent를 각각 `~/.grok/skills/harness/`, `~/.grok/agents/`에 링크한다. 공용 specialist skill과 나머지 command는 Grok의 공식 Claude compatibility를 통해 읽는다. Grok은 experiment와 코드 작업을 맡고, init/spec·thesis 수준 Verdict·비교 축 변경·kill/NO-GO 판단은 Fable/Mythos 세션에 유보한다.
+
+Grok 문서는 `~/.grok`, `~/.agents`, `~/.claude`의 user-level skill 사이 동률 우선순위를 규정하지 않는다. Codex·Claude의 동명 `harness`를 Grok에서만 숨기도록 `~/.grok/config.toml`의 기존 `[skills]` 섹션에 다음 두 경로를 추가한다. `[skills]`가 이미 있으면 섹션을 중복 생성하지 말고 기존 `ignore` 배열에 병합한다. 이 설정은 Claude나 Codex의 discovery에는 영향을 주지 않는다. 같은 동률 규칙으로 `add-ref`·`audit`·`blueprint-ref`·`tidy`도 Grok에서는 Codex 포트(`~/.agents/skills/`)로 해석될 수 있다 — Grok 세션에서 이 커맨드가 필요하면 해당 경로를 같은 방식으로 `ignore`에 추가해 Claude 정본으로 돌린다.
+
+```toml
+[skills]
+ignore = [
+  "~/.agents/skills/harness",
+  "~/.claude/commands/harness.md",
+]
+```
+
+```bash
+cd /path/to/paper-project
+grok --model grok-4.6
+# TUI에서 /harness
+```
+
+첫 세션 전에 `grok inspect --json`에서 `harness` skill의 source `path`가 `~/.grok/skills/harness`이고 `dinnno-implementer`·`dinnno-research-analyst`가 Grok user agent로 보이는지 확인한다 — 사람용 `grok inspect` 출력은 경로 없이 source 종류(`user`)만 보여줘서 세 후보를 구분하지 못한다. 다르면 위 `ignore` 병합을 다시 확인하고 새 Grok 세션을 연다. 프로젝트에 `CLAUDE.md`와 `AGENTS.md`가 모두 있으면 Grok adapter가 state·thesis·안전 규약 차이를 대조하고, 실질적 충돌이 있으면 Execute 전에 `STATE CONFLICT`로 멈춘다.
 
 ## Claude로 한 줄 설치 (진행 중인 프로젝트에)
 
