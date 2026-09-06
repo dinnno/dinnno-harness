@@ -37,7 +37,7 @@
 
 1. 세션 시작. 훅이 `[dinnno]` 줄로 크기 경고, placeholder, 미동기 CHANGELOG, 미결 결정을 보여준다.
 2. `harness` 스킬이 SPEC, ARCHITECTURE, progress 표, 현재 plan만 읽고 단위 하나를 확인한다.
-3. plan(게이트 표 포함) → 실행 → done. 큰 설계면 실행 전에 `plan-redteam`.
+3. plan(게이트 표 포함) → 실행 → done. 큰 설계면 실행 전에 `plan-redteam`. 게이트에는 정의 해시가 붙어 결과를 본 뒤 기준을 고치면 이전 PASS가 무효가 되고, 사람이 봐야 하는 것은 `MANUAL:` 게이트로 적어 사용자 확인 발화가 있어야 PASS가 된다.
 4. 마감은 `close`. `dinnno gates`가 게이트를 돌리고 fresh 검토자가 done의 근거를 확인한다.
 
 멈추는 지점은 다섯 개다: git commit/push, 데이터·ckpt 삭제, 실로봇 명령, thesis·축 변경, kill 결론. 나머지는 완주.

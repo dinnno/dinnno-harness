@@ -79,6 +79,32 @@ pn, dn = vnum(plan), vnum(done)
 if pn > dn: out.append(f"진행 중 단위: docs/plans/{plan} (done_v{pn} 없음)")
 elif pn: out.append(f"마지막 단위 닫힘: plan_v{pn} / {done} — 다음 단위는 사용자 선택")
 
+# gates of the in-progress plan: definition drift vs last record, pending manual gates
+if pn > dn and plan:
+    import hashlib
+    pt = read(f"docs/plans/{plan}")
+    sec = re.search(r"^#+ [^\n]*게이트[^\n]*\n(.*?)(?=^#+ |\Z)", pt, re.S | re.M)
+    def cell(row, i):
+        parts = re.split(r"(?<!\\)\|", row)
+        if len(parts) <= i: return ""
+        c = parts[i].replace("\\|", "|").strip()
+        if c.startswith("`"): c = c[1:]
+        if c.endswith("`"): c = c[:-1]
+        return c
+    gates = []
+    if sec:
+        for row in [l for l in sec.group(1).splitlines() if l.startswith("|")][2:]:
+            name = re.split(r"(?<!\\)\|", row)[1].strip() if row.count("|") >= 2 else ""
+            if not name or name.startswith("{"): continue
+            cmd, exp = cell(row, 2), cell(row, 3)
+            gates.append((name, cmd, hashlib.sha256(f"{name}|{cmd}|{exp}".encode()).hexdigest()[:8]))
+    recs = re.findall(r"^- \d{4}-\d{2}-\d{2} gates: .*$", pt, re.M)
+    prev = dict(re.findall(r"(\S+?)#([0-9a-f]{8})=", recs[-1])) if recs else {}
+    stale = [n for n, _, h in gates if n in prev and prev[n] != h]
+    if stale: out.append("⚠ plan §3 게이트 정의가 마지막 gates 기록과 다름 (이전 PASS 무효, 재실행 필요): " + ", ".join(stale))
+    pend = [n for n, c, h in gates if c.upper().startswith("MANUAL:") and not re.search(rf"^- \d{{4}}-\d{{2}}-\d{{2}} 확인 {re.escape(n)}#{h}:", pt, re.M)]
+    if pend: out.append(f"수동 게이트 확인 대기 {len(pend)}건: " + ", ".join(pend))
+
 # unchecked decisions
 prog = read("docs/progress.md")
 m = re.search(r"^## [^\n]*결정 큐[^\n]*\n(.*?)(?=^## |\Z)", prog, re.S | re.M)
@@ -109,6 +135,15 @@ PY
 }
 
 # ---------------------------------------------------------------- gates
+# Gate table (plan section whose heading contains '게이트'): | gate | command | expect |
+#  - hash  = sha256(name|command|expect)[:8]; printed as #hash and stored in the §5 record line,
+#            so a gate edited after a PASS shows up as STALE instead of borrowing the old evidence.
+#  - MANUAL: <what a human checks>  → not executed. PASS only when the plan has a confirmation line
+#            "- YYYY-MM-DD 확인 <gate>#<hash>: <사용자 발화>" whose hash matches the current definition.
+gate_hash() { printf '%s|%s|%s' "$1" "$2" "$3" | sha256sum | cut -c1-8; }
+cell() { # cell <row> <n>  (unescapes \| inside the cell, strips spaces and one backtick each side)
+  sed 's/\\|/\x01/g' <<< "$1" | cut -d'|' -f"$2" | tr '\001' '|' | sed 's/^ *`\{0,1\}//;s/`\{0,1\} *$//'
+}
 cmd_gates() {
   local plan="" record=0 timeout=600
   while (( $# )); do case "$1" in
@@ -117,30 +152,52 @@ cmd_gates() {
   plan="$(readlink -f "$plan")"
   local root; root="$(find_root "$(dirname "$plan")")" || root="$PWD"
   cd "$root"
-  # rows of the first table under a heading containing '게이트'; columns: gate | command | expect
   local rows; rows=$(awk '/^#+ .*게이트/{f=1;next} f && /^#+ /{exit} f && /^\|/' "$plan" | tail -n +3)
   [[ -z "$rows" ]] && { echo "게이트 표 없음: $plan (heading에 '게이트'가 있는 절의 표 | gate | command | expect |)"; exit 2; }
-  local pass=0 total=0 report="| gate | result | evidence |"$'\n'"|---|---|---|"
+  # previous record: "- DATE gates: n/m PASS (dinnno gates) name#hash=RESULT ..."
+  declare -A prev
+  local last; last=$(grep -E '^- [0-9]{4}-[0-9]{2}-[0-9]{2} gates: ' "$plan" | tail -1)
+  local tok; for tok in $(grep -oE '[^ ]+#[0-9a-f]{8}=[A-Z]+' <<< "$last"); do prev["${tok%%#*}"]="${tok#*#}"; done
+  local pass=0 total=0 pending=0 rec="" notes="" hints=""
+  local report="| gate | #hash | result | evidence |"$'\n'"|---|---|---|---|"
   while IFS= read -r row; do
     [[ -z "$row" ]] && continue
-    local name cmd expect
+    local name cmd expect h
     name=$(cut -d'|' -f2 <<< "$row" | sed 's/^ *//;s/ *$//')
-    cmd=$(sed 's/\\|/\x01/g' <<< "$row" | cut -d'|' -f3 | tr '\001' '|' | sed 's/^ *`\{0,1\}//;s/`\{0,1\} *$//')
-    expect=$(sed 's/\\|/\x01/g' <<< "$row" | cut -d'|' -f4 | tr '\001' '|' | sed 's/^ *`\{0,1\}//;s/`\{0,1\} *$//')
+    cmd=$(cell "$row" 3); expect=$(cell "$row" 4)
     [[ -z "$name" || "$name" == "{"* ]] && continue
-    total=$((total+1))
-    local outp rc
-    outp=$(timeout "$timeout" bash -c "$cmd" 2>&1); rc=$?
-    local last; last=$(tail -1 <<< "$outp" | trunc 100)
-    if (( rc == 0 )) && { [[ -z "$expect" ]] || grep -qE -- "$expect" <<< "$outp"; }; then
-      pass=$((pass+1)); report+=$'\n'"| $name | PASS | $last |"
-    else
-      report+=$'\n'"| $name | FAIL (rc=$rc) | $last |"
+    total=$((total+1)); h=$(gate_hash "$name" "$cmd" "$expect")
+    if [[ -n "${prev[$name]:-}" && "${prev[$name]%%=*}" != "$h" ]]; then
+      notes+="정의 변경: $name #${prev[$name]%%=*} → #$h — 이전 기록의 결과는 무효, 이번 결과만 유효"$'\n'
     fi
+    local result evidence
+    if [[ "${cmd^^}" == MANUAL:* ]]; then
+      local conf; conf=$(grep -E "^- [0-9]{4}-[0-9]{2}-[0-9]{2} 확인 ${name}#[0-9a-f]{8}:" "$plan" | tail -1)
+      local ch; ch=$(grep -oE "#[0-9a-f]{8}" <<< "$conf" | head -1 | tr -d '#')
+      if [[ -n "$conf" && "$ch" == "$h" ]]; then
+        pass=$((pass+1)); result="PASS (manual)"; evidence=$(sed 's/^[^:]*: *//' <<< "$conf" | trunc 100)
+      elif [[ -n "$conf" ]]; then
+        result="STALE"; evidence="확인 당시 #$ch ≠ 현재 #$h — 다시 확인 필요"; pending=$((pending+1))
+      else
+        result="PENDING"; evidence="사용자 확인 필요: $(sed "s/^ *//" <<< "${cmd#*:}")"; pending=$((pending+1))
+        hints+="확인되면 plan §5에 이 줄을 추가: - $(date +%F) 확인 ${name}#${h}: \"<사용자 발화>\""$'\n'
+      fi
+    else
+      local outp rc; outp=$(timeout "$timeout" bash -c "$cmd" 2>&1); rc=$?
+      evidence=$(tail -1 <<< "$outp" | trunc 100)
+      if (( rc == 0 )) && { [[ -z "$expect" ]] || grep -qE -- "$expect" <<< "$outp"; }; then
+        pass=$((pass+1)); result="PASS"
+      else result="FAIL (rc=$rc)"; fi
+    fi
+    report+=$'\n'"| $name | #$h | $result | $evidence |"
+    rec+=" ${name}#${h}=${result%% *}"
   done <<< "$rows"
-  echo "$report"; echo; echo "gates: $pass/$total PASS  ($(date +%F) $(git rev-parse --short HEAD 2>/dev/null))"
+  echo "$report"; echo
+  [[ -n "$notes" ]] && printf "%s" "$notes"
+  [[ -n "$hints" ]] && printf "%s" "$hints"
+  echo "gates: $pass/$total PASS$( (( pending )) && echo ", $pending 대기(수동)")  ($(date +%F) $(git rev-parse --short HEAD 2>/dev/null))"
   if (( record )); then
-    printf -- "- %s gates: %d/%d PASS (dinnno gates)\n" "$(date +%F)" "$pass" "$total" >> "$plan"
+    printf -- "- %s gates: %d/%d PASS (dinnno gates)%s\n" "$(date +%F)" "$pass" "$total" "$rec" >> "$plan"
     echo "recorded → $plan"
   fi
   (( pass == total ))
