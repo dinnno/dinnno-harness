@@ -1,16 +1,12 @@
 # Progress
 
-<!-- 자기완결 갱신 규칙: done/spec 단위 끝에 한 줄 — 타임라인 행 + Ablation 셀 + 헤더(anchored commit/Stage).
-     이 파일은 "여러 done에 흩어진 cross-version 상태의 인덱스"다. done 수치를 복제하지 말고 결론+포인터만(done보다 짧게).
-     헤더 Stage 줄은 현재 상태만 — 이력 서술 축적 ❌(이력은 타임라인 행으로). 파일이 50K를 넘으면 /tidy §6 롤링.
-     상세 규칙: docs/_GUIDE.md(또는 폴더 CLAUDE.md) §progress.md 갱신 protocol. -->
+<!-- 이 파일은 인덱스다. done 수치를 복제하지 않고 결론과 포인터만 적는다. 세션 로그는 plan §5에.
+     헤더 Stage 줄은 현재 상태만. 파일이 50K를 넘으면 dinnno check가 경고한다. -->
 
 Thesis → `RESEARCH_SPEC.md §1` ({한 줄})
-Stage: {예: A — PoC} | spec: {v0} | last anchored commit: {hash}({date})
+Stage: {예: A — PoC} | spec: {v0} | last anchored commit: {hash} ({date})
 
 ## Phase
-
-최종 goal(`RESEARCH_SPEC §1 thesis` = paper contribution)까지의 mile stone.
 
 - [ ] Phase 0: Naive baseline (plan_v0 / done_v0)
 - [ ] Phase 1: {module 제안 1}
@@ -18,36 +14,28 @@ Stage: {예: A — PoC} | spec: {v0} | last anchored commit: {hash}({date})
 - [ ] Phase 3: {real-robot / sim2real}
 - [ ] Phase 4: Paper draft
 
-## 타임라인 (cross-version 인덱스)
+## 타임라인
 
 | unit | 상태 | 한 줄 결론 (thesis position) | done |
 |---|---|---|---|
-| plan_v0_* | {closed/locked/running} | {수치 아닌 판정 + thesis position} | done_v0 |
+| plan_v0_* | {running/closed} | {수치 아닌 판정 + thesis position} | done_v0 |
 
 ## Ablation Matrix
 
-`RESEARCH_SPEC §6`과 1:1. 셀 = done 또는 '미측정'. (seeds(N)·rollouts 명시, 수치는 mean±std. sim/real·ckpt 컬럼은 그 stage 도달 시 추가)
+`RESEARCH_SPEC §6`과 1:1. 셀 = done 또는 '미측정'. 수치는 mean±std, seeds(N)×rollouts.
 
 | ablation_id | 구성요소 | 가설 | done | 핵심 결론 | seeds(N)/rollouts | 상태 |
 |---|---|---|---|---|---|---|
-| A1 | {module} | {제거 시 예측} | done_v? | {결론+포인터} | {42,43,44}×{20} | pending/running/done |
+| A1 | {module} | {제거 시 예측} | done_v? | {결론+포인터} | {42,43,44}×{20} | pending |
 
-## Repro 포인터 + Open 부채
+## Repro 포인터
 
-- seed {42} / config `configs/exp_*.yaml` (실험1개=yaml1개) / dataset {name}@{version 또는 manifest hash} / runs `runs/*/` / env {PyTorch·CUDA·주요 lib}
-- last anchored commit {hash} — ⚠ uncommitted 있으면 재현 삼각형(seed+config+commit) 미완결, 커밋 권장.
+- seed {42} / config `configs/exp_*.yaml` / dataset {name}@{version} / runs `runs/*/` / env {PyTorch·CUDA}
 - ckpt: {경로 또는 '학습 전 없음'}
-- Open 검증 부채: {예: done_v{N}_codex.md 미작성, 조건부 spec rewrite 후보}
 
 ## 결정 큐 + 아이디어 인박스
 
-<!-- 착지 규칙: ①pay-grade flag를 세운 세션은 그 즉시 여기 1줄 ②done §3 thesis 영향 '있음' →
-     [spec-drift] ③kill admissible → [kill-candidate] ④사용자 아이디어는 지배 서사와 모순돼도
-     즉시 💡 1줄(기록≠채택, 그 자리 평가 금지) ⑤Claude 제안도 💡 — `[claude]` 태그+근거 1줄.
-     /harness §1이 매 세션 이 큐를 읽는다.
-     소비: 사용자 선택 시 체크 → Phase/타임라인/Matrix로 흡수. -->
+<!-- 미룬 결정, [spec-drift], [kill-candidate], 💡 아이디어(사용자·Claude, 기록≠채택). 사용자가 고르면 체크하고 Phase/타임라인으로 흡수. -->
 
-- [ ] {YYYY-MM-DD} [{tag}] {결정 요지 1줄} ← {출처 done_v{N}/plan}
-- 💡 {YYYY-MM-DD} {사용자 아이디어 요지 1줄}
-
-(done §4 후보 중 사용자 선택 대기분도 여기에)
+- [ ] {YYYY-MM-DD} [{tag}] {결정 요지 한 줄} ← {출처 done_v{N}/plan}
+- 💡 {YYYY-MM-DD} {아이디어 한 줄}

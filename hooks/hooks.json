@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "__HARNESS_DIR__/scripts/dinnno check --hook",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

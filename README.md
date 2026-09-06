@@ -1,193 +1,65 @@
 # dinnno-harness
 
-로보틱스 AI 연구용 vanilla Claude Code 하네스. 전역 행동 규약 + 논문 단위 프로젝트 골격. Codex 공용 specialist skill과 Grok experiment/coding adapter도 함께 설치한다.
+로보틱스 AI 연구용 개인 하네스. 한 소스가 Claude Code, Codex, Grok 세 런타임에 같은 규약과 스킬을 준다.
 
-## Claude Code 설치 (Ubuntu)
+구성은 네 층뿐이다.
 
-```bash
-# Node.js 18+ 필요. 미설치 시:
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
-
-# Claude Code 본체
-npm install -g @anthropic-ai/claude-code
-
-# 로그인 (브라우저 띄움)
-claude
-```
-
-## 하네스 설치
-
-```bash
-# 1회: Claude 전역 규약·커맨드·에이전트, Codex 공용 specialist skill, Grok adapter를 symlink
-./apply.sh --global
-
-# 프로젝트마다: 골격을 깔기 (이미 있는 파일은 skip)
-./apply.sh /path/to/paper-project
-```
-
-## Grok 4.6로 사용
-
-Grok Build 설치·로그인 후 같은 전역 설치를 실행한다.
-
-```bash
-curl -fsSL https://x.ai/cli/install.sh | bash
-grok login
-./apply.sh --global
-```
-
-설치기는 Grok 전용 `/harness`와 충돌 없는 `dinnno-implementer`·`dinnno-research-analyst` agent를 각각 `~/.grok/skills/harness/`, `~/.grok/agents/`에 링크한다. 공용 specialist skill과 나머지 command는 Grok의 공식 Claude compatibility를 통해 읽는다. Grok은 experiment와 코드 작업을 맡고, init/spec·thesis 수준 Verdict·비교 축 변경·kill/NO-GO 판단은 Fable/Mythos 세션에 유보한다.
-
-Grok 문서는 `~/.grok`, `~/.agents`, `~/.claude`의 user-level skill 사이 동률 우선순위를 규정하지 않는다. Codex·Claude의 동명 `harness`를 Grok에서만 숨기도록 `~/.grok/config.toml`의 기존 `[skills]` 섹션에 다음 두 경로를 추가한다. `[skills]`가 이미 있으면 섹션을 중복 생성하지 말고 기존 `ignore` 배열에 병합한다. 이 설정은 Claude나 Codex의 discovery에는 영향을 주지 않는다. 같은 동률 규칙으로 `add-ref`·`audit`·`blueprint-ref`·`tidy`도 Grok에서는 Codex 포트(`~/.agents/skills/`)로 해석될 수 있다 — Grok 세션에서 이 커맨드가 필요하면 해당 경로를 같은 방식으로 `ignore`에 추가해 Claude 정본으로 돌린다.
-
-```toml
-[skills]
-ignore = [
-  "~/.agents/skills/harness",
-  "~/.claude/commands/harness.md",
-]
-```
-
-```bash
-cd /path/to/paper-project
-grok --model grok-4.6
-# TUI에서 /harness
-```
-
-첫 세션 전에 `grok inspect --json`에서 `harness` skill의 source `path`가 `~/.grok/skills/harness`이고 `dinnno-implementer`·`dinnno-research-analyst`가 Grok user agent로 보이는지 확인한다 — 사람용 `grok inspect` 출력은 경로 없이 source 종류(`user`)만 보여줘서 세 후보를 구분하지 못한다. 다르면 위 `ignore` 병합을 다시 확인하고 새 Grok 세션을 연다. 프로젝트에 `CLAUDE.md`와 `AGENTS.md`가 모두 있으면 Grok adapter가 state·thesis·안전 규약 차이를 대조하고, 실질적 충돌이 있으면 Execute 전에 `STATE CONFLICT`로 멈춘다.
-
-## Claude로 한 줄 설치 (진행 중인 프로젝트에)
-
-진행 중인 프로젝트 디렉토리에서 `claude`를 띄운 뒤 다음을 입력:
-
-```
-~/Workspace/sangjun_noh/for_claude/dinnno-harness/apply.sh $(pwd) 실행하고, docs/RESEARCH_SPEC.md 작성 같이 시작하자.
-```
-
-→ Claude가 `apply.sh`로 templates를 깔고, 곧바로 RESEARCH_SPEC의 thesis 채우기로 진입.
-
-## 머신당 1번 클론 (본체 모델)
-
-dinnno-harness 본체는 **머신마다 한 번**만 클론. 프로젝트마다 클론하지 않음.
-
-```
-~/                                            # 어느 머신이든
-├── .claude/
-│   ├── CLAUDE.md  ───────────────────┐       # symlink (4원칙 + 도메인)
-│   └── commands/*.md  ───────────────┤       # symlink (커맨드 13종)
-│                                      │
-└── Workspace/sangjun_noh/for_claude/  │
-    ├── dinnno-harness/   ◀───────────┘       # ★ 본체 (1번 클론)
-    │   ├── CLAUDE.md, commands/, apply.sh
-    │   └── templates/{CLAUDE.md, gitignore, docs/...}
-    │
-    ├── paper-A/                               # 프로젝트 1 (자체 git)
-    │   ├── CLAUDE.md, .gitignore   ← templates cp (자유 편집)
-    │   └── docs/{RESEARCH_SPEC, ARCHITECTURE, _GUIDE, progress, LOOP,
-    │            plans/{_GUIDE, _plan_template, ...},
-    │            done/{_GUIDE, _done_template, ...},
-    │            references/{_INDEX, _GUIDE, ...}}
-    │
-    └── paper-B/                               # 프로젝트 2
-        └── ...
-```
-
-## 본체 → 프로젝트 업데이트 흐름
-
-| 본체에서 바꾼 것 | 자동 반영? | 기존 프로젝트 |
+| 층 | 파일 | 하는 일 |
 |---|---|---|
-| `CLAUDE.md`, `commands/harness.md` | ✓ symlink — 새 세션부터 즉시 | n/a |
-| `templates/*` | ✗ 이미 깔린 사본은 영향 없음 | 그 프로젝트에서 `./apply.sh <경로>` 재실행 → `cp -n`이라 **새 파일만** 추가, 기존 사본은 그대로 |
-| templates의 **계약 표면** (커맨드가 이름으로 참조하는 파일·섹션) | ✗ | 본체 `CHANGELOG.md`에 한 줄 필수 → 프로젝트는 다음 `/harness` 세션 진입 시 자동 감지(`last-sync:` vs CHANGELOG 비교) → confirm 후 싱크(`/harness` §1) |
+| 규약 | `AGENTS.md` (1페이지) | 멈추는 지점, 코드 규칙, 보고 스타일. 세 런타임이 같은 파일을 읽는다 |
+| 스킬 | `skills/*/SKILL.md` | `harness`(세션 진입) · `close`(근거 확인 후 마감) · `plan-redteam`(다른 모델의 plan 격추) · `loop`(opt-in 반복) + vendored 도구 |
+| 스크립트 | `scripts/dinnno` | `check`(상태·크기·싱크) · `gates`(plan 게이트 실행) · `tidy`(산출물 정리) · `review`(다른 모델 검토 호출) |
+| 템플릿 | `templates/` | 프로젝트 문서 골격 (spec, architecture, progress, plan/done) |
 
-싱크 정책 (전체 재정렬 ❌):
-- 계약 표면만 맞춘다 — 기본은 프로젝트 `CLAUDE.md`의 `## harness 싱크`에 네이밍 매핑 한 줄, 파일 이관은 매핑이 쌓일 때만.
-- 이력·thesis 본문 불가침 — done_v*·옛 plan·RESEARCH_SPEC 서술 재작성 ❌ (stale 배너 주석만).
+판단이 필요한 일은 스킬(산문)에, 답이 정해진 일은 스크립트에 둔다. 세션 시작 훅이 `dinnno check`를 자동으로 돌린다.
 
-## 커맨드
-
-| 커맨드 | 언제 쓰나 |
-|---|---|
-| `/harness` | **모든 세션의 진입점.** 현황 적재 → state가 불명확할 때만 bounded Project Reconciliation → 단위(init/spec/experiment/상위 loop) confirm → Setup→Execute→Verdict |
-| `/research-bootstrap` | **명시 opt-in한 Research Bootstrap Loop.** 기존 init/spec/reference/code discovery와 독립 plan→Execute→Verdict task를 연결해 data↔model↔evaluation↔instrumentation을 탐색하고 First Meaningful Baseline readiness까지 진행 |
-| `/research-loop` | **명시 opt-in한 evidence-driven outer loop.** 기존 plan→Execute→Verdict를 유지하며 current evidence→Second Brain→필요시 external research→fresh Claude/Codex 독립 해석→가장 싼 판별 실험을 승인 boundary·예산 안에서 반복 |
-| `/opus-guide` | 비-Fable 모델 세션에서 `/harness` **직전에** 로드. 행동 보강 델타 레이어(rules-only, 워크플로 시작 ❌). Opus 5+는 §1.5 델타만, Opus 4.8 이하·Sonnet은 전체 적용. Fable 세션은 로드 불필요 |
-| `/workflow-ops` | (sweep)·병렬 Execute에서 Workflow/루프 도구를 쓰기 **직전에** 로드. 장시간 sim·스크립트 견고성·산출물 규율(rules-only) |
-| `/add-ref <url>` | 논문·레포 URL을 마주친 **즉시**. `references/_INDEX.md`에 등록만 (fetch·분석 ❌) |
-| `/blueprint-ref <name>` | 등록된 자료를 **구현하기로 정했을 때**. codex:rescue로 구현 수준 청사진 생성 |
-| `/audit` | 프로젝트 전체 정기 점검·인수인계. **Fable 5 이상 전용** — 검토→인터뷰 합의→HANDOFF 골격 생성→수정(수정마다 갱신)→Opus가 이어받음(중간에 끊겨도 그 지점부터) |
-| `/tidy` | 소비 완료된 세션 산출물 md(날짜 suffix HANDOFF/CHANGELOG, loose docs md, notes/, 비정규 폴더) 정리 — 스캔→상태분류→confirm→`docs/archive/` 이동+`_INDEX`. §6 다이어트 패스가 50K 넘은 progress/LEARNINGS를 롤링 |
-| `/deep-clean` | 축적이 /tidy 범위를 넘은 프로젝트의 **1회성 대청소** — 사체 폴더·plans 고아·md5 중복·done 결번 소급 회수·정본 다이어트. 프로젝트당 별도 세션 1회 |
-| `/issue` | 연구·구현이 **뫼비우스**(같은 고민·수정 순환)에 빠졌을 때. 고민 흐름을 vault `fable/issues/`에 박제 → Fable 세션/새 터미널이 그 파일만 읽고 이어받음. 인자 없이 부르면 open issue 소비 모드 |
-| `/close` | **"세션 close하자"** 선언 시. 이 대화를 모르는 fresh 에이전트가 "목표한 걸 실제 했는가"를 적대 검토(수치 vs 근거, TODO vs diff, 미검증 완료 주장) → 반영 → §5 세션 정리 |
-| `/plan-redteam` | plan 완성 후 **"Execute 시작?" 전**. 이 대화를 모르는 fresh Codex(gpt-5.6-sol·xhigh)가 plan을 격추 시도 — thesis 정합·설계·학습·평가·인과 귀속을 CRITICAL/HARD/SOFT로. 파일 무수정, 결과는 대화 + `plan_v{N}_codex.md` append |
-
-## 경계선 (HARD/SOFT) — Claude가 멈추는 지점
-
-모든 세션·모든 모델 공통 계약. 정본은 `commands/harness.md` §경계선 — 거기 한 줄 고치면 새 세션부터 전 프로젝트 적용(symlink).
-
-- **HARD (멈추고 물어봄):** 세션 시작 "뭐 할지" 확인 · plan 완성 후 "실행 시작?" · `/harness` 내부 다음 단위 자동 진행 ❌(승인된 상위 loop만 새 독립 단위 선택) · git commit/push · data·ckpt·runs 삭제 · 실로봇 명령 · 실험 수준 실패 후 재시도 · thesis·비교 축 변경 · loop 인가 밖·raw fact disagreement · Loop 1↔2 transition/re-bootstrap · kill("이 방향은 죽었다") 결론
-- **SOFT (한 줄 알리고 진행):** 에이전트 호출 · 백그라운드 학습 시작 · TODO 항목 전환 — 그 외 Execute 안은 묻지 않고 완주
-
-서브에이전트: `agents/implementer.md` (`model: opus`·`effort: high`)는 plan 확정 후 기계적 구현, `agents/research-analyst.md`는 research-loop의 fresh read-only evidence 해석용. 단위별 모델·effort 라우팅과 writer≠reviewer 규칙은 `/harness` §4가 정본 (구 `CLAUDE-FABLE-5.md`는 2026-07-27 폐기·흡수).
-
-## 자리 비움 모드 (remote)
-
-- 1회 셋업: 세션에서 `/remote-control` 연결(claude.ai 웹/모바일에서 이 세션 모니터링·제어) + 모바일 Claude 앱 로그인 + `/config`에서 "Push when actions required" 토글.
-- 이후 긴 run·(sweep) 시작 시 하네스가 전환 안내를 1줄 통보하고(질문·대기 ❌), opt-in해두면 HARD 지점·완료·이상 발생 시 휴대폰 push로 보고받는다 (`/harness` §3).
-- 자리 비운 사이 클라우드 실행이 필요하면 `/schedule` routine(스케줄·API 트리거) — 단 로컬 파일 접근 없음(fresh clone) 주의.
-
-## 사용 흐름
-
-1. 새 논문 프로젝트 시작 → `./apply.sh /path/to/proj`
-2. `/harness` 진입 → 기존/장기중단 project는 state가 불명확할 때만 docs·code/config/run·git history를 bounded reconciliation해 Loop 1/2를 추천. Active durable loop가 명확하면 즉시 기존 continuation. 빈 project는 같은 mechanism으로 **(a₀) init → Loop 1**을 추천한다.
-3. (a₀) 후: 단위 작업 진입. 단위는 **(a) spec 갱신** 또는 **(experiment) 한 가설** — 가설 내부는 Setup(plan 작성)→Execute(구현·학습)→Verdict(done)로 자연스럽게 흐른다. **한 가설 = 한 세션 = 한 터미널**이 기본. 다음 가설로 자동 chain ❌ (새 가설은 새 터미널).
-   - task/data/model/evaluation/instrumentation이 아직 불명확하면 (research-bootstrap) — 넓은 engineering 탐색을 독립 harness task로 반복해 runnable→evaluable→First Meaningful Baseline을 만들고, readiness review 뒤 사람이 Loop 2 전환 결정.
-   - baseline GO 이후 국면에서는 (autoloop) — docs/LOOP.md의 Loop-Ready 체크리스트(L1–L7)로 진단 → gap은 loop-prep으로 채우고 → loop-run(루프 인가 1회 후 밤새 trial 자동 반복, keep/rollback ledger + HTML Loop Report 누적).
-   - 사람이 local research boundary·총예산을 한 번 승인해 hypothesis 생성까지 위임하려면 (research-loop) — 기존 plan/done/progress를 그대로 쓰고, 중요한 결과만 fresh Claude/Codex가 같은 raw evidence를 독립 해석한다. 사용하지 않으면 위 기본 흐름은 변하지 않는다.
-4. plan 구현 중에는 plan §6 TODO를 working checklist로. 세션 시작 시 첫 미체크 항목부터, 세션 종료 시 체크 갱신 + §5 세션 로그 한 줄.
-5. 외부 자료(arxiv/code/homepage)는 `docs/references/_INDEX.md`에 URL만 박아두면 `/harness`가 codex:rescue로 분석 → summary만 메인 세션에 적재.
-6. 진척 한눈에 보기: `docs/progress.md` (Phase + Ablation matrix).
-
-## 다이어트 사이클 (월 1회)
-
-1. 거추장스러운 가이드라인/줄 발견 (또는 `/claude-md-improver`로 CLAUDE.md 감사)
-2. 본체 `dinnno-harness/`에서 삭제 → commit
-3. 다음 새 세션부터 전역 즉시 / 새 프로젝트부터 templates 적용
-
-## 다중 머신 / 백업
+## 설치
 
 ```bash
-# 본체에 GitHub remote (1회)
-gh repo create dinnno-harness --private --source=. --remote=origin --push
-
-# 다른 머신
-git clone <url> ~/Workspace/sangjun_noh/for_claude/dinnno-harness
-cd ~/Workspace/sangjun_noh/for_claude/dinnno-harness && ./apply.sh --global
-
-# 동기화
-git -C ~/Workspace/sangjun_noh/for_claude/dinnno-harness pull
+./apply.sh --global                 # 머신당 1회. 세 런타임에 규약·스킬·CLI·훅 연결
+./apply.sh /path/to/paper-project   # 프로젝트마다. 기존 파일은 건드리지 않음
 ```
 
-## 외부 스킬·도구
+`--global`이 만드는 것:
 
-기본은 vanilla — Claude Code/Codex 빌트인과 어우러짐이 확인된 capability만 선택 통합한다.
+| 대상 | Claude Code | Codex | Grok |
+|---|---|---|---|
+| 규약 | `~/.claude/CLAUDE.md` | `~/.codex/AGENTS.md` | `~/.grok/AGENTS.md` |
+| 스킬 | `~/.claude/skills/*` | `~/.agents/skills/*` | `~/.grok/skills/*` |
+| 훅 | `~/.claude/settings.json` | `~/.codex/hooks.json` (`[features] hooks = true` 필요) | `~/.grok/config.toml` |
+| CLI | `~/.local/bin/dinnno` | 동일 | 동일 |
 
-**빌트인 (설치 불필요)**: `/simplify`(코드 정리), `/init`(CLAUDE.md 생성), `/review`·`/security-review`(diff 리뷰), `/claude-md-improver`(CLAUDE.md 품질 감사 — 월간 다이어트용).
+호출 이름: Claude·Grok `/harness`, Codex `$harness`. 프로젝트 안의 `CLAUDE.md`는 `@AGENTS.md` 한 줄이라 세 런타임이 같은 프로젝트 규약을 읽는다.
 
-**marketplace plugins**: Claude Code에서 `/plugin`으로 검색·설치. 현재 켠 목록은 `~/.claude/settings.json`의 `enabledPlugins` 참조(이 표를 손으로 동기화하지 않음 — 표류 방지).
+`ponytail`(최소 코드 사다리)은 기본으로 연결하지 않는다. 원하면 `./apply.sh --global --with-ponytail`.
 
-**vendored: ponytail** (`skills/ponytail/`) — 최소 코드 사다리(YAGNI→기존 재사용→stdlib→네이티브→기존 의존성→최소 구현). `apply.sh --global`이 `~/.claude/skills/`로 링크, 코딩 작업에서 자동 트리거. 재현성 규약(configs·seed)이 사다리보다 우위(`agents/implementer.md`·`/harness` §3). 원본 [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) (MIT) — 커밋 핀·갱신 절차는 SKILL.md 상단 주석.
+## 세션 흐름
 
-**optional specialist engineering skills** (`skills/`) — hard bug feedback loop(`diagnosing-bugs`), deep-module vocabulary와 architecture survey(`codebase-design`, `improve-codebase-architecture`), aggressive structural review(`thermo-nuclear-code-quality-review`), broad read-only engineering audit(`improve`), 설명 재표현(`bro`: Claude `/bro`, Codex `$bro`). 존재한다는 이유로 자동 pipeline이 되지 않으며, 작은 정상 작업은 아무 skill 없이 진행한다. `apply.sh --global`은 이 6종을 Claude의 `~/.claude/skills/`와 Codex의 `~/.agents/skills/`에 링크한다([Codex 공식 local skill 경로](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills)); 기존 always-on ponytail은 Claude에만 유지한다. Pin·license·local adapter는 `skills/UPSTREAM.md`가 정본이다.
+1. 세션 시작. 훅이 `[dinnno]` 줄로 크기 경고, placeholder, 미동기 CHANGELOG, 미결 결정을 보여준다.
+2. `harness` 스킬이 SPEC, ARCHITECTURE, progress 표, 현재 plan만 읽고 단위 하나를 확인한다.
+3. plan(게이트 표 포함) → 실행 → done. 큰 설계면 실행 전에 `plan-redteam`.
+4. 마감은 `close`. `dinnno gates`가 게이트를 돌리고 fresh 검토자가 done의 근거를 확인한다.
 
-**CLI 스킬: graphify** — 코드베이스·문서·논문을 지식 그래프로, grep 대신 query(`/graphify`). 머신당 1회: `uv tool install graphifyy && graphify install`. 쓰는 곳: 큰 repo 구조 질의(`/harness` §4 — `graphify-out/` 있으면 Explore 전에 query), repo형 reference 분석(`/blueprint-ref`). 큰 repo 첫 빌드는 전역 RAM 규약(systemd-run 상한) 적용.
+멈추는 지점은 다섯 개다: git commit/push, 데이터·ckpt 삭제, 실로봇 명령, thesis·축 변경, kill 결론. 나머지는 완주.
 
-**opt-in 런타임: headroom (실험 중)** — 컨텍스트 압축 프록시(스킬 아님). 대용량 로그·긴 세션에서만 세션 단위로 `headroom wrap claude --code-memory none`(플래그 없으면 Serena MCP가 user scope에 자동 설치됨 — 회피 필수). 입·출력 토큰 절감용이지 보고 스타일 강제 도구 아님. `headroom learn` 산출물은 `CLAUDE.local.md` ❌ → 검토 후 `docs/LEARNINGS.md`로 손 이관. 실험 판정 후 안 맞으면 `uv tool uninstall headroom-ai`.
+## 본체 갱신 → 프로젝트 반영
 
-## 작성 원칙 (CLAUDE.md / docs)
+규약·스킬·스크립트는 symlink라 새 세션부터 바로 적용된다. 템플릿의 계약 표면(파일명·절 이름)이 바뀌면 `CHANGELOG.md`에 한 줄 적는다. 프로젝트 `AGENTS.md`의 `last-sync:` 뒤에 새 항목이 있으면 `dinnno check`가 알려주고, 반영은 세션이 confirm 받아 한다. RESEARCH_SPEC·plan·done 본문은 싱크가 건드리지 않는다.
 
-- **Specific** — 구체적 도구/명령어
-- **Structured** — 헤딩·리스트로 스캔 가능
-- **Reviewed** — 월 1회 다이어트
-- **Concise** — 100줄 이하
+## 기존 프로젝트를 v4로
+
+1. `git mv CLAUDE.md AGENTS.md && echo '@AGENTS.md' > CLAUDE.md`
+2. `docs/LEARNINGS.md`를 "현재 유효"(20줄 이내) / "이력"으로 나눈다.
+3. `docs/progress.md`에 쌓인 세션 로그·결정 큐 이력은 `docs/archive/`로 롤링한다 (`dinnno tidy`).
+4. 다음 plan부터 §3 게이트 표를 쓴다.
+
+## Vendored 스킬
+
+`bro`, `codebase-design`, `diagnosing-bugs`, `improve`, `improve-codebase-architecture`, `thermo-nuclear-code-quality-review`, `ponytail`. 출처·핀·라이선스는 `skills/UPSTREAM.md`.
+
+## 다른 머신
+
+```bash
+git clone <url> ~/Workspace/dinnno-research-wrapper/tools/dinnno-harness
+cd ~/Workspace/dinnno-research-wrapper/tools/dinnno-harness && ./apply.sh --global
+```

@@ -1,134 +1,117 @@
 #!/usr/bin/env bash
-# dinnno-harness installer.
-#   ./apply.sh --global             # link Claude core + shared skills for Codex + native Grok adapters
-#   ./apply.sh /path/to/project     # copy templates into a project (skip existing)
-
+# dinnno-harness installer — one source, three runtimes (Claude Code, Codex, Grok).
+#   ./apply.sh --global [--with-ponytail]   # link rules, skills, CLI, and the SessionStart hook
+#   ./apply.sh /path/to/project             # copy the docs scaffold into a project (existing files kept)
 set -euo pipefail
 
 HARNESS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WITH_PONYTAIL=0
 
-backup_if_exists() {
-  local path="$1"
-  if [[ -e "$path" && ! -L "$path" ]]; then
-    local bak="${path}.bak.$(date +%Y%m%d-%H%M%S)"
-    mv "$path" "$bak"
-    echo "backup: $path -> $bak"
-  elif [[ -L "$path" ]]; then
-    rm "$path"
-  fi
+backup_if_exists() { # regular file/dir → timestamped backup; symlink → removed
+  local p="$1"
+  if [[ -e "$p" && ! -L "$p" ]]; then mv "$p" "$p.bak.$(date +%Y%m%d-%H%M%S)"; echo "backup: $p"
+  elif [[ -L "$p" ]]; then rm "$p"; fi
 }
 
-link_skills() {
-  local target_skills_dir="$1"
-  local excluded_skill="${2:-}"
-  mkdir -p "$target_skills_dir"
-  for skilld in "$HARNESS_DIR/skills/"*/; do
-    [[ -f "$skilld/SKILL.md" ]] || continue
-    local sname
-    sname="$(basename "$skilld")"
-    [[ "$sname" == "$excluded_skill" ]] && continue
-    local starget="$target_skills_dir/$sname"
-    backup_if_exists "$starget"
-    ln -s "${skilld%/}" "$starget"
-    echo "linked: $starget -> ${skilld%/}"
+link() { backup_if_exists "$2"; mkdir -p "$(dirname "$2")"; ln -s "$1" "$2"; echo "linked: $2 -> $1"; }
+
+prune_old_links() { # remove symlinks in $1 that point into any dinnno-harness checkout (old layout / old ports)
+  local dir="$1"; [[ -d "$dir" ]] || return 0
+  for p in "$dir"/*; do
+    [[ -L "$p" ]] || continue
+    case "$(readlink -f "$p" 2>/dev/null || readlink "$p")" in *dinnno-harness*) rm "$p"; echo "pruned: $p";; esac
   done
 }
 
-link_grok_adapters() {
-  local target_skill_dir="$HOME/.grok/skills"
-  local target_agent_dir="$HOME/.grok/agents"
-  mkdir -p "$target_skill_dir" "$target_agent_dir"
-
-  local skilld sname starget
-  for skilld in "$HARNESS_DIR/grok/skills/"*/; do
-    [[ -f "$skilld/SKILL.md" ]] || continue
-    sname="$(basename "$skilld")"
-    starget="$target_skill_dir/$sname"
-    backup_if_exists "$starget"
-    ln -s "${skilld%/}" "$starget"
-    echo "linked: $starget -> ${skilld%/}"
+link_skills_into() {
+  local target="$1"; mkdir -p "$target"; prune_old_links "$target"
+  for d in "$HARNESS_DIR"/skills/*/; do
+    [[ -f "$d/SKILL.md" ]] || continue
+    local n; n="$(basename "$d")"
+    [[ "$n" == ponytail && $WITH_PONYTAIL -eq 0 ]] && continue
+    link "${d%/}" "$target/$n"
   done
+}
 
-  local agentf atarget
-  for agentf in "$HARNESS_DIR/grok/agents/"*.md; do
-    [[ -f "$agentf" ]] || continue
-    atarget="$target_agent_dir/$(basename "$agentf")"
-    backup_if_exists "$atarget"
-    ln -s "$agentf" "$atarget"
-    echo "linked: $atarget -> $agentf"
-  done
+merge_hooks_json() { # merge hooks/hooks.json into a Claude/Codex-style settings file (idempotent)
+  local file="$1"
+  python3 - "$file" "$HARNESS_DIR/hooks/hooks.json" "$HARNESS_DIR" <<'PY'
+import json, sys, os
+path, src, hd = sys.argv[1:4]
+new = json.load(open(src))["hooks"]
+for ev in new:
+    for g in new[ev]:
+        for h in g["hooks"]:
+            h["command"] = h["command"].replace("__HARNESS_DIR__", hd)
+cfg = json.load(open(path)) if os.path.exists(path) else {}
+hooks = cfg.setdefault("hooks", {})
+for ev, groups in new.items():
+    existing = hooks.setdefault(ev, [])
+    have = {h.get("command") for g in existing for h in g.get("hooks", [])}
+    for g in groups:
+        if all(h["command"] in have for h in g["hooks"]):
+            continue
+        existing.append(g)
+json.dump(cfg, open(path, "w"), indent=2, ensure_ascii=False); open(path, "a").write("\n")
+print(f"hooks merged: {path}")
+PY
+}
+
+merge_hooks_toml() { # Grok: append a [[hooks.SessionStart]] block to config.toml once
+  local file="$1"; mkdir -p "$(dirname "$file")"; touch "$file"
+  grep -q 'dinnno check' "$file" && { echo "hooks present: $file"; return; }
+  cat >> "$file" <<EOF
+
+# dinnno-harness SessionStart hook (added by apply.sh)
+[[hooks.SessionStart]]
+  [[hooks.SessionStart.hooks]]
+  type = "command"
+  command = "$HARNESS_DIR/scripts/dinnno check --hook"
+  timeout = 15
+EOF
+  echo "hooks appended: $file"
 }
 
 install_global() {
-  local target_md="$HOME/.claude/CLAUDE.md"
-  local target_cmd_dir="$HOME/.claude/commands"
-
-  mkdir -p "$HOME/.claude" "$target_cmd_dir"
-
-  backup_if_exists "$target_md"
-  ln -s "$HARNESS_DIR/CLAUDE.md" "$target_md"
-  echo "linked: $target_md -> $HARNESS_DIR/CLAUDE.md"
-
-  for cmd in "$HARNESS_DIR/commands/"*.md; do
-    [[ -e "$cmd" ]] || continue
-    local name
-    name="$(basename "$cmd")"
-    local target="$target_cmd_dir/$name"
-    backup_if_exists "$target"
-    ln -s "$cmd" "$target"
-    echo "linked: $target -> $cmd"
-  done
-
-  local target_agents_dir="$HOME/.claude/agents"
-  mkdir -p "$target_agents_dir"
-  for agentf in "$HARNESS_DIR/agents/"*.md; do
-    [[ -e "$agentf" ]] || continue
-    local aname
-    aname="$(basename "$agentf")"
-    local atarget="$target_agents_dir/$aname"
-    backup_if_exists "$atarget"
-    ln -s "$agentf" "$atarget"
-    echo "linked: $atarget -> $agentf"
-  done
-
-  link_skills "$HOME/.claude/skills"
-  link_skills "$HOME/.agents/skills" ponytail
-  link_grok_adapters
-
-  echo "done. open a new Claude Code, Codex, or Grok session"
-  echo "grok: verify /harness source path with 'grok inspect --json'; see README if another user-level harness wins"
+  # rules: one file, three readers
+  link "$HARNESS_DIR/AGENTS.md" "$HOME/.claude/CLAUDE.md"
+  link "$HARNESS_DIR/AGENTS.md" "$HOME/.codex/AGENTS.md"
+  link "$HARNESS_DIR/AGENTS.md" "$HOME/.grok/AGENTS.md"
+  # skills: same set everywhere
+  link_skills_into "$HOME/.claude/skills"
+  link_skills_into "$HOME/.agents/skills"
+  link_skills_into "$HOME/.grok/skills"
+  # old layout leftovers (commands/, agents/) — remove only links that point at a harness checkout
+  prune_old_links "$HOME/.claude/commands"; prune_old_links "$HOME/.claude/agents"
+  prune_old_links "$HOME/.grok/agents"; prune_old_links "$HOME/.codex/agents"
+  # CLI + hooks
+  chmod +x "$HARNESS_DIR/scripts/dinnno"
+  link "$HARNESS_DIR/scripts/dinnno" "$HOME/.local/bin/dinnno"
+  mkdir -p "$HOME/.claude" "$HOME/.codex"
+  merge_hooks_json "$HOME/.claude/settings.json"
+  merge_hooks_json "$HOME/.codex/hooks.json"
+  merge_hooks_toml "$HOME/.grok/config.toml"
+  echo
+  echo "done. open a new Claude Code / Codex / Grok session."
+  echo "  - Codex needs [features] hooks = true in ~/.codex/config.toml"
+  echo "  - ~/.local/bin should be on PATH for 'dinnno' (hooks use the absolute path anyway)"
+  echo "  - ponytail is opt-in: ./apply.sh --global --with-ponytail"
 }
 
 install_project() {
-  local target="$1"
-  if [[ ! -d "$target" ]]; then
-    mkdir -p "$target"
-    echo "created: $target"
-  fi
-  target="$(cd "$target" && pwd)"
-
-  cp -rn "$HARNESS_DIR/templates/." "$target/"
-  if [[ -e "$target/gitignore" && ! -e "$target/.gitignore" ]]; then
-    mv "$target/gitignore" "$target/.gitignore"
-  elif [[ -e "$target/gitignore" ]]; then
-    rm "$target/gitignore"
-  fi
-
+  local target="$1"; mkdir -p "$target"; target="$(cd "$target" && pwd)"
+  cp -r --update=none "$HARNESS_DIR/templates/." "$target/" 2>/dev/null || cp -rn "$HARNESS_DIR/templates/." "$target/"
+  [[ -e "$target/gitignore" && ! -e "$target/.gitignore" ]] && mv "$target/gitignore" "$target/.gitignore"
+  rm -f "$target/gitignore"
+  # stamp last-sync with the newest CHANGELOG entry so a fresh project starts in sync
+  local last; last="$(grep -E '^- [0-9]{4}-[0-9]{2}-[0-9]{2} — ' "$HARNESS_DIR/CHANGELOG.md" | tail -1 | cut -c3-70)"
+  grep -q '{설치일}' "$target/AGENTS.md" 2>/dev/null && sed -i "s|{설치일}|$last|" "$target/AGENTS.md"
   echo "installed into: $target"
-  echo "next: edit docs/RESEARCH_SPEC.md, then start Claude or Grok with /harness (Codex: \$harness)"
+  echo "next: fill docs/RESEARCH_SPEC.md and AGENTS.md, then start a session with the harness skill"
 }
 
 case "${1:-}" in
-  --global)
-    install_global
-    ;;
-  -h|--help|"")
-    echo "usage:"
-    echo "  $0 --global              # install Claude core, shared Codex skills, and native Grok adapters"
-    echo "  $0 /path/to/project      # install templates into a project"
-    exit 1
-    ;;
-  *)
-    install_project "$1"
-    ;;
+  --global) [[ "${2:-}" == "--with-ponytail" ]] && WITH_PONYTAIL=1; install_global;;
+  -h|--help|"") sed -n '2,4p' "$0"; exit 1;;
+  *) install_project "$1";;
 esac

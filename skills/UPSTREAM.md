@@ -1,6 +1,6 @@
 # Vendored skill provenance
 
-This manifest covers the optional specialist set below; ponytail keeps its earlier pin inline in `skills/ponytail/SKILL.md`. External skills are pinned snapshots. They never auto-update or auto-merge; review the upstream diff and selectively update only after confirming that the harness lifecycle and authority boundaries remain unchanged.
+This manifest covers the optional specialist set below; ponytail keeps its earlier pin inline in `skills/ponytail/SKILL.md` and is linked only with `./apply.sh --global --with-ponytail`. External skills are pinned snapshots. They never auto-update or auto-merge; review the upstream diff and selectively update only after confirming that the harness lifecycle and authority boundaries remain unchanged.
 
 | Local skill | Source | Pinned revision | License | Local modifications |
 |---|---|---|---|---|

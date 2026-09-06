@@ -1,0 +1,228 @@
+#!/usr/bin/env bash
+# dinnno — harness helper CLI. Runs the deterministic parts of the workflow so the
+# model does not have to: project state check, plan gates, artifact tidy, cross-model review.
+#
+#   dinnno check  [--hook]                 project state summary (sizes, placeholders, sync, open decisions)
+#   dinnno gates  <plan.md> [--record] [--timeout SEC]
+#   dinnno tidy   [--apply FILE...]        list loose artifacts; --apply moves given files to docs/archive/
+#   dinnno review --with codex|claude PROMPT.md [-o OUT.md] [--unsafe]
+#
+# Works from anywhere inside a dinnno project (a repo that has docs/RESEARCH_SPEC.md).
+set -uo pipefail
+
+HARNESS_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+export DINNNO_SIZE_LIMIT="${DINNNO_SIZE_LIMIT:-51200}"
+
+find_root() {
+  local d="${1:-$PWD}"
+  while [[ "$d" != "/" ]]; do
+    [[ -f "$d/docs/RESEARCH_SPEC.md" ]] && { echo "$d"; return 0; }
+    d="$(dirname "$d")"
+  done
+  return 1
+}
+
+kb() { printf "%dK" $(( ( $(wc -c < "$1") + 512 ) / 1024 )); }
+trunc() { awk -v n="$1" '{ print substr($0, 1, n) }'; }
+
+# ---------------------------------------------------------------- check
+cmd_check() {
+  local hook=0; [[ "${1:-}" == "--hook" ]] && hook=1
+  local root; root="$(find_root)" || { (( hook )) && exit 0; echo "not a dinnno project (docs/RESEARCH_SPEC.md not found)"; exit 1; }
+  python3 - "$root" "$HARNESS_DIR" "$hook" <<'PY'
+import os, re, sys, glob
+root, hd, hook = sys.argv[1], sys.argv[2], sys.argv[3] == "1"
+os.chdir(root)
+LIMIT = int(os.environ.get("DINNNO_SIZE_LIMIT", "51200"))
+out = []
+def size(p): return os.path.getsize(p)
+def kb(p): return f"{(size(p)+512)//1024}K"
+def read(p):
+    try: return open(p, encoding="utf-8", errors="replace").read()
+    except FileNotFoundError: return ""
+def latest(d, prefix):
+    fs = [f for f in os.listdir(d) if re.match(rf"{prefix}_v\d+", f)] if os.path.isdir(d) else []
+    return max(fs, key=lambda f: int(re.search(r"_v(\d+)", f).group(1)), default=None)
+def vnum(f): return int(re.search(r"_v(\d+)", f).group(1)) if f else 0
+
+# instruction files
+has_a, has_c = os.path.exists("AGENTS.md"), os.path.exists("CLAUDE.md")
+if has_a and has_c:
+    c = read("CLAUDE.md").strip()
+    if c != "@AGENTS.md" and c != read("AGENTS.md").strip():
+        out.append("⚠ AGENTS.md와 CLAUDE.md 내용이 다르다 — 한쪽을 정본으로 두고 CLAUDE.md는 '@AGENTS.md' 한 줄로")
+elif has_c:
+    out.append("AGENTS.md 없음 — Codex·Grok 공용을 위해 권장: git mv CLAUDE.md AGENTS.md && echo '@AGENTS.md' > CLAUDE.md")
+inst = "AGENTS.md" if has_a else "CLAUDE.md"
+
+# sizes
+plan, done = latest("docs/plans", "plan"), latest("docs/done", "done")
+files = [inst, "docs/RESEARCH_SPEC.md", "docs/ARCHITECTURE.md", "docs/progress.md", "docs/LEARNINGS.md"] + ([f"docs/plans/{plan}"] if plan else [])
+sizes, big = [], []
+for f in files:
+    if not os.path.exists(f): out.append(f"없음: {f}"); continue
+    sizes.append(f"{os.path.basename(f)} {kb(f)}")
+    if size(f) > LIMIT: big.append(f)
+out.append("크기: " + " · ".join(sizes))
+if big: out.append(f"⚠ {LIMIT}B 초과 — 통째로 읽지 말고 필요한 절만 grep: " + " ".join(big))
+
+# placeholders
+ph = 0
+for f in (inst, "docs/RESEARCH_SPEC.md"):
+    for line in read(f).splitlines():
+        if re.match(r"\s*(#|>|\||```)", line): continue
+        if re.search(r"\{[^}]{1,40}\}", line): ph += 1
+if ph: out.append(f"placeholder {{…}} {ph}줄 남음 ({inst} / RESEARCH_SPEC) — init 또는 spec 단위 후보")
+
+# plan/done pairing
+pn, dn = vnum(plan), vnum(done)
+if pn > dn: out.append(f"진행 중 단위: docs/plans/{plan} (done_v{pn} 없음)")
+elif pn: out.append(f"마지막 단위 닫힘: plan_v{pn} / {done} — 다음 단위는 사용자 선택")
+
+# unchecked decisions
+prog = read("docs/progress.md")
+m = re.search(r"^## [^\n]*결정 큐[^\n]*\n(.*?)(?=^## |\Z)", prog, re.S | re.M)
+if m:
+    items = [l for l in m.group(1).splitlines() if l.startswith("- [ ]")]
+    if items: out.append(f"미결 결정 {len(items)}건: " + " | ".join(l[6:86] for l in items[:3]))
+
+# harness sync
+norm = lambda s: re.sub(r"[^0-9A-Za-z가-힣]", "", s)
+mk = re.search(r"last-sync:\s*(.+)", read(inst))
+mk = mk.group(1).strip() if mk else ""
+if not mk or "{" in mk:
+    out.append(f"last-sync 마커 없음/placeholder — {inst}의 'last-sync:'를 본체 CHANGELOG 마지막 항목으로")
+else:
+    entries = [l[2:] for l in read(os.path.join(hd, "CHANGELOG.md")).splitlines() if re.match(r"- \d{4}-\d{2}-\d{2} — ", l)]
+    key = norm(mk)[:12]
+    idx = next((i for i, e in enumerate(entries) if norm(e).startswith(key)), None)
+    if idx is None:
+        d = mk[:10]; unsynced = [e for e in entries if e[:10] >= d]
+    else:
+        unsynced = entries[idx + 1:]
+    if unsynced:
+        out.append(f"하네스 미동기 {len(unsynced)}건 (last-sync: {mk[:40]}): " + " | ".join(e[:70] for e in unsynced))
+
+pre = "[dinnno] " if hook else ""
+print("\n".join(pre + l for l in out))
+PY
+}
+
+# ---------------------------------------------------------------- gates
+cmd_gates() {
+  local plan="" record=0 timeout=600
+  while (( $# )); do case "$1" in
+    --record) record=1;; --timeout) timeout="$2"; shift;; *) plan="$1";; esac; shift; done
+  [[ -f "$plan" ]] || { echo "usage: dinnno gates <plan.md> [--record] [--timeout SEC]"; exit 2; }
+  plan="$(readlink -f "$plan")"
+  local root; root="$(find_root "$(dirname "$plan")")" || root="$PWD"
+  cd "$root"
+  # rows of the first table under a heading containing '게이트'; columns: gate | command | expect
+  local rows; rows=$(awk '/^#+ .*게이트/{f=1;next} f && /^#+ /{exit} f && /^\|/' "$plan" | tail -n +3)
+  [[ -z "$rows" ]] && { echo "게이트 표 없음: $plan (heading에 '게이트'가 있는 절의 표 | gate | command | expect |)"; exit 2; }
+  local pass=0 total=0 report="| gate | result | evidence |"$'\n'"|---|---|---|"
+  while IFS= read -r row; do
+    [[ -z "$row" ]] && continue
+    local name cmd expect
+    name=$(cut -d'|' -f2 <<< "$row" | sed 's/^ *//;s/ *$//')
+    cmd=$(sed 's/\\|/\x01/g' <<< "$row" | cut -d'|' -f3 | tr '\001' '|' | sed 's/^ *`\{0,1\}//;s/`\{0,1\} *$//')
+    expect=$(sed 's/\\|/\x01/g' <<< "$row" | cut -d'|' -f4 | tr '\001' '|' | sed 's/^ *`\{0,1\}//;s/`\{0,1\} *$//')
+    [[ -z "$name" || "$name" == "{"* ]] && continue
+    total=$((total+1))
+    local outp rc
+    outp=$(timeout "$timeout" bash -c "$cmd" 2>&1); rc=$?
+    local last; last=$(tail -1 <<< "$outp" | trunc 100)
+    if (( rc == 0 )) && { [[ -z "$expect" ]] || grep -qE -- "$expect" <<< "$outp"; }; then
+      pass=$((pass+1)); report+=$'\n'"| $name | PASS | $last |"
+    else
+      report+=$'\n'"| $name | FAIL (rc=$rc) | $last |"
+    fi
+  done <<< "$rows"
+  echo "$report"; echo; echo "gates: $pass/$total PASS  ($(date +%F) $(git rev-parse --short HEAD 2>/dev/null))"
+  if (( record )); then
+    printf -- "- %s gates: %d/%d PASS (dinnno gates)\n" "$(date +%F)" "$pass" "$total" >> "$plan"
+    echo "recorded → $plan"
+  fi
+  (( pass == total ))
+}
+
+# ---------------------------------------------------------------- tidy
+cmd_tidy() {
+  local root; root="$(find_root)" || { echo "not a dinnno project"; exit 1; }
+  cd "$root"
+  if [[ "${1:-}" == "--apply" ]]; then
+    shift; (( $# )) || { echo "usage: dinnno tidy --apply FILE..."; exit 2; }
+    for f in "$@"; do
+      [[ -f "$f" ]] || { echo "skip (없음): $f"; continue; }
+      local m; m=$(date -r "$f" +%Y-%m); mkdir -p "docs/archive/$m"
+      local dest="docs/archive/$m/$(basename "$f")"
+      [[ -e "$dest" ]] && dest="${dest%.md}_$(date -r "$f" +%d).md"
+      if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then git mv "$f" "$dest"; else mv "$f" "$dest"; fi
+      [[ -f docs/archive/_INDEX.md ]] || echo "# archive index" > docs/archive/_INDEX.md
+      printf -- "- \`%s\` → \`%s\` — %s\n" "$f" "$dest" "$(date +%F) tidy" >> docs/archive/_INDEX.md
+      echo "moved: $f → $dest"
+    done
+    return
+  fi
+  echo "정규 집합 밖 md (후보 — 내용을 열어 소비 여부를 판단한 뒤 --apply):"
+  { ls *.md 2>/dev/null | grep -vE '^(README|AGENTS|CLAUDE)\.md$' | sed 's|^|./|'
+    ls docs/*.md 2>/dev/null | grep -vE 'docs/(RESEARCH_SPEC|ARCHITECTURE|progress|LEARNINGS|LOOP|_GUIDE)\.md$'
+    ls docs/notes/*.md 2>/dev/null
+  } | while read -r f; do printf "  %-60s %s %5s\n" "$f" "$(date -r "$f" +%F)" "$(kb "$f")"; done
+  for d in docs/*/; do case "$(basename "$d")" in plans|done|references|notes|archive|experiments) ;; *) echo "  비정규 폴더: $d";; esac; done
+}
+
+# ---------------------------------------------------------------- review
+cmd_review() {
+  local with="" prompt="" out="" unsafe=0
+  while (( $# )); do case "$1" in
+    --with) with="$2"; shift;; -o) out="$2"; shift;; --unsafe) unsafe=1;; *) prompt="$1";; esac; shift; done
+  [[ -f "$prompt" && -n "$with" ]] || { echo "usage: dinnno review --with codex|claude PROMPT.md [-o OUT.md] [--unsafe]"; exit 2; }
+  local root; root="$(find_root)" || root="$PWD"
+  prompt="$(readlink -f "$prompt")"
+  [[ -z "$out" ]] && out="${prompt%.md}_out.md"
+  local log="${out%.md}_log.txt"
+  local before; before=$(git -C "$root" status --porcelain 2>/dev/null)
+  local start; start=$(date +%s)
+  local rc
+  case "$with" in
+    codex)
+      local sb="read-only"; (( unsafe )) && sb="danger-full-access"
+      codex exec -s "$sb" -C "$root" -m "${DINNNO_CODEX_MODEL:-gpt-5.6-sol}" -c model_reasoning_effort="${DINNNO_CODEX_EFFORT:-xhigh}" \
+        --skip-git-repo-check -o "$out" \
+        "다음 파일을 읽고 그 안의 지시를 그대로 수행하라: $prompt — read-only 검토다. 어떤 파일도 수정하지 마라." > "$log" 2>&1
+      rc=$?
+      ;;
+    claude)
+      ( cd "$root" && claude -p "$(cat "$prompt")
+
+이 검토는 read-only다. 파일을 수정하지 말고 결과만 출력하라." \
+          --model "${DINNNO_CLAUDE_MODEL:-opus}" --allowedTools Read Grep Glob > "$out" 2> "$log" )
+      rc=$?
+      ;;
+    *) echo "unknown --with $with"; exit 2;;
+  esac
+  local after; after=$(git -C "$root" status --porcelain 2>/dev/null)
+  local fail=""
+  (( rc != 0 )) && fail+="exit=$rc "
+  [[ -s "$out" ]] || fail+="empty-output "
+  [[ "$before" == "$after" ]] || fail+="worktree-changed "
+  if (( unsafe )); then
+    local touched; touched=$(find "$root" -newermt "@$start" -type f -not -path '*/.git/*' -not -path "$(dirname "$out")/*" | head -5)
+    [[ -n "$touched" ]] && fail+="files-touched($touched) "
+  fi
+  if [[ -n "$fail" ]]; then
+    echo "REVIEW FAILED: $fail — log: $log"
+    grep -qiE 'bwrap|Operation not permitted' "$log" 2>/dev/null && (( ! unsafe )) && echo "sandbox 실패가 재현됨 → 이번 한 번만 --unsafe 로 재시도 (danger-full-access, 종료 후 무수정 검증 포함)"
+    exit 1
+  fi
+  echo "REVIEW OK: $out ($(kb "$out"), ${with})"
+}
+
+case "${1:-}" in
+  check)  shift; cmd_check "$@";;
+  gates)  shift; cmd_gates "$@";;
+  tidy)   shift; cmd_tidy "$@";;
+  review) shift; cmd_review "$@";;
+  *) sed -n '2,10p' "$0"; exit 2;;
+esac
