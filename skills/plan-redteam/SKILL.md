@@ -29,7 +29,7 @@ plan을 쓴 세션은 자기 설계를 관대하게 본다. GPU 시간을 태우
 dinnno review --with codex <scratch>/redteam_prompt.md -o <scratch>/redteam_out.md
 ```
 
-xhigh는 수 분에서 수십 분 걸리니 백그라운드로 돌리고 완료를 기다린다. `REVIEW FAILED`면 그 원문을 보고하고 멈춘다. 리뷰를 이 세션이 대신 써서 채우지 않는다. sandbox 실패가 재현됐다는 안내가 나오면 그 한 번만 `--unsafe`로 재시도한다.
+xhigh는 수 분에서 수십 분 걸리니 백그라운드로 돌리고 완료를 기다린다. `REVIEW FAILED`면 그 원문을 보고하고 멈춘다. 리뷰를 이 세션이 대신 써서 채우지 않는다. sandbox 실패면 로그를 첨부해 사용자에게 보고한다. sandbox 밖에서 돌리는 우회는 없다.
 
 ## 4. 결과
 

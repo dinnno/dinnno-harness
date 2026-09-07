@@ -5,7 +5,7 @@
 #   dinnno check  [--hook]                 project state summary (sizes, placeholders, sync, open decisions)
 #   dinnno gates  <plan.md> [--record] [--timeout SEC]
 #   dinnno tidy   [--apply FILE...]        list loose artifacts; --apply moves given files to docs/archive/
-#   dinnno review --with codex|claude PROMPT.md [-o OUT.md] [--unsafe]
+#   dinnno review --with codex|claude PROMPT.md [-o OUT.md]
 #
 # Works from anywhere inside a dinnno project (a repo that has docs/RESEARCH_SPEC.md).
 set -uo pipefail
@@ -261,30 +261,26 @@ cmd_tidy() {
 }
 
 # ---------------------------------------------------------------- review
+# Cross-model read-only review. The sandbox (codex -s read-only / claude with read-only tools) is the
+# no-modification guarantee; there is no unsafe fallback — if the sandbox fails, report the log and stop.
 cmd_review() {
-  local with="" prompt="" out="" unsafe=0
+  local with="" prompt="" out=""
   while (( $# )); do case "$1" in
-    --with) with="$2"; shift;; -o) out="$2"; shift;; --unsafe) unsafe=1;; *) prompt="$1";; esac; shift; done
-  [[ -f "$prompt" && -n "$with" ]] || { echo "usage: dinnno review --with codex|claude PROMPT.md [-o OUT.md] [--unsafe]"; exit 2; }
+    --with) with="$2"; shift;; -o) out="$2"; shift;;
+    --unsafe) echo "--unsafe는 제거됐다: sandbox 밖 실행은 무수정을 보장할 수 없다. sandbox 실패면 로그를 보고하고 멈춘다"; exit 2;;
+    *) prompt="$1";; esac; shift; done
+  [[ -f "$prompt" && -n "$with" ]] || { echo "usage: dinnno review --with codex|claude PROMPT.md [-o OUT.md]"; exit 2; }
   local root; root="$(find_root)" || root="$PWD"
   prompt="$(readlink -f "$prompt")"
   [[ -z "$out" ]] && out="${prompt%.md}_out.md"
-  local log="${out%.md}_log.txt"
+  out="$(readlink -f "$out")"; local log="${out%.md}_log.txt"
   rm -f "$out"   # only output produced by this run counts as evidence
-  local rel_out="./${out#"$root"/}" rel_log="./${log#"$root"/}"   # output/log may live inside the project; never count them as changes
-  snapshot() { # content hash for small files, size+mtime for big ones; excludes .git, the output and the log
-    ( cd "$root" && find . -type f -not -path './.git/*' -not -path "$rel_out" -not -path "$rel_log" -size -4096k -print0 | sort -z | xargs -0 -r sha256sum
-      find . -type f -not -path './.git/*' -not -path "$rel_out" -not -path "$rel_log" -size +4095k -printf '%p\t%s\t%T@\n' | sort ) 2>/dev/null
-  }
-  gstatus() { git -C "$root" status --porcelain 2>/dev/null | grep -vF -e "${rel_out#./}" -e "${rel_log#./}"; }
-  local snap_before=""; (( unsafe )) && snap_before=$(snapshot)
+  gstatus() { git -C "$root" status --porcelain 2>/dev/null | grep -vF -e "${out#"$root"/}" -e "${log#"$root"/}"; }
   local before; before=$(gstatus)
-  local start; start=$(date +%s)
   local rc
   case "$with" in
     codex)
-      local sb="read-only"; (( unsafe )) && sb="danger-full-access"
-      codex exec -s "$sb" -C "$root" -m "${DINNNO_CODEX_MODEL:-gpt-5.6-sol}" -c model_reasoning_effort="${DINNNO_CODEX_EFFORT:-xhigh}" \
+      codex exec -s read-only -C "$root" -m "${DINNNO_CODEX_MODEL:-gpt-5.6-sol}" -c model_reasoning_effort="${DINNNO_CODEX_EFFORT:-xhigh}" \
         --skip-git-repo-check -o "$out" \
         "다음 파일을 읽고 그 안의 지시를 그대로 수행하라: $prompt — read-only 검토다. 어떤 파일도 수정하지 마라." > "$log" 2>&1
       rc=$?
@@ -303,14 +299,9 @@ cmd_review() {
   (( rc != 0 )) && fail+="exit=$rc "
   [[ -s "$out" ]] || fail+="empty-output "
   [[ "$before" == "$after" ]] || fail+="worktree-changed "
-  if (( unsafe )); then
-    local snap_after; snap_after=$(snapshot)
-    local changed; changed=$(diff <(echo "$snap_before") <(echo "$snap_after") | grep -E '^[<>]' | awk '{print ($1=="<" ? "삭제/변경전: " : "생성/변경후: ") $NF}' | head -6)
-    [[ -n "$changed" ]] && fail+="files-changed($changed) "
-  fi
   if [[ -n "$fail" ]]; then
-    echo "REVIEW FAILED: $fail — log: $log"
-    grep -qiE 'bwrap|Operation not permitted' "$log" 2>/dev/null && (( ! unsafe )) && echo "sandbox 실패가 재현됨 → 이번 한 번만 --unsafe 로 재시도 (danger-full-access, 종료 후 무수정 검증 포함)"
+    echo "REVIEW FAILED: $fail— log: $log"
+    grep -qiE 'bwrap|Operation not permitted' "$log" 2>/dev/null && echo "sandbox 실패가 재현됨 — 로그 원문을 사용자에게 보고한다. 하네스는 sandbox 밖 fallback을 제공하지 않는다"
     exit 1
   fi
   echo "REVIEW OK: $out ($(kb "$out"), ${with})"

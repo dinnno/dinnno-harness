@@ -11,7 +11,7 @@
 | 스크립트 | `scripts/dinnno` | `check`(상태·크기·싱크) · `gates`(plan 게이트 실행) · `tidy`(산출물 정리) · `review`(다른 모델 검토 호출) |
 | 템플릿 | `templates/` | 프로젝트 문서 골격 (spec, architecture, progress, plan/done) |
 
-판단이 필요한 일은 스킬(산문)에, 답이 정해진 일은 스크립트에 둔다. 세션 시작 훅이 `dinnno check`를 자동으로 돌린다. `dinnno review --unsafe`는 git이 추적하는 변경과 새로 생긴 파일은 잡지만, 추적하지 않는 파일의 삭제까지는 잡지 못한다.
+판단이 필요한 일은 스킬(산문)에, 답이 정해진 일은 스크립트에 둔다. 세션 시작 훅이 `dinnno check`를 자동으로 돌린다. `dinnno review`는 sandbox(read-only) 안에서만 다른 모델을 돌리고, sandbox 밖 우회 옵션은 없다.
 
 ## 설치
 
