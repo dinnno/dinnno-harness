@@ -8,7 +8,7 @@ Claude Code(`~/.claude/CLAUDE.md`), Codex(`~/.codex/AGENTS.md`), Grok(`~/.grok/A
 
 ## 멈추는 지점 (모든 런타임·모든 모델 공통)
 
-사용자 확인 후에만 한다: git commit/push · data·ckpt·runs의 삭제나 덮어쓰기 · 실로봇에 명령 전송(sim은 해당 없음) · thesis나 비교 축 변경 · "이 방향은 죽었다"는 결론. 이 밖에서는 완주가 기본이고, 중간에 "계속할까요?"를 묻지 않는다. 사용자가 문제를 설명하거나 질문하는 중이면 산출물은 진단이다. 고치지 말고 보고한다.
+사용자 확인 후에만 한다: git commit/push · data·ckpt·runs의 삭제나 덮어쓰기 · 실로봇에 명령 전송(sim은 해당 없음) · thesis나 비교 축 변경 · "이 방향은 죽었다"는 결론. `harness` 스킬이 정한 두 확인(이번 세션의 단위, plan 실행 시작)도 여기에 든다. 이 밖에서는 완주가 기본이고, 중간에 "계속할까요?"를 묻지 않는다. 사용자가 문제를 설명하거나 질문하는 중이면 산출물은 진단이다. 고치지 말고 보고한다.
 
 ## 코드
 
@@ -16,7 +16,7 @@ Claude Code(`~/.claude/CLAUDE.md`), Codex(`~/.codex/AGENTS.md`), Grok(`~/.grok/A
 - 실험 1개 = `configs/*.yaml` 1개. 실험 파라미터는 코드에 넣지 않는다. 재현 = seed + config + commit hash + dataset 버전.
 - 요청 범위만 만든다. 추측성 추상화, 훗날을 위한 옵션, 일어날 수 없는 경우의 에러 처리는 넣지 않는다. 옆 코드를 정리하고 싶으면 고치지 말고 제안으로 남긴다.
 - `libs/`는 읽기 전용. Python 우선, shell은 얇은 실행 스크립트만.
-- GPU 우선. 처음 돌리는 스크립트나 벤치는 `systemd-run --user --scope -p MemoryMax=8G -- python x.py`로 돌린다. 호스트 RAM은 이웃 세션과 공유라 OOM 하나가 그 데스크톱의 세션 전부를 죽인다.
+- GPU 우선. 라이브러리 CPU 커널은 대개 청킹이 없어 (N×M) 중간 텐서를 호스트 RAM에 통째로 만든다. 처음 돌리는 스크립트나 벤치는 `systemd-run --user --scope -p MemoryMax=8G -- python x.py`로 돌리고, 실행을 서브에이전트에 맡길 때도 그 상한을 프롬프트에 적어 준다. 호스트 RAM은 이웃 세션과 공유라 OOM 하나가 그 데스크톱의 세션 전부를 죽인다.
 
 ## 검증과 보고
 

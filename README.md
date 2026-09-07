@@ -26,7 +26,7 @@
 |---|---|---|---|
 | 규약 | `~/.claude/CLAUDE.md` | `~/.codex/AGENTS.md` | `~/.grok/AGENTS.md` |
 | 스킬 | `~/.claude/skills/*` | `~/.agents/skills/*` | `~/.grok/skills/*` |
-| 훅 | `~/.claude/settings.json` | `~/.codex/hooks.json` (`[features] hooks = true` 필요) | `~/.grok/config.toml` |
+| 훅 | `~/.claude/settings.json` | `~/.codex/hooks.json` (`[features] hooks = true` 필요, 새 세션에서 `/hooks`로 dinnno 훅을 trust해야 실행됨) | `~/.grok/config.toml` (훅 출력이 컨텍스트에 들어가는지는 Grok 세션에서 미검증) |
 | CLI | `~/.local/bin/dinnno` | 동일 | 동일 |
 
 호출 이름: Claude·Grok `/harness`, Codex `$harness`. 프로젝트 안의 `CLAUDE.md`는 `@AGENTS.md` 한 줄이라 세 런타임이 같은 프로젝트 규약을 읽는다.
@@ -50,12 +50,12 @@
 
 1. `git mv CLAUDE.md AGENTS.md && echo '@AGENTS.md' > CLAUDE.md`
 2. `docs/LEARNINGS.md`를 "현재 유효"(20줄 이내) / "이력"으로 나눈다.
-3. `docs/progress.md`에 쌓인 세션 로그·결정 큐 이력은 `docs/archive/`로 롤링한다 (`dinnno tidy`).
+3. `docs/progress.md`에 쌓인 세션 로그·결정 큐 이력은 세션이 confirm 받아 `docs/archive/rollup_YYYY-MM.md`로 옮긴다. `dinnno tidy`는 파일 단위 이동만 하고 파일 안을 자르지는 않는다.
 4. 다음 plan부터 §3 게이트 표를 쓴다.
 
 ## Vendored 스킬
 
-`bro`, `codebase-design`, `diagnosing-bugs`, `improve`, `improve-codebase-architecture`, `thermo-nuclear-code-quality-review`, `ponytail`. 출처·핀·라이선스는 `skills/UPSTREAM.md`.
+`bro`, `codebase-design`, `diagnosing-bugs`, `improve`, `improve-codebase-architecture`, `thermo-nuclear-code-quality-review`, `ponytail`. 출처·핀·라이선스는 `skills/UPSTREAM.md`. `research-second-brain`(문헌 위키 조회)은 자체 제작 스킬로 세 런타임에 같이 연결된다.
 
 ## 다른 머신
 

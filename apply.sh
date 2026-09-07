@@ -6,6 +6,7 @@ set -euo pipefail
 
 HARNESS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WITH_PONYTAIL=0
+command -v python3 >/dev/null || { echo "python3가 필요하다 (훅 병합·last-sync 스탬프·dinnno check)"; exit 1; }
 
 backup_if_exists() { # regular file/dir → timestamped backup; symlink → removed
   local p="$1"
@@ -19,7 +20,9 @@ prune_old_links() { # remove symlinks in $1 that point into any dinnno-harness c
   local dir="$1"; [[ -d "$dir" ]] || return 0
   for p in "$dir"/*; do
     [[ -L "$p" ]] || continue
-    case "$(readlink -f "$p" 2>/dev/null || readlink "$p")" in *dinnno-harness*) rm "$p"; echo "pruned: $p";; esac
+    case "$(readlink -f "$p" 2>/dev/null || readlink "$p")" in
+      "$HARNESS_DIR"/*|*/dinnno-harness/*|*/dinnno-harness-codex/*|*/dinnno-harness-v4/*) rm "$p"; echo "pruned: $p";;
+    esac
   done
 }
 
@@ -73,6 +76,9 @@ EOF
 }
 
 install_global() {
+  case "$HARNESS_DIR" in */.worktrees/*|*/worktrees/*)
+    [[ "${DINNNO_ALLOW_WORKTREE:-}" == 1 ]] || { echo "worktree 경로($HARNESS_DIR)에서 --global을 돌리면 symlink가 여기에 고정된다. main 체크아웃(tools/dinnno-harness)에서 실행하라. 강행: DINNNO_ALLOW_WORKTREE=1"; exit 1; };;
+  esac
   # rules: one file, three readers
   link "$HARNESS_DIR/AGENTS.md" "$HOME/.claude/CLAUDE.md"
   link "$HARNESS_DIR/AGENTS.md" "$HOME/.codex/AGENTS.md"
@@ -93,7 +99,7 @@ install_global() {
   merge_hooks_toml "$HOME/.grok/config.toml"
   echo
   echo "done. open a new Claude Code / Codex / Grok session."
-  echo "  - Codex needs [features] hooks = true in ~/.codex/config.toml"
+  echo "  - Codex: [features] hooks = true 필요, 그리고 새 세션에서 /hooks 로 dinnno 훅을 trust해야 실행된다 (신뢰 전까지 조용히 건너뜀)"
   echo "  - ~/.local/bin should be on PATH for 'dinnno' (hooks use the absolute path anyway)"
   echo "  - ponytail is opt-in: ./apply.sh --global --with-ponytail"
 }
@@ -104,8 +110,15 @@ install_project() {
   [[ -e "$target/gitignore" && ! -e "$target/.gitignore" ]] && mv "$target/gitignore" "$target/.gitignore"
   rm -f "$target/gitignore"
   # stamp last-sync with the newest CHANGELOG entry so a fresh project starts in sync
-  local last; last="$(grep -E '^- [0-9]{4}-[0-9]{2}-[0-9]{2} — ' "$HARNESS_DIR/CHANGELOG.md" | tail -1 | cut -c3-70)"
-  grep -q '{설치일}' "$target/AGENTS.md" 2>/dev/null && sed -i "s|{설치일}|$last|" "$target/AGENTS.md"
+  python3 - "$HARNESS_DIR/CHANGELOG.md" "$target/AGENTS.md" <<'PY'
+import re, sys
+cl, ag = sys.argv[1:3]
+entries = [l[2:].strip() for l in open(cl, encoding="utf-8") if re.match(r"- \d{4}-\d{2}-\d{2} — ", l)]
+last = entries[-1][:60] if entries else ""
+try: s = open(ag, encoding="utf-8").read()
+except FileNotFoundError: sys.exit()
+if "{설치일}" in s: open(ag, "w", encoding="utf-8").write(s.replace("{설치일}", last))
+PY
   echo "installed into: $target"
   echo "next: fill docs/RESEARCH_SPEC.md and AGENTS.md, then start a session with the harness skill"
 }

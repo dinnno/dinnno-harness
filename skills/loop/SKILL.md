@@ -7,7 +7,7 @@ description: 사용자가 명시적으로 "loop 돌리자"고 opt-in했을 때�
 
 ## 인가 (사용자 확인 한 번)
 
-`docs/notes/YYYY-MM-DD_loop-{slug}.md`에 적고 승인받는다: 질문 · thesis/축 경계 · 허용 변경 표면 · 예산(반복 수, GPU 시간, run당 상한) · 정지 조건(연속 no-improve K회, experiment-level 이상, 예산 소진). 이 승인이 경계 안의 local plan 실행을 인가한다. thesis나 축 변경, 경계 밖 표면, 예산 초과, experiment-level 이상 뒤 재실행, 실로봇, kill은 계속 사용자 확인이다.
+`docs/notes/YYYY-MM-DD_loop-{slug}.md`에 적고 승인받는다: 질문 · thesis/축 경계 · 허용 변경 표면 · 예산(반복 수, GPU 시간, run당 상한) · 정지 조건(연속 no-improve K회, experiment-level 이상, 예산 소진). 이 승인이 경계 안의 local plan 실행을 인가한다. thesis나 축 변경, 경계 밖 표면, 예산 초과, experiment-level 이상 뒤 재실행, 실로봇, kill은 계속 사용자 확인이다. RESEARCH_SPEC §6에 선언된 ablation 행을 순서대로 도는 sweep도 같은 인가 안에서 같은 방식으로 돈다.
 
 ## 반복 (활성 가설은 한 번에 하나)
 

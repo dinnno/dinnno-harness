@@ -23,7 +23,7 @@
 - 루프 예산: (최대 재시도 N회 · 최대 GPU h — 이 안에서는 code-level 조정과 재실행을 묻지 않는다)
 - 정지 조건: (임계값 달성 / 예산 소진 / experiment-level 이상 — 먼저 오는 것)
 
-게이트 표는 `dinnno gates`가 실행한다. command 셀 안의 `|`는 `\|`로 쓴다. expect는 출력에 대한 정규식이고, 비우면 exit 0만 본다. 실행 전에 기준을 적는 것이 사전등록이다. 각 게이트에는 정의 해시(#xxxxxxxx)가 붙어서, 결과를 본 뒤 기준을 고치면 이전 PASS는 무효로 표시된다. 사람이 봐야 하는 것은 `MANUAL:`로 적는다. 사용자가 확인을 말하면 §5에 `- YYYY-MM-DD 확인 {gate}#{hash}: "사용자 발화"` 한 줄을 넣어야 PASS가 된다.
+게이트 표는 `dinnno gates`가 실행한다. command 셀 안의 `|`는 `\|`로 쓴다. expect는 출력에 대한 정규식이고, 비우면 exit 0만 본다. 실행 전에 기준을 적는 것이 사전등록이다. 각 게이트에는 정의 해시(#xxxxxxxx)가 붙어서, 결과를 본 뒤 기준을 고치면 이전 PASS는 무효로 표시된다. 사람이 봐야 하는 것은 `MANUAL:`로 적는다. 사용자가 확인을 말하면 plan 파일에(§5 권장) `- YYYY-MM-DD 확인 {gate}#{hash}: "사용자 발화"` 한 줄을 넣어야 PASS가 된다. `dinnno gates --record`의 기록 줄은 파일 끝에 붙는다.
 
 | gate | command | expect |
 |---|---|---|

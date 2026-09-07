@@ -23,12 +23,13 @@ find_root() {
 }
 
 kb() { printf "%dK" $(( ( $(wc -c < "$1") + 512 ) / 1024 )); }
-trunc() { awk -v n="$1" '{ print substr($0, 1, n) }'; }
+trunc() { python3 -c 'import sys;n=int(sys.argv[1]);[print(l.rstrip("\n")[:n]) for l in sys.stdin]' "$1"; }
 
 # ---------------------------------------------------------------- check
 cmd_check() {
   local hook=0; [[ "${1:-}" == "--hook" ]] && hook=1
   local root; root="$(find_root)" || { (( hook )) && exit 0; echo "not a dinnno project (docs/RESEARCH_SPEC.md not found)"; exit 1; }
+  command -v python3 >/dev/null || { echo "[dinnno] python3 없음 — check 건너뜀"; exit 0; }
   python3 - "$root" "$HARNESS_DIR" "$hook" <<'PY'
 import os, re, sys, glob
 root, hd, hook = sys.argv[1], sys.argv[2], sys.argv[3] == "1"
@@ -51,8 +52,6 @@ if has_a and has_c:
     c = read("CLAUDE.md").strip()
     if c != "@AGENTS.md" and c != read("AGENTS.md").strip():
         out.append("⚠ AGENTS.md와 CLAUDE.md 내용이 다르다 — 한쪽을 정본으로 두고 CLAUDE.md는 '@AGENTS.md' 한 줄로")
-elif has_c:
-    out.append("AGENTS.md 없음 — Codex·Grok 공용을 위해 권장: git mv CLAUDE.md AGENTS.md && echo '@AGENTS.md' > CLAUDE.md")
 inst = "AGENTS.md" if has_a else "CLAUDE.md"
 
 # sizes
@@ -71,7 +70,8 @@ ph = 0
 for f in (inst, "docs/RESEARCH_SPEC.md"):
     for line in read(f).splitlines():
         if re.match(r"\s*(#|>|\||```)", line): continue
-        if re.search(r"\{[^}]{1,40}\}", line): ph += 1
+        line = re.sub(r"`[^`]*`", "", line)  # ignore code spans
+        if any(not re.fullmatch(r"N([+-]\d+)?|[\d\s,.\-]+", m) for m in re.findall(r"\{([^{}]{1,40})\}", line)): ph += 1
 if ph: out.append(f"placeholder {{…}} {ph}줄 남음 ({inst} / RESEARCH_SPEC) — init 또는 spec 단위 후보")
 
 # plan/done pairing
@@ -87,14 +87,16 @@ if pn > dn and plan:
     def cell(row, i):
         parts = re.split(r"(?<!\\)\|", row)
         if len(parts) <= i: return ""
-        c = parts[i].replace("\\|", "|").strip()
+        c = parts[i].replace("\\|", "|").strip(" ")
         if c.startswith("`"): c = c[1:]
         if c.endswith("`"): c = c[:-1]
         return c
     gates = []
     if sec:
-        for row in [l for l in sec.group(1).splitlines() if l.startswith("|")][2:]:
-            name = re.split(r"(?<!\\)\|", row)[1].strip() if row.count("|") >= 2 else ""
+        lines = [l for l in sec.group(1).splitlines() if l.startswith("|")]
+        hi = next((i for i, l in enumerate(lines) if re.match(r"\|\s*gate\s*\|", l)), None)
+        for row in (lines[hi + 2:] if hi is not None else []):
+            name = re.split(r"(?<!\\)\|", row)[1].strip(" ") if row.count("|") >= 2 else ""
             if not name or name.startswith("{"): continue
             cmd, exp = cell(row, 2), cell(row, 3)
             gates.append((name, cmd, hashlib.sha256(f"{name}|{cmd}|{exp}".encode()).hexdigest()[:8]))
@@ -105,11 +107,28 @@ if pn > dn and plan:
     pend = [n for n, c, h in gates if c.upper().startswith("MANUAL:") and not re.search(rf"^- \d{{4}}-\d{{2}}-\d{{2}} 확인 {re.escape(n)}#{h}:", pt, re.M)]
     if pend: out.append(f"수동 게이트 확인 대기 {len(pend)}건: " + ", ".join(pend))
 
+# session-close contract: open TODOs of the in-progress plan, latest done indexed in progress
+if pn > dn and plan:
+    todo = re.search(r"^#+ [^\n]*TODO[^\n]*\n(.*?)(?=^#+ |\Z)", read(f"docs/plans/{plan}"), re.S | re.M)
+    if todo:
+        n_open = sum(1 for l in todo.group(1).splitlines() if l.startswith("- [ ]") and not l[6:].lstrip().startswith("{"))
+        if n_open: out.append(f"plan TODO 미체크 {n_open}건 ({plan})")
+if dn and done and f"done_v{dn}" not in read("docs/progress.md"):
+    out.append(f"progress.md에 {done} 언급 없음 — 타임라인 행·Matrix 셀·헤더 갱신(종료 계약)")
+
+# v4 migration status
+mig = []
+if not has_a: mig.append("AGENTS.md 없음 (git mv CLAUDE.md AGENTS.md && echo '@AGENTS.md' > CLAUDE.md)")
+if os.path.exists("docs/LEARNINGS.md") and "현재 유효" not in read("docs/LEARNINGS.md"): mig.append("LEARNINGS '현재 유효' 절 없음")
+if "현재 방향" not in read("docs/RESEARCH_SPEC.md"): mig.append("SPEC '현재 방향' 블록 없음")
+if mig: out.append("v4 이관 필요: " + " · ".join(mig))
+if len(read(inst)) > 10000: out.append(f"⚠ {inst} {len(read(inst))}자 — Grok은 규칙 파일을 10,000자에서 잘라 읽는다")
+
 # unchecked decisions
 prog = read("docs/progress.md")
 m = re.search(r"^## [^\n]*결정 큐[^\n]*\n(.*?)(?=^## |\Z)", prog, re.S | re.M)
 if m:
-    items = [l for l in m.group(1).splitlines() if l.startswith("- [ ]")]
+    items = [l for l in m.group(1).splitlines() if l.startswith("- [ ]") and not l[6:].lstrip().startswith("{")]
     if items: out.append(f"미결 결정 {len(items)}건: " + " | ".join(l[6:86] for l in items[:3]))
 
 # harness sync
@@ -152,8 +171,8 @@ cmd_gates() {
   plan="$(readlink -f "$plan")"
   local root; root="$(find_root "$(dirname "$plan")")" || root="$PWD"
   cd "$root"
-  local rows; rows=$(awk '/^#+ .*게이트/{f=1;next} f && /^#+ /{exit} f && /^\|/' "$plan" | tail -n +3)
-  [[ -z "$rows" ]] && { echo "게이트 표 없음: $plan (heading에 '게이트'가 있는 절의 표 | gate | command | expect |)"; exit 2; }
+  local rows; rows=$(awk 'f && /^#+ /{exit} /^#+ .*게이트/{f=1;next} f && !t && /^\| *gate *\|/{t=1;getline;next} f && t && /^\|/' "$plan")
+  [[ -z "$rows" ]] && { echo "게이트 표 없음: $plan (heading에 '게이트'가 있는 절 안의 | gate | command | expect | 표)"; exit 2; }
   # previous record: "- DATE gates: n/m PASS (dinnno gates) name#hash=RESULT ..."
   declare -A prev
   local last; last=$(grep -E '^- [0-9]{4}-[0-9]{2}-[0-9]{2} gates: ' "$plan" | tail -1)
@@ -172,7 +191,7 @@ cmd_gates() {
     fi
     local result evidence
     if [[ "${cmd^^}" == MANUAL:* ]]; then
-      local conf; conf=$(grep -E "^- [0-9]{4}-[0-9]{2}-[0-9]{2} 확인 ${name}#[0-9a-f]{8}:" "$plan" | tail -1)
+      local conf; conf=$(grep -F -- " 확인 ${name}#" "$plan" | grep -E '^- [0-9]{4}-[0-9]{2}-[0-9]{2} 확인 ' | tail -1)
       local ch; ch=$(grep -oE "#[0-9a-f]{8}" <<< "$conf" | head -1 | tr -d '#')
       if [[ -n "$conf" && "$ch" == "$h" ]]; then
         pass=$((pass+1)); result="PASS (manual)"; evidence=$(sed 's/^[^:]*: *//' <<< "$conf" | trunc 100)
@@ -180,7 +199,7 @@ cmd_gates() {
         result="STALE"; evidence="확인 당시 #$ch ≠ 현재 #$h — 다시 확인 필요"; pending=$((pending+1))
       else
         result="PENDING"; evidence="사용자 확인 필요: $(sed "s/^ *//" <<< "${cmd#*:}")"; pending=$((pending+1))
-        hints+="확인되면 plan §5에 이 줄을 추가: - $(date +%F) 확인 ${name}#${h}: \"<사용자 발화>\""$'\n'
+        hints+="확인되면 plan 파일에 이 줄을 추가(§5 권장): - $(date +%F) 확인 ${name}#${h}: \"<사용자 발화>\""$'\n'
       fi
     else
       local outp rc; outp=$(timeout "$timeout" bash -c "$cmd" 2>&1); rc=$?
@@ -192,6 +211,7 @@ cmd_gates() {
     report+=$'\n'"| $name | #$h | $result | $evidence |"
     rec+=" ${name}#${h}=${result%% *}"
   done <<< "$rows"
+  (( total == 0 )) && { echo "실행 가능한 게이트 없음: 표에 placeholder 행뿐 — plan §3을 먼저 채운다 ($plan)"; exit 2; }
   echo "$report"; echo
   [[ -n "$notes" ]] && printf "%s" "$notes"
   [[ -n "$hints" ]] && printf "%s" "$hints"

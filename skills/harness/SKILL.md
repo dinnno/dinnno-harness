@@ -11,7 +11,7 @@ description: dinnno 연구 프로젝트(docs/RESEARCH_SPEC.md가 있는 레포)�
 
 `dinnno check`를 실행한다(세션 시작 훅이 이미 `[dinnno]` 줄을 출력했으면 생략). 크기 경고, placeholder, 미동기 CHANGELOG, 미결 결정이 거기 나온다.
 
-그다음 읽는다: `docs/RESEARCH_SPEC.md`(§1 thesis, §4 비교 축) · `docs/ARCHITECTURE.md` · `docs/progress.md`의 헤더·타임라인·Matrix와 미체크 결정 큐 · `docs/LEARNINGS.md`의 "현재 유효" 절 · 진행 중인 `docs/plans/plan_v{N}_*.md`. 옛 plan/done, 세션 로그, 이력 절은 필요한 항목만 grep한다. check가 50K 초과로 표시한 파일은 통째로 읽지 않는다.
+그다음 읽는다: `docs/RESEARCH_SPEC.md`(§1 thesis, §4 비교 축) · `docs/ARCHITECTURE.md` · `docs/progress.md`의 헤더·타임라인·Matrix와 미체크 결정 큐 · `docs/LEARNINGS.md`의 "현재 유효" 절 · 진행 중인 `docs/plans/plan_v{N}_*.md`. 옛 plan/done, 세션 로그, 이력 절은 필요한 항목만 grep한다. check가 50K 초과로 표시한 파일은 통째로 읽지 않는다. check가 "v4 이관 필요"로 알린 절이나 파일은 그 세션에서 신설을 제안한다.
 
 ## 2. 단위 확인 (사용자 confirm 한 번)
 
@@ -26,7 +26,7 @@ description: dinnno 연구 프로젝트(docs/RESEARCH_SPEC.md가 있는 레포)�
 
 ## 3. experiment
 
-**plan.** `docs/plans/_plan_template.md`를 복사해 `plan_v{N}_{slug}.md`를 쓴다. §3 게이트 표에 성공 기준을 실행 가능한 명령과 기대 출력으로 적는다. 완성되면 "이 plan으로 실행 시작?"을 추천안과 최강 대안 하나를 붙여 한 번 묻는다. 설계 결정이 크면 `plan-redteam` 스킬로 fresh 리뷰를 먼저 받을 수 있다.
+**plan.** `docs/plans/_plan_template.md`를 복사해 `plan_v{N}_{slug}.md`를 쓴다. 이어가는 plan의 절 번호가 템플릿과 다르면 절 이름(게이트, 세션 로그, TODO)으로 대응한다. §3 게이트 표에 성공 기준을 실행 가능한 명령과 기대 출력으로 적는다. 완성되면 "이 plan으로 실행 시작?"을 추천안과 최강 대안 하나를 붙여 한 번 묻는다. 설계 결정이 크면 `plan-redteam` 스킬로 fresh 리뷰를 먼저 받을 수 있다.
 
 **실행.** 이 세션이 직접 구현한다. 서로 독립인 파일이 여럿이면 런타임의 서브에이전트로 병렬 fan-out하되, ARCHITECTURE와 plan §2 전체를 함께 넘긴다. 긴 학습은 백그라운드로 돌리고 기다리는 동안 eval·plot·done 골격을 준비한다. plan §3 예산 안에서는 code-level 수정과 재실행을 묻지 않고 반복한다. experiment-level 이상(발산, 가설 반증, 한 번 고친 뒤 재실패)은 원문 출력과 함께 보고하고 멈춘다.
 
@@ -37,6 +37,7 @@ description: dinnno 연구 프로젝트(docs/RESEARCH_SPEC.md가 있는 레포)�
 - 설계와 verdict는 이 세션이 한다. 독립 검토는 다른 모델로 받는다: `dinnno review --with codex|claude <prompt.md>`, 또는 런타임의 fresh read-only 서브에이전트. 리뷰어에게는 파일 경로와 목표만 주고 이 세션의 결론은 주지 않는다.
 - thesis, 비교 축, kill처럼 논문을 바꾸는 판단은 사용자에게 올린다. 더 큰 모델의 세션이 필요하다고 보이면 그렇게 말한다.
 - 넓은 코드 탐색은 런타임의 read-only 탐색 서브에이전트에, PDF·대용량 로그 요약은 `dinnno review`에 맡긴다.
+- 가설이 정체되면(연속 no-improve, 다음 후보 고갈) `research-second-brain` 스킬로 선행연구 힌트를 두세 개만 가져와 결정 큐에 💡로 둔다.
 
 ## 5. 종료
 
@@ -51,4 +52,4 @@ description: dinnno 연구 프로젝트(docs/RESEARCH_SPEC.md가 있는 레포)�
 
 ## 런타임 메모
 
-Claude `/harness`, Codex `$harness`, Grok `/harness`. 서브에이전트, 백그라운드 실행, 병렬 워크플로는 각 런타임의 것을 쓴다. Claude에서 30분 넘는 run을 시작하면 `/remote-control` 전환을 한 줄로 안내한다.
+Claude `/harness`, Codex `$harness`, Grok `/harness`. 서브에이전트, 백그라운드 실행, 병렬 워크플로는 각 런타임의 것을 쓴다. Claude에서 30분 넘는 run을 시작하면 `/remote-control` 전환을 한 줄로 안내하고, 푸시 알림이 켜져 있으면 확인이 필요한 지점·run 완료·이상 발생 때 한 줄씩 보낸다.
