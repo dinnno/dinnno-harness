@@ -8,9 +8,10 @@ HARNESS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WITH_PONYTAIL=0
 command -v python3 >/dev/null || { echo "python3가 필요하다 (훅 병합·last-sync 스탬프·dinnno check)"; exit 1; }
 
-backup_if_exists() { # regular file/dir → timestamped backup; symlink → removed
+BACKUP_DIR="$HOME/.dinnno-backup/$(date +%Y%m%d-%H%M%S)"
+backup_if_exists() { # regular file/dir → moved to ~/.dinnno-backup/<stamp>/ (never left inside a skills dir, where it would load as a phantom skill); symlink → removed
   local p="$1"
-  if [[ -e "$p" && ! -L "$p" ]]; then mv "$p" "$p.bak.$(date +%Y%m%d-%H%M%S)"; echo "backup: $p"
+  if [[ -e "$p" && ! -L "$p" ]]; then mkdir -p "$BACKUP_DIR"; mv "$p" "$BACKUP_DIR/$(basename "$p")"; echo "backup: $p -> $BACKUP_DIR/"
   elif [[ -L "$p" ]]; then rm "$p"; fi
 }
 
