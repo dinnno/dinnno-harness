@@ -28,9 +28,9 @@ description: dinnno 연구 프로젝트(docs/RESEARCH_SPEC.md가 있는 레포)�
 
 **plan.** `docs/plans/_plan_template.md`를 복사해 `plan_v{N}_{slug}.md`를 쓴다. 이어가는 plan의 절 번호가 템플릿과 다르면 절 이름(게이트, 세션 로그, TODO)으로 대응한다. §3 게이트 표에 성공 기준을 실행 가능한 명령과 기대 출력으로 적는다. 완성되면 "이 plan으로 실행 시작?"을 추천안과 최강 대안 하나를 붙여 한 번 묻는다. 설계 결정이 크면 `plan-redteam` 스킬로 fresh 리뷰를 먼저 받을 수 있다.
 
-**실행.** 이 세션이 직접 구현한다. 서로 독립인 파일이 여럿이면 런타임의 서브에이전트로 병렬 fan-out하되, ARCHITECTURE와 plan §2 전체를 함께 넘긴다. 긴 학습은 백그라운드로 돌리고 기다리는 동안 eval·plot·done 골격을 준비한다. plan §3 예산 안에서는 code-level 수정과 재실행을 묻지 않고 반복한다. experiment-level 이상(발산, 가설 반증, 한 번 고친 뒤 재실패)은 원문 출력과 함께 보고하고 멈춘다.
+**실행.** 이 세션이 직접 구현한다. 서로 독립인 파일이 여럿이면 런타임의 서브에이전트로 병렬 fan-out하되, ARCHITECTURE와 plan §2 전체를 함께 넘긴다. 서브에이전트를 보내거나 긴 run을 시작할 때는 한 줄 알리고 진행한다. 긴 학습은 백그라운드로 돌리고 기다리는 동안 eval·plot·done 골격을 준비한다. plan §3 예산 안에서는 code-level 수정과 재실행을 묻지 않고 반복하되, 예산을 넘거나 수 시간 GPU가 드는 재실행은 먼저 보고한다. experiment-level 이상(발산, 가설 반증, 한 번 고친 뒤 재실패)은 원문 출력과 함께 보고하고 멈춘다.
 
-**done.** `docs/done/_done_template.md`를 복사해 `done_v{N}.md`. `dinnno gates docs/plans/plan_v{N}_*.md` 결과가 §2의 근거다. negative 결과는 kill이 아니다. 주장 범위와 실측 범위가 같은지, metric이 목표 품질과 같은 방향인지, seed×rollout이 그 효과를 감지할 수 있었는지, baseline·config·데이터가 깨끗한지 네 가지를 스스로 확인하기 전에는 "insufficient evidence"로 쓴다. kill과 thesis 변경은 사용자 결정이다.
+**done.** `docs/done/_done_template.md`를 복사해 `done_v{N}.md`. `dinnno gates docs/plans/plan_v{N}_{slug}.md`(리뷰 파일 `*_codex.md` 말고 plan 본문) 결과가 §2의 근거다. done을 쓰면 그 자리에서 `close` 스킬의 1~3단계(게이트 실행, 이 대화를 모르는 검토자의 근거 확인, 반영)를 수행한다. 쓴 사람이 자기 결과를 검토하지 않는다는 원칙이라 close를 따로 부르지 않아도 한다. negative 결과는 kill이 아니다. 주장 범위와 실측 범위가 같은지, metric이 목표 품질과 같은 방향인지, seed×rollout이 그 효과를 감지할 수 있었는지, baseline·config·데이터가 깨끗한지 네 가지를 스스로 확인하기 전에는 "insufficient evidence"로 쓴다. kill과 thesis 변경은 사용자 결정이다.
 
 ## 4. 위임과 모델
 
@@ -47,6 +47,7 @@ description: dinnno 연구 프로젝트(docs/RESEARCH_SPEC.md가 있는 레포)�
 - done을 쓴 단위면 `progress.md` 타임라인 행, Matrix 셀, 헤더(Stage, anchored commit).
 - thesis나 방법론이 움직였으면 `RESEARCH_SPEC.md` §0 현재 방향.
 - 미룬 결정은 `progress.md` 결정 큐에 한 줄.
+- 영구 문서(plan, done, progress)에 `/tmp`나 세션 scratch 경로를 인용하지 않는다. 필요하면 프로젝트 경로로 복사한 뒤 인용한다.
 
 종료 보고는 결론(수치 포함)을 먼저, 그다음 실제 한 것, 예상과의 차이, 다음 후보 두세 개.
 

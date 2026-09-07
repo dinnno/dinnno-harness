@@ -11,7 +11,7 @@ Sangjun의 git-backed 로보틱스 연구 위키를 **어느 프로젝트 세션
 ## 조회
 
 ```bash
-~/.claude/skills/research-second-brain/brain.sh "<구체적 질의>" \
+<이 스킬 폴더>/brain.sh "<구체적 질의>" \
   --project-lines <optional-line> \
   --types source,concept,idea,index \
   --limit 8 --max-chars 12000
@@ -23,7 +23,7 @@ project lines: `hoi-transformer`, `neural-grasp-critic`, `pi-touch`, `3d-flow-di
 
 ## 결과 사용 규칙
 
-1. 반환된 `wiki_locator`(file:line) 중 **더 필요한 heading만** 추가로 Read한다.
+1. 반환된 `wiki_locator`(file:line) 중 **더 필요한 heading만** 추가로 읽는다.
 2. 인용은 `brain:...@<vault_git_commit>`과 `original_url`을 **함께** 단다.
 3. `depth: captured`는 얕은 캡처다 — method/loss/평가 세부를 구현 근거로 단정하지 말고 원 논문을 확인한다. `summarized`만 깊은 근거.
 4. `provenance_gap: true`는 원 URL 미상 legacy source — 출처 미검증으로 취급.
@@ -33,4 +33,4 @@ project lines: `hoi-transformer`, `neural-grasp-critic`, `pi-touch`, `3d-flow-di
 
 ## harness 세션에서
 
-`/harness` §4의 "Second brain 질의"가 이 스킬의 호출 지점이다 — 가설 정체(연속 no-improve · done §4 후보 고갈 · kill 후 pivot 탐색) 시 Explore ×1로 dispatch하고, 회수물은 방법론 힌트 2-3개로 압축해 done §4 후보나 결정 큐 💡에 착지시킨다. 본 세션이 vault를 직접 광범위하게 Read하지 않는다.
+`harness` 스킬 §4와 `loop` 스킬이 이 스킬의 호출 지점이다 — 가설 정체(연속 no-improve · done §4 후보 고갈 · kill 후 pivot 탐색) 시 런타임의 read-only 탐색 서브에이전트 하나로 dispatch하고, 회수물은 방법론 힌트 2-3개로 압축해 done §4 후보나 결정 큐 💡에 착지시킨다. 본 세션이 vault를 직접 광범위하게 읽지 않는다.

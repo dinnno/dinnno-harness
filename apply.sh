@@ -21,7 +21,7 @@ prune_old_links() { # remove symlinks in $1 that point into any dinnno-harness c
   for p in "$dir"/*; do
     [[ -L "$p" ]] || continue
     case "$(readlink -f "$p" 2>/dev/null || readlink "$p")" in
-      "$HARNESS_DIR"/*|*/dinnno-harness/*|*/dinnno-harness-codex/*|*/dinnno-harness-v4/*) rm "$p"; echo "pruned: $p";;
+      "$HARNESS_DIR"/*|*/tools/dinnno-harness/*|*/tools/dinnno-harness-codex/*|*/.worktrees/dinnno-harness-v4/*) rm "$p"; echo "pruned: $p";;
     esac
   done
 }
@@ -99,16 +99,18 @@ install_global() {
   merge_hooks_toml "$HOME/.grok/config.toml"
   echo
   echo "done. open a new Claude Code / Codex / Grok session."
-  echo "  - Codex: [features] hooks = true 필요, 그리고 새 세션에서 /hooks 로 dinnno 훅을 trust해야 실행된다 (신뢰 전까지 조용히 건너뜀)"
+  echo "  - Codex: 새 훅은 경고 후 trust 전까지 실행되지 않는다 — 새 세션에서 /hooks 로 dinnno 훅을 trust. 구버전은 [features] hooks = true 필요"
   echo "  - ~/.local/bin should be on PATH for 'dinnno' (hooks use the absolute path anyway)"
   echo "  - ponytail is opt-in: ./apply.sh --global --with-ponytail"
 }
 
 install_project() {
   local target="$1"; mkdir -p "$target"; target="$(cd "$target" && pwd)"
+  local had_gi=0; [[ -e "$target/gitignore" ]] && had_gi=1   # a pre-existing file named 'gitignore' is the user's — leave it
   cp -r --update=none "$HARNESS_DIR/templates/." "$target/" 2>/dev/null || cp -rn "$HARNESS_DIR/templates/." "$target/"
-  [[ -e "$target/gitignore" && ! -e "$target/.gitignore" ]] && mv "$target/gitignore" "$target/.gitignore"
-  rm -f "$target/gitignore"
+  if (( ! had_gi )) && [[ -e "$target/gitignore" ]]; then
+    if [[ -e "$target/.gitignore" ]]; then rm -f "$target/gitignore"; else mv "$target/gitignore" "$target/.gitignore"; fi
+  fi
   # stamp last-sync with the newest CHANGELOG entry so a fresh project starts in sync
   python3 - "$HARNESS_DIR/CHANGELOG.md" "$target/AGENTS.md" <<'PY'
 import re, sys

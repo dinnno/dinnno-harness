@@ -16,7 +16,7 @@
 
 ## 운영
 
-밤당 5–15 trial 전제. 변이는 랜덤이 아니라 plan에 적은 우선순위 순. 1) allowlist 안에서 `trial_{k}.yaml` 작성 2) 백그라운드 실행, 대기 중 다음 변이와 done 골격 준비 3) eval 요약 → J·guard → keep/rollback 4) ledger 한 행 + 리포트 재생성 5) 정지 조건까지 반복. code-level 실패는 고치고 계속, experiment-level 이상은 즉시 정지. 루프 안에서 kill 결론을 내리지 않는다. 세션이 죽으면 ledger 마지막 행부터 재개.
+밤당 5–15 trial 전제. 변이는 랜덤이 아니라 plan에 적은 우선순위 순. 1) allowlist 안에서 `trial_{k}.yaml` 작성 2) 백그라운드 실행, 대기 중 다음 변이와 done 골격 준비 3) eval 요약 → J·guard → keep/rollback 4) ledger 한 행 + 리포트 재생성 5) 정지 조건까지 반복. code-level 실패는 고치고 계속, experiment-level 이상은 즉시 정지. 루프 안에서 kill 결론을 내리지 않는다. 세션이 죽으면 ledger 마지막 행부터 재개. 루프가 끝나면 champion을 튜닝에 쓰지 않은 held-out 평가로 1회 재검증한 뒤 Matrix에 기입한다.
 
 ## Champion
 

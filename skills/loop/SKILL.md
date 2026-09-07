@@ -14,7 +14,7 @@ description: 사용자가 명시적으로 "loop 돌리자"고 opt-in했을 때�
 1. **evidence.** 기계가독 metric과 raw failure(로그, rollout)를 먼저 본다. done 요약만 읽고 원인을 만들지 않는다. 막히면 `research-second-brain` 스킬로 선행연구 힌트를 두세 개만 가져온다.
 2. **가설.** H1과 근거, 최강 대안 H2, 둘을 가르는 가장 싼 실험, 각각의 예상 관찰을 적는다. 결과가 예상 밖이거나 임계값 근처면 같은 파일 목록을 fresh 검토자와 다른 모델(`dinnno review`)에 서로의 결론 없이 보내 해석을 받는다. 투표하지 않는다. 사실이 다르면 원천을 재확인하고, 원인 설명이 다르면 판별 실험을 고르고, 확신만 다르면 더 약한 주장을 쓴다.
 3. **실행과 판정.** 기존 plan → 실행 → done 그대로. 판정어는 `exploratory support | exploratory contradiction | insufficient evidence`. thesis급 주장은 튜닝에 쓰지 않은 locked confirmatory 평가(실행 전에 고정한 metric, 기준, seed×rollout)를 통과한 뒤에만 후보가 된다.
-4. note에 한 행(plan/done 포인터, 결과, 소비 예산, 다음)을 추가하고 정지 조건까지 반복한다. 평가 타당성, task 정의, 데이터 가정처럼 설정 자체가 흔들리면 멈추고 사용자에게 재설계를 제안한다.
+4. note에 한 행(plan/done 포인터, 결과, 소비 예산, 다음)을 추가하고 정지 조건까지 반복한다. 긴 run은 시작 전에 note에 run id·산출물 경로·시작 시각을 적고, 세션이 끊기면 그 기록부터 확인해 같은 run을 두 번 돌리지 않는다. 평가 타당성, task 정의, 데이터 가정처럼 설정 자체가 흔들리면 멈추고 사용자에게 재설계를 제안한다.
 
 ## autoloop (config 변이)
 

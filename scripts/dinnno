@@ -42,7 +42,7 @@ def read(p):
     try: return open(p, encoding="utf-8", errors="replace").read()
     except FileNotFoundError: return ""
 def latest(d, prefix):
-    fs = [f for f in os.listdir(d) if re.match(rf"{prefix}_v\d+", f)] if os.path.isdir(d) else []
+    fs = [f for f in os.listdir(d) if re.match(rf"{prefix}_v\d+", f) and "_codex" not in f and "_template" not in f] if os.path.isdir(d) else []
     return max(fs, key=lambda f: int(re.search(r"_v(\d+)", f).group(1)), default=None)
 def vnum(f): return int(re.search(r"_v(\d+)", f).group(1)) if f else 0
 
@@ -123,6 +123,10 @@ if os.path.exists("docs/LEARNINGS.md") and "현재 유효" not in read("docs/LEA
 if "현재 방향" not in read("docs/RESEARCH_SPEC.md"): mig.append("SPEC '현재 방향' 블록 없음")
 if mig: out.append("v4 이관 필요: " + " · ".join(mig))
 if len(read(inst)) > 10000: out.append(f"⚠ {inst} {len(read(inst))}자 — Grok은 규칙 파일을 10,000자에서 잘라 읽는다")
+cur = re.search(r"^## [^\n]*현재 유효[^\n]*\n(.*?)(?=^## |\Z)", read("docs/LEARNINGS.md"), re.S | re.M)
+if cur:
+    n_cur = sum(1 for l in cur.group(1).splitlines() if l.startswith("- "))
+    if n_cur > 20: out.append(f"LEARNINGS '현재 유효' {n_cur}줄 — 20줄 안으로 통폐합하거나 이력으로 내린다")
 
 # unchecked decisions
 prog = read("docs/progress.md")
@@ -166,8 +170,10 @@ cell() { # cell <row> <n>  (unescapes \| inside the cell, strips spaces and one 
 cmd_gates() {
   local plan="" record=0 timeout=600
   while (( $# )); do case "$1" in
-    --record) record=1;; --timeout) timeout="$2"; shift;; *) plan="$1";; esac; shift; done
+    --record) record=1;; --timeout) timeout="$2"; shift;;
+    *) [[ -n "$plan" ]] && { echo "plan 파일은 하나만 지정한다 (받은 것: $plan, $1) — glob이 리뷰 파일까지 펼친 것일 수 있다"; exit 2; }; plan="$1";; esac; shift; done
   [[ -f "$plan" ]] || { echo "usage: dinnno gates <plan.md> [--record] [--timeout SEC]"; exit 2; }
+  case "$(basename "$plan")" in *_codex*|*_template*) echo "리뷰·템플릿 파일이 아니라 plan 본문을 지정한다: $plan"; exit 2;; esac
   plan="$(readlink -f "$plan")"
   local root; root="$(find_root "$(dirname "$plan")")" || root="$PWD"
   cd "$root"
@@ -193,8 +199,11 @@ cmd_gates() {
     if [[ "${cmd^^}" == MANUAL:* ]]; then
       local conf; conf=$(grep -F -- " 확인 ${name}#" "$plan" | grep -E '^- [0-9]{4}-[0-9]{2}-[0-9]{2} 확인 ' | tail -1)
       local ch; ch=$(grep -oE "#[0-9a-f]{8}" <<< "$conf" | head -1 | tr -d '#')
-      if [[ -n "$conf" && "$ch" == "$h" ]]; then
-        pass=$((pass+1)); result="PASS (manual)"; evidence=$(sed 's/^[^:]*: *//' <<< "$conf" | trunc 100)
+      local said; said=$(sed 's/^[^:]*: *//' <<< "$conf" | sed 's/^"//;s/"$//')
+      if [[ -n "$conf" && "$ch" == "$h" && -n "$said" && "$said" != *"<사용자 발화>"* ]]; then
+        pass=$((pass+1)); result="PASS (manual)"; evidence=$(trunc 100 <<< "\"$said\"")
+      elif [[ -n "$conf" && "$ch" == "$h" ]]; then
+        result="PENDING"; evidence="확인 줄에 사용자 발화가 비어 있다 — 실제 발화를 적는다"; pending=$((pending+1))
       elif [[ -n "$conf" ]]; then
         result="STALE"; evidence="확인 당시 #$ch ≠ 현재 #$h — 다시 확인 필요"; pending=$((pending+1))
       else
@@ -202,7 +211,7 @@ cmd_gates() {
         hints+="확인되면 plan 파일에 이 줄을 추가(§5 권장): - $(date +%F) 확인 ${name}#${h}: \"<사용자 발화>\""$'\n'
       fi
     else
-      local outp rc; outp=$(timeout "$timeout" bash -c "$cmd" 2>&1); rc=$?
+      local outp rc; outp=$(timeout "$timeout" bash -o pipefail -c "$cmd" 2>&1); rc=$?
       evidence=$(tail -1 <<< "$outp" | trunc 100)
       if (( rc == 0 )) && { [[ -z "$expect" ]] || grep -qE -- "$expect" <<< "$outp"; }; then
         pass=$((pass+1)); result="PASS"
@@ -229,17 +238,19 @@ cmd_tidy() {
   cd "$root"
   if [[ "${1:-}" == "--apply" ]]; then
     shift; (( $# )) || { echo "usage: dinnno tidy --apply FILE..."; exit 2; }
+    local failed=0
     for f in "$@"; do
       [[ -f "$f" ]] || { echo "skip (없음): $f"; continue; }
       local m; m=$(date -r "$f" +%Y-%m); mkdir -p "docs/archive/$m"
-      local dest="docs/archive/$m/$(basename "$f")"
-      [[ -e "$dest" ]] && dest="${dest%.md}_$(date -r "$f" +%d).md"
-      if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then git mv "$f" "$dest"; else mv "$f" "$dest"; fi
+      local base="docs/archive/$m/$(basename "$f")" dest k=1
+      dest="$base"; while [[ -e "$dest" ]]; do dest="${base%.md}_$(date -r "$f" +%d)_$k.md"; k=$((k+1)); done
+      if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then git mv "$f" "$dest"; else mv -n "$f" "$dest"; fi
+      [[ -e "$dest" && ! -e "$f" ]] || { echo "이동 실패: $f (인덱스에 기록하지 않음)"; failed=1; continue; }
       [[ -f docs/archive/_INDEX.md ]] || echo "# archive index" > docs/archive/_INDEX.md
       printf -- "- \`%s\` → \`%s\` — %s\n" "$f" "$dest" "$(date +%F) tidy" >> docs/archive/_INDEX.md
       echo "moved: $f → $dest"
     done
-    return
+    return $failed
   fi
   echo "정규 집합 밖 md (후보 — 내용을 열어 소비 여부를 판단한 뒤 --apply):"
   { ls *.md 2>/dev/null | grep -vE '^(README|AGENTS|CLAUDE)\.md$' | sed 's|^|./|'
@@ -259,6 +270,7 @@ cmd_review() {
   prompt="$(readlink -f "$prompt")"
   [[ -z "$out" ]] && out="${prompt%.md}_out.md"
   local log="${out%.md}_log.txt"
+  rm -f "$out"   # only output produced by this run counts as evidence
   local before; before=$(git -C "$root" status --porcelain 2>/dev/null)
   local start; start=$(date +%s)
   local rc
@@ -285,7 +297,7 @@ cmd_review() {
   [[ -s "$out" ]] || fail+="empty-output "
   [[ "$before" == "$after" ]] || fail+="worktree-changed "
   if (( unsafe )); then
-    local touched; touched=$(find "$root" -newermt "@$start" -type f -not -path '*/.git/*' -not -path "$(dirname "$out")/*" | head -5)
+    local touched; touched=$(find "$root" -newermt "@$start" -type f -not -path '*/.git/*' -not -path "$out" -not -path "$log" | head -5)
     [[ -n "$touched" ]] && fail+="files-touched($touched) "
   fi
   if [[ -n "$fail" ]]; then

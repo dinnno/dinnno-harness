@@ -11,7 +11,7 @@
 | 스크립트 | `scripts/dinnno` | `check`(상태·크기·싱크) · `gates`(plan 게이트 실행) · `tidy`(산출물 정리) · `review`(다른 모델 검토 호출) |
 | 템플릿 | `templates/` | 프로젝트 문서 골격 (spec, architecture, progress, plan/done) |
 
-판단이 필요한 일은 스킬(산문)에, 답이 정해진 일은 스크립트에 둔다. 세션 시작 훅이 `dinnno check`를 자동으로 돌린다.
+판단이 필요한 일은 스킬(산문)에, 답이 정해진 일은 스크립트에 둔다. 세션 시작 훅이 `dinnno check`를 자동으로 돌린다. `dinnno review --unsafe`는 git이 추적하는 변경과 새로 생긴 파일은 잡지만, 추적하지 않는 파일의 삭제까지는 잡지 못한다.
 
 ## 설치
 
@@ -26,7 +26,7 @@
 |---|---|---|---|
 | 규약 | `~/.claude/CLAUDE.md` | `~/.codex/AGENTS.md` | `~/.grok/AGENTS.md` |
 | 스킬 | `~/.claude/skills/*` | `~/.agents/skills/*` | `~/.grok/skills/*` |
-| 훅 | `~/.claude/settings.json` | `~/.codex/hooks.json` (`[features] hooks = true` 필요, 새 세션에서 `/hooks`로 dinnno 훅을 trust해야 실행됨) | `~/.grok/config.toml` (훅 출력이 컨텍스트에 들어가는지는 Grok 세션에서 미검증) |
+| 훅 | `~/.claude/settings.json` | `~/.codex/hooks.json` (새 훅은 경고 후 trust 전까지 실행되지 않으니 새 세션에서 `/hooks`로 dinnno 훅을 trust. 구버전은 `[features] hooks = true` 필요) | `~/.grok/config.toml` (훅 출력이 컨텍스트에 들어가는지는 Grok 세션에서 미검증) |
 | CLI | `~/.local/bin/dinnno` | 동일 | 동일 |
 
 호출 이름: Claude·Grok `/harness`, Codex `$harness`. 프로젝트 안의 `CLAUDE.md`는 `@AGENTS.md` 한 줄이라 세 런타임이 같은 프로젝트 규약을 읽는다.
@@ -40,7 +40,7 @@
 3. plan(게이트 표 포함) → 실행 → done. 큰 설계면 실행 전에 `plan-redteam`. 게이트에는 정의 해시가 붙어 결과를 본 뒤 기준을 고치면 이전 PASS가 무효가 되고, 사람이 봐야 하는 것은 `MANUAL:` 게이트로 적어 사용자 확인 발화가 있어야 PASS가 된다.
 4. 마감은 `close`. `dinnno gates`가 게이트를 돌리고 fresh 검토자가 done의 근거를 확인한다.
 
-멈추는 지점은 다섯 개다: git commit/push, 데이터·ckpt 삭제, 실로봇 명령, thesis·축 변경, kill 결론. 나머지는 완주.
+멈추는 지점은 다섯 개다: git commit/push, 데이터·ckpt 삭제, 실로봇 명령, thesis·축 변경, kill 결론. 여기에 harness 스킬의 두 확인(이번 세션 단위, plan 실행 시작)이 더해진다. 나머지는 완주.
 
 ## 본체 갱신 → 프로젝트 반영
 
