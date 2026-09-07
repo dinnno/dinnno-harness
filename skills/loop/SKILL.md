@@ -18,4 +18,4 @@ description: 사용자가 명시적으로 "loop 돌리자"고 opt-in했을 때�
 
 ## autoloop (config 변이)
 
-working baseline 이후, `docs/LOOP.md`의 L1–L7이 채워졌을 때만. 변이는 allowlist 안의 yaml만 만들고, keep/rollback은 J와 guard로 판정하며, ledger 한 행과 리포트 재생성이 곧 보고다. 코드 변경이 필요한 변이는 결정 큐에 적고 건너뛴다.
+working baseline 이후, `docs/LOOP.md`의 L1–L7이 채워졌을 때만. 변이는 allowlist 안의 yaml만 만들고, keep/rollback은 J와 guard로 판정하며, ledger 한 행과 리포트 재생성이 곧 보고다. 루프가 끝나면 champion을 튜닝에 쓰지 않은 held-out 평가로 한 번 재검증한 뒤에야 Matrix에 기입한다. 코드 변경이 필요한 변이는 결정 큐에 적고 건너뛴다.

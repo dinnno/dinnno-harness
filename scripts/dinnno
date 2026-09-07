@@ -199,7 +199,7 @@ cmd_gates() {
     if [[ "${cmd^^}" == MANUAL:* ]]; then
       local conf; conf=$(grep -F -- " 확인 ${name}#" "$plan" | grep -E '^- [0-9]{4}-[0-9]{2}-[0-9]{2} 확인 ' | tail -1)
       local ch; ch=$(grep -oE "#[0-9a-f]{8}" <<< "$conf" | head -1 | tr -d '#')
-      local said; said=$(sed 's/^[^:]*: *//' <<< "$conf" | sed 's/^"//;s/"$//')
+      local said; said=$(sed 's/^[^:]*://' <<< "$conf" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/^"//;s/"$//;s/^[[:space:]]*//;s/[[:space:]]*$//')
       if [[ -n "$conf" && "$ch" == "$h" && -n "$said" && "$said" != *"<사용자 발화>"* ]]; then
         pass=$((pass+1)); result="PASS (manual)"; evidence=$(trunc 100 <<< "\"$said\"")
       elif [[ -n "$conf" && "$ch" == "$h" ]]; then
@@ -271,7 +271,14 @@ cmd_review() {
   [[ -z "$out" ]] && out="${prompt%.md}_out.md"
   local log="${out%.md}_log.txt"
   rm -f "$out"   # only output produced by this run counts as evidence
-  local before; before=$(git -C "$root" status --porcelain 2>/dev/null)
+  local rel_out="./${out#"$root"/}" rel_log="./${log#"$root"/}"   # output/log may live inside the project; never count them as changes
+  snapshot() { # content hash for small files, size+mtime for big ones; excludes .git, the output and the log
+    ( cd "$root" && find . -type f -not -path './.git/*' -not -path "$rel_out" -not -path "$rel_log" -size -4096k -print0 | sort -z | xargs -0 -r sha256sum
+      find . -type f -not -path './.git/*' -not -path "$rel_out" -not -path "$rel_log" -size +4095k -printf '%p\t%s\t%T@\n' | sort ) 2>/dev/null
+  }
+  gstatus() { git -C "$root" status --porcelain 2>/dev/null | grep -vF -e "${rel_out#./}" -e "${rel_log#./}"; }
+  local snap_before=""; (( unsafe )) && snap_before=$(snapshot)
+  local before; before=$(gstatus)
   local start; start=$(date +%s)
   local rc
   case "$with" in
@@ -291,14 +298,15 @@ cmd_review() {
       ;;
     *) echo "unknown --with $with"; exit 2;;
   esac
-  local after; after=$(git -C "$root" status --porcelain 2>/dev/null)
+  local after; after=$(gstatus)
   local fail=""
   (( rc != 0 )) && fail+="exit=$rc "
   [[ -s "$out" ]] || fail+="empty-output "
   [[ "$before" == "$after" ]] || fail+="worktree-changed "
   if (( unsafe )); then
-    local touched; touched=$(find "$root" -newermt "@$start" -type f -not -path '*/.git/*' -not -path "$out" -not -path "$log" | head -5)
-    [[ -n "$touched" ]] && fail+="files-touched($touched) "
+    local snap_after; snap_after=$(snapshot)
+    local changed; changed=$(diff <(echo "$snap_before") <(echo "$snap_after") | grep -E '^[<>]' | awk '{print ($1=="<" ? "삭제/변경전: " : "생성/변경후: ") $NF}' | head -6)
+    [[ -n "$changed" ]] && fail+="files-changed($changed) "
   fi
   if [[ -n "$fail" ]]; then
     echo "REVIEW FAILED: $fail — log: $log"
