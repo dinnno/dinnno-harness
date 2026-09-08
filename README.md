@@ -7,7 +7,7 @@
 | 층 | 파일 | 하는 일 |
 |---|---|---|
 | 규약 | `AGENTS.md` (1페이지) | 멈추는 지점, 코드 규칙, 보고 스타일. 세 런타임이 같은 파일을 읽는다 |
-| 스킬 | `skills/*/SKILL.md` | `harness`(세션 진입) · `close`(근거 확인 후 마감) · `plan-redteam`(다른 모델의 plan 격추) · `loop`(opt-in 반복) + vendored 도구 |
+| 스킬 | `skills/*/SKILL.md` | `harness`(세션 진입) · `close`(근거 확인 후 마감) · `plan-redteam`(다른 모델의 plan 격추) · `loop`(opt-in 반복) · `fanout`(pane에 일 분담) · `vis`(시각화 보관) + vendored 도구 |
 | 스크립트 | `scripts/dinnno` | `check`(상태·크기·싱크) · `gates`(plan 게이트 실행) · `tidy`(산출물 정리) · `review`(다른 모델 검토 호출) |
 | 템플릿 | `templates/` | 프로젝트 문서 골격 (spec, architecture, progress, plan/done) |
 
