@@ -10,7 +10,7 @@ description: >
   검토만 하고 구현 토큰은 pane이 쓰게 하는 것이다. herdr 안(HERDR_ENV=1)에서만
   동작한다. 이미 시작된 pane의 상태를 보거나 herdr CLI 자체를 다루는 일은
   herdr 스킬 쪽이다.
-argument-hint: "[N] [codex|opus]"
+argument-hint: "[N] [codex|opus|grok]"
 ---
 
 # fanout — pane에 일을 넘기고 결과를 회수한다
@@ -69,8 +69,22 @@ free -g | awk '/Mem:/{print "available:", $7"G"}'
 상한의 합이 가용의 절반을 넘지 않게 나누고, 그 값을 각 브리프에 적는다. 실행이 없는
 몫(문서·리뷰)은 예산에서 뺀다.
 
-에이전트 종류는 사용자 지정이 우선이고, 없으면: 구현·리팩터·테스트는 `codex`,
-긴 맥락 판단·설계·문서는 `claude`(opus). 섞어도 된다.
+### 모델 배정
+
+메인 세션(Fable 5.1 high 또는 gpt-6-astra medium)은 **구현하지 않는다.** 분해·브리프·감독·
+검토·질문 응대·가이드만 한다. 구현 토큰은 전부 pane이 쓴다.
+
+pane의 모델은 사용자 지정이 우선이고, 없으면 몫의 종류로 정한다.
+
+| 몫 | 모델 | `herdr agent start` 뒤에 붙이는 인자 |
+|---|---|---|
+| 시각화(플롯·뷰어·애니메이션) | claude opus xhigh | `--kind claude -- --model opus --effort xhigh` |
+| 보통 구현·리팩터·테스트 | codex gpt-6-astra low, 또는 gpt-5.6-sol high | `--kind codex -- -m gpt-6-astra -c model_reasoning_effort=low` |
+| 선행연구 조사·deep research | codex 또는 grok. **opus 금지** | `--kind codex -- -m gpt-5.6-sol -c model_reasoning_effort=high` 또는 `--kind grok -- -m grok-4.6 --reasoning-effort high` |
+| 긴 맥락 판단·설계·문서 | claude opus | `--kind claude -- --model opus` |
+
+몫이 표보다 가벼워 보이면(단순 치환, 스크립트 한 개, 형식 변환) 더 낮은 모델이나 effort로
+내려도 된다. 내렸으면 §7 보고 표의 pane 열에 적는다. 표보다 올리는 것은 사용자에게 묻는다.
 
 ## 2. 작업 디렉토리와 브리프
 
@@ -157,9 +171,12 @@ PID=$(herdr pane split --current --direction down --cwd "$PWD" --no-focus \
 같은 방향으로 반복해서 쪼개면 쓸 수 없이 좁아진다. 3개 이상이면 방향을 번갈아 간다.
 
 ```bash
-herdr agent start impl-loader --kind codex --pane <pane-id>
-herdr agent start design-note --kind claude --pane <pane-id> -- --model opus
+herdr agent start impl-loader --kind codex --pane <pane-id> -- -m gpt-6-astra -c model_reasoning_effort=low
+herdr agent start vis-rollout --kind claude --pane <pane-id> -- --model opus --effort xhigh
+herdr agent start survey-prior --kind codex --pane <pane-id> -- -m gpt-5.6-sol -c model_reasoning_effort=high
 ```
+
+모델·effort는 §1 표대로 붙인다. 붙이지 않으면 각 CLI의 기본값(코덱스는 `~/.codex/config.toml`)이 쓰인다.
 
 ## 4. 일 보내기와 대기
 
@@ -238,10 +255,10 @@ report가 비어 있거나 없을 때만 `herdr agent read`로 화면을 본다.
 
 pane별로 한 줄씩, 사용자가 다음에 무엇을 결정하면 되는지로 끝낸다.
 
-| pane | 몫 | 결과 | 검증 |
-|---|---|---|---|
-| impl-loader | 로더 병목 수정 | 완료 | 메인에서 재실행, 1 epoch 통과 |
-| review-metrics | 지표 정의 검토 | 판단 필요 | 미실행 (질문 1건) |
+| pane | 몫 | 모델 | 결과 | 검증 |
+|---|---|---|---|---|
+| impl-loader | 로더 병목 수정 | astra low | 완료 | 메인에서 재실행, 1 epoch 통과 |
+| review-metrics | 지표 정의 검토 | sol high | 판단 필요 | 미실행 (질문 1건) |
 
 pane은 기본적으로 열어 둔다. 사용자가 결과를 직접 보고 싶어 하는 경우가 많다.
 닫자고 하면 이 스킬이 만든 pane만 닫는다.

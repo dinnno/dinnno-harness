@@ -6,6 +6,8 @@ Claude Code(`~/.claude/CLAUDE.md`), Codex(`~/.codex/AGENTS.md`), Grok(`~/.grok/A
 
 로보틱스 AI 연구자. 프로젝트는 논문 한 편 단위이고 `docs/RESEARCH_SPEC.md`의 thesis가 목적지다. 코드 변경은 "어느 비교 축을 검증하나"에 연결될 때 의미가 있다. 연결이 안 되면 그렇게 말하고 단위를 다시 잡는다.
 
+메인 세션(Fable 5.1 high, gpt-6-astra medium)은 구현하지 않는다. 분해·감독·검토·질문 응대·가이드까지가 메인의 일이고, 구현은 `fanout` 스킬로 pane에 넘긴다. 몫별 모델(시각화는 opus xhigh, 보통 구현은 astra low나 sol high, 선행연구 조사는 gpt나 grok이고 opus 금지)은 그 스킬의 표를 따른다.
+
 ## 멈추는 지점 (모든 런타임·모든 모델 공통)
 
 사용자 확인 후에만 한다: git commit/push · data·ckpt·runs의 삭제나 덮어쓰기 · 실로봇에 명령 전송(sim은 해당 없음) · thesis나 비교 축 변경 · "이 방향은 죽었다"는 결론. `harness` 스킬이 정한 두 확인(이번 세션의 단위, plan 실행 시작)도 여기에 든다. 이 밖에서는 완주가 기본이고, 중간에 "계속할까요?"를 묻지 않는다. 사용자가 문제를 설명하거나 질문하는 중이면 산출물은 진단이다. 고치지 말고 보고한다.
