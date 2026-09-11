@@ -6,7 +6,7 @@ description: >
   시켜", "병렬로 돌려", "동시에 여러 개", "codex한테 넘겨", "opus가 구현하게",
   "인수인계해서", "분담시켜", "위임" 같은 말을 하면 반드시 이 스킬을 쓴다.
   구현·조사·리뷰를 여러 갈래로 벌릴 수 있는 작업이 나왔을 때, 사용자가 pane을
-  말하지 않았더라도 이 방식이 나으면 제안한다. 목적은 메인 세션이 분해·감독·취합·
+  말하지 않았더라도 이 방식이 나으면 제안한다. 목적은 팀장 세션이 분해·감독·취합·
   검토만 하고 구현 토큰은 pane이 쓰게 하는 것이다. herdr 안(HERDR_ENV=1)에서만
   동작한다. 이미 시작된 pane의 상태를 보거나 herdr CLI 자체를 다루는 일은
   herdr 스킬 쪽이다.
@@ -15,14 +15,16 @@ argument-hint: "[N] [codex|opus|grok]"
 
 # fanout — pane에 일을 넘기고 결과를 회수한다
 
-메인 세션이 구현까지 하면 컨텍스트가 빠르게 녹는다. 이 스킬은 역할을 나눈다:
-**메인은 분해·브리프·감독·취합·검토를 하고, 구현 토큰은 pane의 codex나 opus가 쓴다.**
+이 스킬을 부르는 세션이 그 프로젝트의 **팀장**이고, pane의 에이전트가 팀원이다. 팀장이 구현까지
+하면 컨텍스트가 빠르게 녹는다. 이 스킬은 역할을 나눈다:
+**팀장은 분해·브리프·감독·취합·검토를 하고, 구현 토큰은 pane의 codex나 opus가 쓴다.**
+팀원 결과의 책임은 팀장에게 있다. 합치고 검증하기 전까지 그것은 결과가 아니다.
 
 여기서 두 가지 규칙이 따라 나온다. 지키지 않으면 나누는 의미가 없다.
 
 - **브리프는 파일로 쓰고 프롬프트에는 경로만 넘긴다.** 긴 텍스트를 터미널에 붙여넣으면
-  괄호·따옴표에서 깨지고, 그 자체가 메인 출력 토큰이다.
-- **결과도 파일로 받고 메인은 그 파일만 읽는다.** pane 화면을 스크롤해 읽으면 절약한
+  괄호·따옴표에서 깨지고, 그 자체가 팀장의 출력 토큰이다.
+- **결과도 파일로 받고 팀장은 그 파일만 읽는다.** pane 화면을 스크롤해 읽으면 절약한
   토큰이 그대로 되돌아온다. 게다가 에이전트는 대개 alternate screen에서 돌아서
   지나간 출력을 온전히 되읽을 수도 없다.
 
@@ -48,7 +50,7 @@ herdr CLI 문법이 헷갈리면 `herdr agent`, `herdr pane`을 인자 없이 �
 나눌 때의 기준:
 
 - **파일 소유권이 겹치지 않게.** 각 몫에 "네가 쓰는 파일" 목록을 명시할 수 있어야 한다.
-  겹치는 부분이 있으면 그 부분만 메인이 먼저 처리하고 나머지를 나눈다.
+  겹치는 부분이 있으면 그 부분만 팀장이 먼저 처리하고 나머지를 나눈다.
 - **각 몫은 혼자 끝낼 수 있는 완결 단위.** "구현"과 "그 구현의 테스트"를 다른 pane에
   주지 않는다.
 - **소유권은 무엇을 읽느냐가 아니라 무엇을 쓰느냐로 따진다.** 조사·리뷰처럼 정말 아무것도
@@ -71,7 +73,7 @@ free -g | awk '/Mem:/{print "available:", $7"G"}'
 
 ### 모델 배정
 
-메인 세션(Fable 5.1 high 또는 gpt-6-astra medium)은 **구현하지 않는다.** 분해·브리프·감독·
+팀장(Fable 5.1 high 또는 gpt-6-astra medium)은 **구현하지 않는다.** 분해·브리프·감독·
 검토·질문 응대·가이드만 한다. 구현 토큰은 전부 pane이 쓴다.
 
 pane의 모델은 사용자 지정이 우선이고, 없으면 몫의 종류로 정한다.
@@ -79,12 +81,18 @@ pane의 모델은 사용자 지정이 우선이고, 없으면 몫의 종류로 �
 | 몫 | 모델 | `herdr agent start` 뒤에 붙이는 인자 |
 |---|---|---|
 | 시각화(플롯·뷰어·애니메이션) | claude opus xhigh | `--kind claude -- --model opus --effort xhigh` |
-| 보통 구현·리팩터·테스트 | codex gpt-6-astra low, 또는 gpt-5.6-sol high | `--kind codex -- -m gpt-6-astra -c model_reasoning_effort=low` |
+| 보통 구현·리팩터·테스트 | claude opus 또는 codex gpt-5.6-sol. effort는 아래 기준 | `--kind claude -- --model opus --effort <e>` 또는 `--kind codex -- -m gpt-5.6-sol -c model_reasoning_effort=<e>` |
 | 선행연구 조사·deep research | codex 또는 grok. **opus 금지** | `--kind codex -- -m gpt-5.6-sol -c model_reasoning_effort=high` 또는 `--kind grok -- -m grok-4.6 --reasoning-effort high` |
 | 긴 맥락 판단·설계·문서 | claude opus | `--kind claude -- --model opus` |
 
-몫이 표보다 가벼워 보이면(단순 치환, 스크립트 한 개, 형식 변환) 더 낮은 모델이나 effort로
-내려도 된다. 내렸으면 §7 보고 표의 pane 열에 적는다. 표보다 올리는 것은 사용자에게 묻는다.
+effort는 몫마다 정한다. 단순 치환·형식 변환·스크립트 하나면 `low`나 `medium`, 보통 구현은
+`high`, 설계 판단이 섞인 구현(인터페이스 결정, 수치 안정성)은 `xhigh`. 정한 값은 §7 보고 표의
+모델 열에 적는다. 시각화의 opus xhigh는 내리지 않는다.
+
+**Workflow 도구.** 팀장이 Claude Code이고, 몫이 파일을 쓰지 않는 병렬 검토·검증·조사(파일
+수십 개 훑기, done의 주장마다 근거 대조, 후보 여러 개 독립 평가)면 pane 대신 Workflow 도구를
+써도 된다. 이 문장이 그 opt-in이다. 쓰기 전에 `workflow-authoring` 스킬을 읽고, 크기 지침
+(15 agents) 안에서, 각 agent에 모델을 opus 이하로 명시한다. 파일을 쓰는 구현 몫은 항상 pane이다.
 
 ## 2. 작업 디렉토리와 브리프
 
@@ -171,10 +179,12 @@ PID=$(herdr pane split --current --direction down --cwd "$PWD" --no-focus \
 같은 방향으로 반복해서 쪼개면 쓸 수 없이 좁아진다. 3개 이상이면 방향을 번갈아 간다.
 
 ```bash
-herdr agent start impl-loader --kind codex --pane <pane-id> -- -m gpt-6-astra -c model_reasoning_effort=low
+herdr agent start impl-loader --kind codex --pane <pane-id> -- -m gpt-5.6-sol -c model_reasoning_effort=high
 herdr agent start vis-rollout --kind claude --pane <pane-id> -- --model opus --effort xhigh
-herdr agent start survey-prior --kind codex --pane <pane-id> -- -m gpt-5.6-sol -c model_reasoning_effort=high
+herdr agent start survey-prior --kind grok --pane <pane-id> -- -m grok-4.6 --reasoning-effort high
 ```
+
+pane id는 나중에 닫을 때 필요하니 `$FO/<이름>/pane_id`에 적어 둔다.
 
 모델·effort는 §1 표대로 붙인다. 붙이지 않으면 각 CLI의 기본값(코덱스는 `~/.codex/config.toml`)이 쓰인다.
 
@@ -233,7 +243,7 @@ herdr agent send-keys <이름> esc          # 취소·거절
 키 이름이 `invalid_key`로 거절되면 표기를 바꿔 다시 시도한다. 잘못된 키는 아무 바이트도
 쓰지 않고 거절되므로 시도 자체는 안전하다. UI가 풀린 뒤에야 다음 `prompt`를 보낸다.
 
-기다리는 동안 메인은 자기 몫(취합 준비, 검증 명령 준비)을 한다. 단 브리프에서 pane에
+기다리는 동안 팀장은 자기 몫(취합 준비, 검증 명령 준비)을 한다. 단 브리프에서 pane에
 준 파일은 만지지 않는다. 오래 걸리는 작업이면 중간에 사용자에게 상태를 한 줄 알린다.
 
 ## 6. 회수와 통합
@@ -244,21 +254,40 @@ cat "$FO"/*/report.md
 
 report가 비어 있거나 없을 때만 `herdr agent read`로 화면을 본다.
 
-받은 report를 그대로 믿지 않는다. 메인이 할 일은 세 가지다.
+받은 report를 그대로 믿지 않는다. 팀장이 할 일은 네 가지다.
 
-1. **주장과 산출물을 대조한다.** "검증 통과"라고 쓰여 있으면 그 명령을 메인이 한 번
+1. **주장과 산출물을 대조한다.** "검증 통과"라고 쓰여 있으면 그 명령을 팀장이 한 번
    직접 돌린다. 돌리지 않은 검증은 완료로 쓰지 않는다.
 2. **경계를 지켰는지 본다.** `git status`로 브리프에 없던 파일이 바뀌었는지 확인한다.
 3. **몫들 사이의 모순을 찾는다.** 각자 맞는데 합치면 안 맞는 경우가 실제로 가장 많다.
+   합친 상태에서 plan 게이트나 테스트를 한 번 돌린다. 몫별 검증 통과가 전체 통과는 아니다.
+4. **위임 대장에 적는다.** 진행 중 plan이 있으면 그 파일의 "위임 대장" 절에, 없으면
+   `$FO/ledger.md`에 pane마다 한 줄: 이름 · 모델 · 브리프 경로 · report 경로 · 팀장이 돌린
+   검증 · 통합(반영 / 반려: 사유 / 대기). 통합 열이 빈 행이 남아 있으면 이 fanout은 끝난 것이
+   아니고, 사용자 보고에도 그렇게 쓴다.
 
 ## 7. 보고
 
 pane별로 한 줄씩, 사용자가 다음에 무엇을 결정하면 되는지로 끝낸다.
 
-| pane | 몫 | 모델 | 결과 | 검증 |
-|---|---|---|---|---|
-| impl-loader | 로더 병목 수정 | astra low | 완료 | 메인에서 재실행, 1 epoch 통과 |
-| review-metrics | 지표 정의 검토 | sol high | 판단 필요 | 미실행 (질문 1건) |
+| pane | 몫 | 모델 | 결과 | 검증 | pane |
+|---|---|---|---|---|---|
+| impl-loader | 로더 병목 수정 | sol high | 완료 | 팀장이 재실행, 1 epoch 통과 | 닫음 |
+| review-metrics | 지표 정의 검토 | opus medium | 판단 필요 | 미실행 (질문 1건) | 열어 둠 |
 
-pane은 기본적으로 열어 둔다. 사용자가 결과를 직접 보고 싶어 하는 경우가 많다.
-닫자고 하면 이 스킬이 만든 pane만 닫는다.
+## 8. pane 정리
+
+통합이 끝나면 팀장이 판단해서 필요 없는 pane을 닫는다. 사용자에게 묻지 않는다.
+
+닫는다: report를 읽고 §6의 대조까지 마쳐 완료로 확정한 pane, 조사·리뷰처럼 산출물이 report
+파일로 다 넘어온 pane.
+
+열어 둔다: `blocked`로 사용자 결정이 남은 pane, 미완이라 이어서 시킬 pane, 사용자가 화면을
+직접 보겠다고 한 pane, 실행 로그를 사용자가 봐야 판단이 서는 pane.
+
+```bash
+herdr agent get <이름>            # working이면 닫지 않는다
+herdr pane close "$(cat "$FO/<이름>/pane_id")"
+```
+
+이 스킬이 만든 pane만 닫는다. 어느 pane을 닫고 남겼는지는 위 보고 표의 마지막 열에 적는다.
