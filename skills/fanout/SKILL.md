@@ -73,21 +73,24 @@ free -g | awk '/Mem:/{print "available:", $7"G"}'
 
 ### 모델 배정
 
-팀장(Fable 5.1 high 또는 gpt-6-astra medium)은 **구현하지 않는다.** 분해·브리프·감독·
+팀장(Fable 또는 Astra, 모델 버전과 effort는 사용자 지정)은 **구현하지 않는다.** 분해·브리프·감독·
 검토·질문 응대·가이드만 한다. 구현 토큰은 전부 pane이 쓴다.
 
 pane의 모델은 사용자 지정이 우선이고, 없으면 몫의 종류로 정한다.
 
 | 몫 | 모델 | `herdr agent start` 뒤에 붙이는 인자 |
 |---|---|---|
-| 시각화(플롯·뷰어·애니메이션) | claude opus xhigh | `--kind claude -- --model opus --effort xhigh` |
-| 보통 구현·리팩터·테스트 | claude opus 또는 codex gpt-5.6-sol. effort는 아래 기준 | `--kind claude -- --model opus --effort <e>` 또는 `--kind codex -- -m gpt-5.6-sol -c model_reasoning_effort=<e>` |
-| 선행연구 조사·deep research | codex 또는 grok. **opus 금지** | `--kind codex -- -m gpt-5.6-sol -c model_reasoning_effort=high` 또는 `--kind grok -- -m grok-4.6 --reasoning-effort high` |
-| 긴 맥락 판단·설계·문서 | claude opus | `--kind claude -- --model opus` |
+| 시각화(플롯·뷰어·애니메이션) | claude opus, medium 기본 | `--kind claude -- --permission-mode auto --model opus --effort medium` |
+| 보통 구현·리팩터·테스트 | claude opus medium 또는 codex gpt-6-sol 우선, gpt-5.6-sol도 가능 | `--kind claude -- --permission-mode auto --model opus --effort medium` 또는 `--kind codex -- -m gpt-6-sol -c model_reasoning_effort=<e>` |
+| 매우 가벼운 치환·형식 정리 | 작업에 맞는 하위 Claude 모델 또는 codex gpt-6-luna | `--kind claude -- --permission-mode auto --model <확인한-하위-모델>` 또는 `--kind codex -- -m gpt-6-luna -c model_reasoning_effort=<e>` |
+| 선행연구 조사·deep research | codex 또는 grok. **opus 금지**. 최신·트렌디한 연구 탐색에는 grok 활용 | `--kind codex -- -m gpt-6-sol -c model_reasoning_effort=<e>` 또는 `--kind grok -- --reasoning-effort high` |
+| 긴 맥락 판단·설계·문서 | claude opus, medium 기본 | `--kind claude -- --permission-mode auto --model opus --effort medium` |
 
-effort는 몫마다 정한다. 단순 치환·형식 변환·스크립트 하나면 `low`나 `medium`, 보통 구현은
-`high`, 설계 판단이 섞인 구현(인터페이스 결정, 수치 안정성)은 `xhigh`. 정한 값은 §7 보고 표의
-모델 열에 적는다. 시각화의 opus xhigh는 내리지 않는다.
+Claude opus는 medium이 기본이며, 시각화에도 xhigh를 고정하지 않는다. `opus` alias가 실제로
+Opus 5.5를 가리키는지 실행 환경에서 확인한다. GPT effort는 별도로 몫의 난이도에 맞춘다:
+단순 치환·형식 정리는 `low`나 `medium`, 보통 구현은 `high`, 설계 판단이 섞인 구현(인터페이스
+결정, 수치 안정성)은 `xhigh`. 정한 값은 §7 보고 표의 모델 열에 적는다. Grok은 CLI 기본
+모델을 사용하고, 실제 사용된 모델을 확인해 보고 표에 기록한다.
 
 **Workflow 도구.** 팀장이 Claude Code이고, 몫이 파일을 쓰지 않는 병렬 검토·검증·조사(파일
 수십 개 훑기, done의 주장마다 근거 대조, 후보 여러 개 독립 평가)면 pane 대신 Workflow 도구를
@@ -179,14 +182,18 @@ PID=$(herdr pane split --current --direction down --cwd "$PWD" --no-focus \
 같은 방향으로 반복해서 쪼개면 쓸 수 없이 좁아진다. 3개 이상이면 방향을 번갈아 간다.
 
 ```bash
-herdr agent start impl-loader --kind codex --pane <pane-id> -- -m gpt-5.6-sol -c model_reasoning_effort=high
-herdr agent start vis-rollout --kind claude --pane <pane-id> -- --model opus --effort xhigh
-herdr agent start survey-prior --kind grok --pane <pane-id> -- -m grok-4.6 --reasoning-effort high
+herdr agent start impl-loader --kind codex --pane <pane-id> -- -m gpt-6-sol -c model_reasoning_effort=high
+herdr agent start vis-rollout --kind claude --pane <pane-id> -- --permission-mode auto --model opus --effort medium
+herdr agent start survey-prior --kind grok --pane <pane-id> -- --reasoning-effort high
 ```
 
 pane id는 나중에 닫을 때 필요하니 `$FO/<이름>/pane_id`에 적어 둔다.
 
-모델·effort는 §1 표대로 붙인다. 붙이지 않으면 각 CLI의 기본값(코덱스는 `~/.codex/config.toml`)이 쓰인다.
+모델·effort는 §1 표대로 붙인다. Grok의 모델 인자는 생략해 CLI 기본 모델을 사용한다.
+
+claude pane에는 항상 `--permission-mode auto`를 붙인다. 안 붙이면 파일 편집과 셸 실행마다
+승인 UI에 걸려 `blocked`가 된다. auto 모드는 git·삭제 같은 위험 명령은 여전히 묻는다(§5).
+`--dangerously-skip-permissions`는 그것까지 통과시키므로 쓰지 않는다.
 
 ## 4. 일 보내기와 대기
 
@@ -272,8 +279,9 @@ pane별로 한 줄씩, 사용자가 다음에 무엇을 결정하면 되는지�
 
 | pane | 몫 | 모델 | 결과 | 검증 | pane |
 |---|---|---|---|---|---|
-| impl-loader | 로더 병목 수정 | sol high | 완료 | 팀장이 재실행, 1 epoch 통과 | 닫음 |
-| review-metrics | 지표 정의 검토 | opus medium | 판단 필요 | 미실행 (질문 1건) | 열어 둠 |
+| impl-loader | 로더 병목 수정 | gpt-6-sol high | 완료 | 팀장이 재실행, 1 epoch 통과 | 닫음 |
+| review-metrics | 지표 정의 검토 | opus (Opus 5.5 확인) medium | 판단 필요 | 미실행 (질문 1건) | 열어 둠 |
+| survey-prior | 최신 선행연구 조사 | grok (실제 모델 확인 후 기록) | 완료 | 출처 대조 | 닫음 |
 
 ## 8. pane 정리
 
