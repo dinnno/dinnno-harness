@@ -17,9 +17,9 @@ Sangjun의 git-backed 로보틱스 연구 위키를 **어느 프로젝트 세션
   --limit 8 --max-chars 12000
 ```
 
-런처가 vault root(`SECOND_BRAIN_ROOT` → CWD 상위 탐색 → 알려진 후보)와 pyyaml 가능한 인터프리터를 알아서 잡는다. 경로를 직접 쓰지 말 것.
+런처가 vault root(`SECOND_BRAIN_ROOT` → CWD 상위 탐색 → 알려진 후보)와 pyyaml 가능한 인터프리터를 알아서 잡고, 마지막 fetch가 1시간을 넘었으면 원격을 fast-forward로 받아온다(위키 내용은 고치지 않는다). pull이 실패하면 몇 커밋 뒤처졌는지 stderr로 알린다. 경로를 직접 쓰지 말 것.
 
-project lines: `hoi-transformer`, `neural-grasp-critic`, `pi-touch`, `3d-flow-diffusion-policy`, `force-conditioned-humanoid`.
+`--project-lines`에는 프로젝트 repo 이름(`pi-touch`, `hoi-sam`, `ForceGap`, `GenDexFit`, `efficient-retarget-v1` …)을 그대로 줘도 된다. line 목록은 위키의 `research-agenda.md`에서 자동으로 읽는다. 결과에 `unknown_project_lines`가 붙으면 agenda에 없는 프로젝트이니 필터 없이 다시 조회한다.
 
 ## 결과 사용 규칙
 

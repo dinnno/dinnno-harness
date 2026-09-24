@@ -1,6 +1,6 @@
 ---
 name: loop
-description: 사용자가 명시적으로 "loop 돌리자"고 opt-in했을 때만. 승인된 경계와 예산 안에서 가설 하나를 evidence 수집 → 경쟁 가설 → 가장 싼 판별 실험 → plan/done으로 반복하거나, config 변이 autoloop(docs/LOOP.md)을 돌린다. 기본 harness 흐름을 바꾸지 않는다.
+description: 사용자가 반복 실행을 명시적으로 요청했을 때만. "loop 돌리자", "10라운드 돌려", "SR 0.7 될 때까지", "목표 달성까지 알아서 돌려", "goal 걸고 돌려"처럼 라운드 수나 목표 수치를 걸고 자율 반복을 맡기는 말이 그 요청이다. 승인된 경계와 예산 안에서 가설 하나를 evidence 수집 → 경쟁 가설 → 가장 싼 판별 실험 → plan/done으로 반복하거나, config 변이 autoloop(docs/LOOP.md)을 돌린다. 기본 harness 흐름을 바꾸지 않는다.
 ---
 
 # loop — 승인된 경계 안의 반복

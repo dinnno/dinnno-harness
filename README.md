@@ -7,7 +7,7 @@
 | 층 | 파일 | 하는 일 |
 |---|---|---|
 | 규약 | `AGENTS.md` (1페이지) | 멈추는 지점, 코드 규칙, 보고 스타일. 세 런타임이 같은 파일을 읽는다 |
-| 스킬 | `skills/*/SKILL.md` | `harness`(세션 진입) · `close`(근거 확인 후 마감) · `plan-redteam`(다른 모델의 plan 격추) · `loop`(opt-in 반복) · `fanout`(pane에 일 분담) · `vis`(시각화 보관) + vendored 도구 |
+| 스킬 | `skills/*/SKILL.md` | `harness`(세션 진입) · `close`(근거 확인 후 마감) · `plan-redteam`(다른 모델의 plan 격추) · `loop`(opt-in 반복) · `fanout`(pane에 일 분담) · `vis`(시각화 보관) · `research-second-brain`(문헌 위키 조회) · `bro`(쉬운 말 재설명) |
 | 스크립트 | `scripts/dinnno` | `check`(상태·크기·싱크) · `gates`(plan 게이트 실행) · `tidy`(산출물 정리) · `review`(다른 모델 검토 호출) · `res`(프로젝트별 GPU·RAM 점유) |
 | 템플릿 | `templates/` | 프로젝트 문서 골격 (spec, architecture, progress, plan/done) |
 
@@ -31,8 +31,6 @@
 
 호출 이름: Claude·Grok `/harness`, Codex `$harness`. 프로젝트 안의 `CLAUDE.md`는 `@AGENTS.md` 한 줄이라 세 런타임이 같은 프로젝트 규약을 읽는다.
 
-`ponytail`(최소 코드 사다리)은 기본으로 연결하지 않는다. 원하면 `./apply.sh --global --with-ponytail`.
-
 ## 세션 흐름
 
 1. 세션 시작. 훅이 `[dinnno]` 줄로 크기 경고, placeholder, 미동기 CHANGELOG, 미결 결정을 보여준다.
@@ -55,7 +53,7 @@
 
 ## Vendored 스킬
 
-`bro`, `codebase-design`, `diagnosing-bugs`, `improve`, `improve-codebase-architecture`, `thermo-nuclear-code-quality-review`, `ponytail`. 출처·핀·라이선스는 `skills/UPSTREAM.md`. `research-second-brain`(문헌 위키 조회)은 자체 제작 스킬로 세 런타임에 같이 연결된다.
+`bro`만 외부에서 가져왔다. 출처·핀·라이선스는 `skills/UPSTREAM.md`.
 
 ## 다른 머신
 

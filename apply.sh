@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # dinnno-harness installer — one source, three runtimes (Claude Code, Codex, Grok).
-#   ./apply.sh --global [--with-ponytail]   # link rules, skills, CLI, and the SessionStart hook
+#   ./apply.sh --global                     # link rules, skills, CLI, and the SessionStart hook
 #   ./apply.sh /path/to/project             # copy the docs scaffold into a project (existing files kept)
 set -euo pipefail
 
 HARNESS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WITH_PONYTAIL=0
 command -v python3 >/dev/null || { echo "python3가 필요하다 (훅 병합·last-sync 스탬프·dinnno check)"; exit 1; }
 
 BACKUP_DIR="$HOME/.dinnno-backup/$(date +%Y%m%d-%H%M%S)"
@@ -32,7 +31,6 @@ link_skills_into() {
   for d in "$HARNESS_DIR"/skills/*/; do
     [[ -f "$d/SKILL.md" ]] || continue
     local n; n="$(basename "$d")"
-    [[ "$n" == ponytail && $WITH_PONYTAIL -eq 0 ]] && continue
     link "${d%/}" "$target/$n"
   done
 }
@@ -102,7 +100,6 @@ install_global() {
   echo "done. open a new Claude Code / Codex / Grok session."
   echo "  - Codex: 새 훅은 경고 후 trust 전까지 실행되지 않는다 — 새 세션에서 /hooks 로 dinnno 훅을 trust. 구버전은 [features] hooks = true 필요"
   echo "  - ~/.local/bin should be on PATH for 'dinnno' (hooks use the absolute path anyway)"
-  echo "  - ponytail is opt-in: ./apply.sh --global --with-ponytail"
 }
 
 install_project() {
@@ -127,7 +124,7 @@ PY
 }
 
 case "${1:-}" in
-  --global) [[ "${2:-}" == "--with-ponytail" ]] && WITH_PONYTAIL=1; install_global;;
+  --global) install_global;;
   -h|--help|"") sed -n '2,4p' "$0"; exit 1;;
   *) install_project "$1";;
 esac
