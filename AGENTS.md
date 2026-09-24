@@ -25,7 +25,7 @@ Claude Code(`~/.claude/CLAUDE.md`), Codex(`~/.codex/AGENTS.md`), Grok(`~/.grok/A
 - 요청 범위만 만든다. 추측성 추상화, 훗날을 위한 옵션, 일어날 수 없는 경우의 에러 처리는 넣지 않는다. 옆 코드를 정리하고 싶으면 고치지 말고 제안으로 남긴다.
 - `libs/`는 읽기 전용. Python 우선, shell은 얇은 실행 스크립트만.
 - GPU 우선. 라이브러리 CPU 커널은 대개 청킹이 없어 (N×M) 중간 텐서를 호스트 RAM에 통째로 만든다.
-- 이 머신의 GPU와 RAM은 병렬로 도는 다른 프로젝트 세션과 공유한다. 무거운 run을 띄우기 전에 `dinnno res`로 지금 누가 무엇을 쓰는지 본다. 새 스크립트는 1~2분짜리 probe로 GPU·RAM 최대치를 재고, 여유가 그 최대치의 1.3배 이상이면 이웃과 겹쳐서 띄운다. 겹치는 것이 기본이다. 여유가 모자라면 설정을 줄이지 말고 자리가 날 때까지 기다린다. OOM이 나면 먼저 `dinnno res`로 이웃 탓인지 본다. 이웃 탓이면 같은 설정으로 다시 띄우고, 제 run이 원래 안 들어가는 크기일 때만 설정을 줄인다. RAM 상한은 `systemd-run --user --scope -p MemoryMax=<probe 최대치×1.5>G -- python x.py`로 걸고, 서브에이전트에 실행을 맡길 때도 그 값을 적어 준다. 호스트 RAM OOM 하나가 그 데스크톱의 세션 전부를 죽인다.
+- 이 머신의 GPU와 RAM은 병렬로 도는 다른 프로젝트 세션과 공유한다. 무거운 run을 띄우기 전에 `dinnno res`로 지금 누가 무엇을 쓰는지 본다. 새 스크립트는 1~2분짜리 probe로 GPU·RAM 최대치를 재고, 여유가 그 최대치의 1.5배 이상이면 이웃과 겹쳐서 띄운다(RAM 상한과 같은 배수). 겹치는 것이 기본이다. 여유가 모자라면 설정을 줄이지 말고 자리가 날 때까지 기다린다. OOM이 나면 먼저 `dinnno res`로 이웃 탓인지 본다. 이웃 탓이면 같은 설정으로 다시 띄우고, 제 run이 원래 안 들어가는 크기일 때만 설정을 줄인다. RAM 상한은 `systemd-run --user --scope -p MemoryMax=<probe 최대치×1.5>G -- python x.py`로 걸고, 서브에이전트에 실행을 맡길 때도 그 값을 적어 준다. 호스트 RAM OOM 하나가 그 데스크톱의 세션 전부를 죽인다.
 
 ## 검증과 보고
 
@@ -35,5 +35,5 @@ Claude Code(`~/.claude/CLAUDE.md`), Codex(`~/.codex/AGENTS.md`), Grok(`~/.grok/A
 
 ## 환경
 
-- 하네스 본체: `~/Workspace/dinnno-research-wrapper/tools/dinnno-harness`. 점검 CLI: `dinnno check | gates | tidy | review`.
+- 하네스 본체: `~/Workspace/dinnno-research-wrapper/tools/dinnno-harness`. 점검 CLI: `dinnno check | gates | tidy | review | res`.
 - 문헌 위키(second brain): `~/Workspace/dinnno-research-wrapper/tools/oh-dinnno-opsidian`. 조회는 `research-second-brain` 스킬, 직접 통째로 읽지 않는다.

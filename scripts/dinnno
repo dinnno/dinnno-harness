@@ -166,7 +166,7 @@ for d in sorted(glob.glob(os.path.expanduser("~/.dinnno/fanout/*/"))):
     why = []
     if missing: why.append("report 없음: " + ",".join(missing))
     if not os.path.exists(led): why.append("ledger 없음")
-    elif "대기" in read(led): why.append("ledger에 대기 행")
+    elif re.search(r"\|\s*대기\s*\|\s*$", read(led), re.M): why.append("ledger에 대기 행")  # 통합 열(마지막 칸)만 본다
     if why: fo_open.append(f"{os.path.basename(d.rstrip('/'))} ({'; '.join(why)})")
 if fo_open:
     out.append("미회수 fanout " + str(len(fo_open)) + "건 — 회수·대조·사용자 보고 후 ledger로 닫는다: " + " | ".join(fo_open))
@@ -205,15 +205,15 @@ def cmd(pid):
 mem = {l.split(":")[0]: int(l.split()[1]) / 2**20 for l in open("/proc/meminfo")}
 lines, rows = [], {}
 try:
-    q = lambda a: subprocess.run(["nvidia-smi", a, "--format=csv,noheader,nounits"], capture_output=True, text=True, timeout=10).stdout.strip()
+    q = lambda a: subprocess.run(["nvidia-smi", a, "--format=csv,noheader,nounits"], capture_output=True, text=True, timeout=4).stdout.strip()
     for g in q("--query-gpu=index,name,memory.used,memory.total").splitlines():
         i, name, used, tot = [x.strip() for x in g.split(",")]
         lines.append(f"GPU{i} {name}: {float(used)/1024:.1f}G 사용 / {float(tot)/1024:.1f}G, 여유 {(float(tot)-float(used))/1024:.1f}G")
     for a in q("--query-compute-apps=pid,used_memory").splitlines():
         pid, used = [x.strip() for x in a.split(",")]
         rows[pid] = float(used) / 1024
-except (OSError, subprocess.SubprocessError):
-    lines.append("GPU: nvidia-smi 없음")
+except (OSError, subprocess.SubprocessError, ValueError):  # [N/A] 값(MIG·WSL·권한 제한)도 여기로
+    lines.append("GPU: nvidia-smi 없음 또는 읽을 수 없음")
 # heavy CPU-side processes too (RSS > 2G), since host-RAM OOM kills every session on the desktop
 for pid in filter(str.isdigit, os.listdir("/proc")):
     if pid not in rows and rss(pid) > 2: rows[pid] = 0.0
