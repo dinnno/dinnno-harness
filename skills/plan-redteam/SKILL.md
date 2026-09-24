@@ -5,7 +5,7 @@ description: plan을 완성한 뒤 실행 전에, 이 대화를 모르는 다른
 
 # plan-redteam — fresh 모델의 plan 격추
 
-plan을 쓴 세션은 자기 설계를 관대하게 본다. GPU 시간을 태우기 전에 다른 모델이 "이 plan은 왜 실패하는가"를 찾는다. 살아남은 plan만 실행할 가치가 있다.
+plan을 쓴 세션은 자기 설계를 관대하게 본다. 그래서 리뷰어는 팀장(Opus·sol)과 다른 Astra(`--with codex`, 기본)나 Fable(`--with claude`)이다. GPU 시간을 태우기 전에 다른 모델이 "이 plan은 왜 실패하는가"를 찾는다. 살아남은 plan만 실행할 가치가 있다.
 
 ## 1. 대상과 입력
 

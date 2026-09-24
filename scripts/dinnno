@@ -6,6 +6,7 @@
 #   dinnno gates  <plan.md> [--record] [--timeout SEC]
 #   dinnno tidy   [--apply FILE...]        list loose artifacts; --apply moves given files to docs/archive/
 #   dinnno review --with codex|claude PROMPT.md [-o OUT.md]
+#   dinnno res                             who uses this machine's GPU/RAM now, grouped by project
 #
 # Works from anywhere inside a dinnno project (a repo that has docs/RESEARCH_SPEC.md).
 set -uo pipefail
@@ -152,8 +153,79 @@ else:
     if unsynced:
         out.append(f"하네스 미동기 {len(unsynced)}건 (last-sync: {mk[:40]}): " + " | ".join(e[:70] for e in unsynced))
 
+# fanout dirs for this project (brief names this root as cwd) from the last 7 days that are not closed:
+# closed = every brief has a report and $FO/ledger.md exists with no row still marked 대기.
+import time
+fo_open = []
+for d in sorted(glob.glob(os.path.expanduser("~/.dinnno/fanout/*/"))):
+    if time.time() - os.path.getmtime(d) > 7 * 86400: continue
+    briefs = glob.glob(d + "*/brief.md")
+    if not any(re.search(re.escape(root) + r"(?![\w.-])", read(b)) for b in briefs): continue
+    missing = [os.path.basename(os.path.dirname(b)) for b in briefs if not os.path.exists(os.path.dirname(b) + "/report.md")]
+    led = d + "ledger.md"
+    why = []
+    if missing: why.append("report 없음: " + ",".join(missing))
+    if not os.path.exists(led): why.append("ledger 없음")
+    elif "대기" in read(led): why.append("ledger에 대기 행")
+    if why: fo_open.append(f"{os.path.basename(d.rstrip('/'))} ({'; '.join(why)})")
+if fo_open:
+    out.append("미회수 fanout " + str(len(fo_open)) + "건 — 회수·대조·사용자 보고 후 ledger로 닫는다: " + " | ".join(fo_open))
+
 pre = "[dinnno] " if hook else ""
 print("\n".join(pre + l for l in out))
+PY
+  (( hook )) && cmd_res --hook
+}
+
+# ---------------------------------------------------------------- res
+# Several project sessions share one machine and cannot see each other's runs. This prints who holds
+# GPU memory and RAM right now, grouped by project root (from each process's cwd), so a session can
+# co-locate when it fits, wait when it does not, and tell a neighbour-caused OOM from its own.
+cmd_res() {
+  python3 - "${1:-}" <<'PY'
+import os, subprocess, sys
+hook = sys.argv[1] == "--hook"
+def proj(pid):
+    try: d = os.readlink(f"/proc/{pid}/cwd")
+    except OSError: return "?"
+    x = d
+    while x != "/":
+        if os.path.exists(x + "/docs/RESEARCH_SPEC.md"): return os.path.basename(x)
+        x = os.path.dirname(x)
+    return d.replace(os.path.expanduser("~"), "~")
+def rss(pid):
+    try:
+        for l in open(f"/proc/{pid}/status"):
+            if l.startswith("VmRSS:"): return int(l.split()[1]) / 2**20
+    except OSError: pass
+    return 0.0
+def cmd(pid):
+    try: return open(f"/proc/{pid}/cmdline").read().replace("\0", " ").strip()[:70]
+    except OSError: return ""
+mem = {l.split(":")[0]: int(l.split()[1]) / 2**20 for l in open("/proc/meminfo")}
+lines, rows = [], {}
+try:
+    q = lambda a: subprocess.run(["nvidia-smi", a, "--format=csv,noheader,nounits"], capture_output=True, text=True, timeout=10).stdout.strip()
+    for g in q("--query-gpu=index,name,memory.used,memory.total").splitlines():
+        i, name, used, tot = [x.strip() for x in g.split(",")]
+        lines.append(f"GPU{i} {name}: {float(used)/1024:.1f}G 사용 / {float(tot)/1024:.1f}G, 여유 {(float(tot)-float(used))/1024:.1f}G")
+    for a in q("--query-compute-apps=pid,used_memory").splitlines():
+        pid, used = [x.strip() for x in a.split(",")]
+        rows[pid] = float(used) / 1024
+except (OSError, subprocess.SubprocessError):
+    lines.append("GPU: nvidia-smi 없음")
+# heavy CPU-side processes too (RSS > 2G), since host-RAM OOM kills every session on the desktop
+for pid in filter(str.isdigit, os.listdir("/proc")):
+    if pid not in rows and rss(pid) > 2: rows[pid] = 0.0
+lines.append(f"RAM: 가용 {mem['MemAvailable']:.0f}G / {mem['MemTotal']:.0f}G")
+by = {}
+for pid, g in rows.items():
+    by.setdefault(proj(pid), []).append((g, rss(pid), pid, cmd(pid)))
+for pr, ps in sorted(by.items(), key=lambda kv: -sum(p[0] + p[1] for p in kv[1])):
+    top = max(ps)
+    lines.append(f"  {pr}: GPU {sum(p[0] for p in ps):.1f}G, RAM {sum(p[1] for p in ps):.1f}G, {len(ps)}개 — {top[3]}")
+pre = "[dinnno] 자원 " if hook else ""
+print("\n".join((pre if i == 0 else ("[dinnno]   " if hook else "")) + l for i, l in enumerate(lines)))
 PY
 }
 
@@ -280,7 +352,7 @@ cmd_review() {
   local rc
   case "$with" in
     codex)
-      codex exec -s read-only -C "$root" -m "${DINNNO_CODEX_MODEL:-gpt-5.6-sol}" -c model_reasoning_effort="${DINNNO_CODEX_EFFORT:-xhigh}" \
+      codex exec -s read-only -C "$root" -m "${DINNNO_CODEX_MODEL:-gpt-6-astra}" -c model_reasoning_effort="${DINNNO_CODEX_EFFORT:-medium}" \
         --skip-git-repo-check -o "$out" \
         "다음 파일을 읽고 그 안의 지시를 그대로 수행하라: $prompt — read-only 검토다. 어떤 파일도 수정하지 마라." > "$log" 2>&1
       rc=$?
@@ -289,7 +361,7 @@ cmd_review() {
       ( cd "$root" && claude -p "$(cat "$prompt")
 
 이 검토는 read-only다. 파일을 수정하지 말고 결과만 출력하라." \
-          --model "${DINNNO_CLAUDE_MODEL:-opus}" --allowedTools Read Grep Glob > "$out" 2> "$log" )
+          --model "${DINNNO_CLAUDE_MODEL:-claude-fable-5-1}" --allowedTools Read Grep Glob > "$out" 2> "$log" )
       rc=$?
       ;;
     *) echo "unknown --with $with"; exit 2;;
@@ -312,5 +384,6 @@ case "${1:-}" in
   gates)  shift; cmd_gates "$@";;
   tidy)   shift; cmd_tidy "$@";;
   review) shift; cmd_review "$@";;
+  res)    shift; cmd_res "$@";;
   *) sed -n '2,10p' "$0"; exit 2;;
 esac
