@@ -10,6 +10,7 @@
 - **agenda line:** `{vault research-agenda의 대응 항목명 — 없으면 "신규"}`
 - **방향:** {무엇을 푸는가 — 120자 이내}
 - **방법론:** {어떤 형태로 푸는가 — 120자 이내}
+- **상태:** {active | blocked(무엇을) | parked(재개 조건) | succeeded(→ 계승 프로젝트) | archived}
 - **갱신:** {YYYY-MM-DD}
 
 ## 1. Thesis

@@ -35,5 +35,5 @@ Claude Code(`~/.claude/CLAUDE.md`), Codex(`~/.codex/AGENTS.md`), Grok(`~/.grok/A
 
 ## 환경
 
-- 하네스 본체: `~/Workspace/dinnno-research-wrapper/tools/dinnno-harness`. 점검 CLI: `dinnno check | gates | tidy | review | res`.
+- 하네스 본체: `~/Workspace/dinnno-research-wrapper/tools/dinnno-harness`. 점검 CLI: `dinnno check | gates | tidy | review | res | pivot scan`.
 - 문헌 위키(second brain): `~/Workspace/dinnno-research-wrapper/tools/oh-dinnno-opsidian`. 조회는 `research-second-brain` 스킬, 직접 통째로 읽지 않는다.

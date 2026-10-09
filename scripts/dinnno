@@ -7,6 +7,7 @@
 #   dinnno tidy   [--apply FILE...]        list loose artifacts; --apply moves given files to docs/archive/
 #   dinnno review --with codex|claude PROMPT.md [-o OUT.md]
 #   dinnno res                             who uses this machine's GPU/RAM now, grouped by project
+#   dinnno pivot scan [PROJECT_PATH]       read-only inventory before archiving a project (exit 3 = blockers)
 #
 # Works from anywhere inside a dinnno project (a repo that has docs/RESEARCH_SPEC.md).
 set -uo pipefail
@@ -23,6 +24,26 @@ find_root() {
   return 1
 }
 
+find_lineage_dir() {
+  local d="${1:-$PWD}" candidate
+  if [[ -n "${DINNNO_LINEAGE_DIR:-}" ]]; then
+    [[ -d "$DINNNO_LINEAGE_DIR" ]] && printf '%s' "$DINNNO_LINEAGE_DIR"
+    return 0
+  fi
+  if [[ -n "${SECOND_BRAIN_ROOT:-}" && -d "$SECOND_BRAIN_ROOT/projects" ]]; then
+    printf '%s' "$SECOND_BRAIN_ROOT/projects"; return 0
+  fi
+  while [[ "$d" != "/" ]]; do
+    candidate="$d/tools/oh-dinnno-opsidian/projects"
+    [[ -d "$candidate" ]] && { printf '%s' "$candidate"; return 0; }
+    d="$(dirname "$d")"
+  done
+  for candidate in "$HOME/Workspace/dinnno-research-wrapper/tools/oh-dinnno-opsidian/projects" \
+                   "$HOME/dinnno-research-wrapper/tools/oh-dinnno-opsidian/projects"; do
+    [[ -d "$candidate" ]] && { printf '%s' "$candidate"; return 0; }
+  done
+}
+
 kb() { printf "%dK" $(( ( $(wc -c < "$1") + 512 ) / 1024 )); }
 trunc() { python3 -c 'import sys;n=int(sys.argv[1]);[print(l.rstrip("\n")[:n]) for l in sys.stdin]' "$1"; }
 
@@ -30,10 +51,12 @@ trunc() { python3 -c 'import sys;n=int(sys.argv[1]);[print(l.rstrip("\n")[:n]) f
 cmd_check() {
   local hook=0; [[ "${1:-}" == "--hook" ]] && hook=1
   local root; root="$(find_root)" || { (( hook )) && exit 0; echo "not a dinnno project (docs/RESEARCH_SPEC.md not found)"; exit 1; }
+  local lineage_dir; lineage_dir="$(find_lineage_dir "$root")"
   command -v python3 >/dev/null || { echo "[dinnno] python3 없음 — check 건너뜀"; exit 0; }
-  python3 - "$root" "$HARNESS_DIR" "$hook" <<'PY'
+  python3 - "$root" "$HARNESS_DIR" "$hook" "$lineage_dir" <<'PY'
 import os, re, sys, glob
 root, hd, hook = sys.argv[1], sys.argv[2], sys.argv[3] == "1"
+lineage_dir = sys.argv[4]
 os.chdir(root)
 LIMIT = int(os.environ.get("DINNNO_SIZE_LIMIT", "51200"))
 out = []
@@ -46,6 +69,48 @@ def latest(d, prefix):
     fs = [f for f in os.listdir(d) if re.match(rf"{prefix}_v\d+", f) and "_codex" not in f and "_template" not in f] if os.path.isdir(d) else []
     return max(fs, key=lambda f: int(re.search(r"_v(\d+)", f).group(1)), default=None)
 def vnum(f): return int(re.search(r"_v(\d+)", f).group(1)) if f else 0
+
+def card(path):
+    fields = {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            if f.readline().strip() != "---": return fields
+            for line in f:
+                if line.strip() == "---": break
+                if ":" in line:
+                    key, value = line.split(":", 1)
+                    value = value.strip()
+                    fields[key.strip()] = "" if value.startswith("{") else value
+    except OSError:
+        pass
+    return fields
+
+def names(value): return {part.strip() for part in value.split(",") if part.strip()}
+
+if lineage_dir:
+    cards = []
+    for path in sorted(glob.glob(os.path.join(lineage_dir, "*.md"))):
+        name = os.path.basename(path)
+        if name == "README.md" or name.startswith("_"): continue
+        fields = card(path)
+        if fields: cards.append((name[:-3], fields))
+    project = os.path.basename(root)
+    own = next((fields for name, fields in cards if project in ({fields.get("project", ""), name} | names(fields.get("aliases", "")))), None)
+    ids = {project} | ({own.get("project", "")} | names(own.get("aliases", "")) if own else set()) - {""}
+    if own and own.get("status") and own["status"] != "active":
+        line = f"계보: 이 프로젝트는 {own['status']}"
+        if own.get("resume_if"): line += f" — 재개 조건: {own['resume_if']}"
+        if own.get("succeeded_by"): line += f" → {own['succeeded_by']}"
+        out.append(line)
+    for name, fields in cards:
+        if fields is own: continue
+        label = fields.get("project") or name
+        if ids & names(fields.get("waits_on", "")):
+            line = f"계보: {label}가 이 연구를 기다림"
+            if fields.get("resume_if"): line += f" — 재개 조건: {fields['resume_if']}"
+            out.append(line)
+        if ids & names(fields.get("supplies", "")):
+            out.append(f"계보: {label}이 이 연구에 산출물 공급")
 
 # instruction files
 has_a, has_c = os.path.exists("AGENTS.md"), os.path.exists("CLAUDE.md")
@@ -229,6 +294,206 @@ print("\n".join((pre if i == 0 else ("[dinnno]   " if hook else "")) + l for i, 
 PY
 }
 
+# ---------------------------------------------------------------- pivot
+cmd_pivot() {
+  [[ "${1:-}" == "scan" && $# -le 2 ]] || { echo "usage: dinnno pivot scan [PROJECT_PATH]"; return 2; }
+  shift
+  local target; target="$(cd "${1:-$PWD}" 2>/dev/null && pwd)" || { echo "no such directory: $1"; return 1; }
+  local root; root="$(git -C "$target" rev-parse --show-toplevel 2>/dev/null)" || root="$(find_root "$target")" \
+    || { echo "not a git repo or dinnno project: $target"; return 1; }
+  local lineage_dir; lineage_dir="$(find_lineage_dir "$root")"
+  python3 - "$root" "$lineage_dir" <<'PY'
+import datetime, os, re, shutil, subprocess, sys
+from pathlib import Path
+
+root = Path(sys.argv[1]).resolve()
+lineage_dir = Path(sys.argv[2]) if sys.argv[2] else None
+
+def git(*args, cwd=root, check=True):
+    p = subprocess.run(["git", "-C", str(cwd), *args], capture_output=True, text=True)
+    if check and p.returncode:
+        raise RuntimeError(p.stderr.strip() or f"git {args[0]} failed")
+    return p.stdout.strip()
+
+def card(path):
+    fields = {}
+    try:
+        with path.open(encoding="utf-8") as f:
+            if f.readline().strip() != "---": return fields
+            for line in f:
+                if line.strip() == "---": break
+                if ":" in line:
+                    key, value = line.split(":", 1)
+                    value = value.strip()
+                    fields[key.strip()] = "" if value.startswith("{") else value
+    except OSError:
+        pass
+    return fields
+
+def names(value): return {part.strip() for part in value.split(",") if part.strip()}
+
+try:
+    common = Path(git("rev-parse", "--git-common-dir"))
+except RuntimeError as e:
+    print(f"git 상태를 읽을 수 없음: {e}", file=sys.stderr)
+    sys.exit(1)
+common = (root / common).resolve() if not common.is_absolute() else common.resolve()
+print(f"프로젝트: {root}")
+print(f"Git common dir: {common}")
+worktrees = []
+for block in git("worktree", "list", "--porcelain").split("\n\n"):
+    fields = dict(line.split(" ", 1) for line in block.splitlines() if " " in line)
+    if fields.get("worktree"):
+        worktrees.append(fields)
+print(f"Worktree {len(worktrees)}개" + (" — ⚠ 같은 repo의 다른 worktree가 있음" if len(worktrees) > 1 else ""))
+for wt in worktrees:
+    branch = wt.get("branch", "(detached)").removeprefix("refs/heads/")
+    path = wt["worktree"]
+    if Path(path).resolve() == common:
+        main_worktree = git("config", "--get", "core.worktree", check=False)
+        if main_worktree:
+            path = str((common / main_worktree).resolve())
+    print(f"  {path}  HEAD {wt.get('HEAD', '?')}  branch {branch}")
+
+print("Remote:")
+remotes = []
+for line in git("remote", "-v").splitlines():
+    parts = line.split()
+    if len(parts) >= 2 and (len(parts) < 3 or parts[2] == "(fetch)"):
+        url = parts[1]
+        owner = re.search(r"[:/]([^/:]+)/[^/]+(?:\.git)?$", url)
+        print(f"  {parts[0]} {url}  owner: {owner.group(1) if owner else '?'}")
+        remotes.append(url)
+if not remotes: print("  없음")
+
+print("로컬 브랜치 (원격 비교는 로컬 추적 ref 기준, fetch 안 함):")
+unpublished = []
+branches = []
+for line in git("for-each-ref", "--format=%(refname:short)%09%(objectname)%09%(upstream:short)", "refs/heads").splitlines():
+    branch, sha, upstream = (line.split("\t") + [""])[:3]
+    compare = ["^" + upstream] if upstream else ["--not", "--remotes"]
+    count = int(git("rev-list", "--count", branch, *compare) or 0)
+    branches.append((branch, sha))
+    if count: unpublished.append(f"{branch} {count}개")
+    print(f"  {branch}  HEAD {sha}  upstream {upstream or '없음'}  추적 ref에 없는 커밋 {count}개")
+stashes = len(git('stash', 'list').splitlines())
+print(f"Stash: {stashes}개")
+raw = subprocess.run(["git", "-C", str(root), "ls-files", "--others", "--exclude-standard", "-z"], capture_output=True, check=True).stdout
+untracked = [root / os.fsdecode(p) for p in raw.split(b"\0") if p]
+untracked_bytes = sum(p.stat().st_size for p in untracked if p.is_file())
+print(f"현재 worktree 미추적 파일: {len(untracked)}개, 합계 {untracked_bytes:,} bytes")
+for p in untracked: print(f"  {p.relative_to(root)}")
+
+print("문서 보존:")
+local_docs = []
+for rel in ("docs/RESEARCH_SPEC.md", "docs/LEARNINGS.md", "docs/progress.md", "docs/plans", "docs/done"):
+    path = root / rel
+    if not path.exists():
+        print(f"  {rel}: 없음")
+        continue
+    tracked = bool(git("ls-files", "--", rel))
+    ignored = subprocess.run(["git", "-C", str(root), "check-ignore", "-q", rel]).returncode == 0
+    others = git("ls-files", "--others", "--", rel) or git("ls-files", "--others", "--ignored", "--exclude-standard", "--", rel)
+    if tracked and others:
+        local_docs.append(rel)
+        print(f"  {rel}: ⚠ 일부만 추적됨 — git에 없는 파일이 있음")
+    elif tracked:
+        print(f"  {rel}: git 추적됨")
+    else:
+        local_docs.append(rel)
+        print(f"  {rel}: ⚠ 로컬에만 있음 — 지우면 사라짐" + (" (ignored)" if ignored else ""))
+
+print("루트의 ignored 큰 산출물:")
+artifact = re.compile(r"^(runs|data|ckpt.*|checkpoints|outputs|wandb|logs)$")
+found = False
+for path in sorted(root.iterdir()):
+    if not path.is_dir() or not artifact.fullmatch(path.name): continue
+    if subprocess.run(["git", "-C", str(root), "check-ignore", "-q", str(path)]).returncode: continue
+    du = subprocess.run(["du", "-sh", str(path)], capture_output=True, text=True)
+    print(f"  {path.name}: {du.stdout.split()[0] if du.returncode == 0 else '크기 읽기 실패'}")
+    found = True
+if not found: print("  없음")
+
+terms = {root.name}
+archive_copy = None
+if lineage_dir and lineage_dir.is_dir():
+    for path in sorted(lineage_dir.glob("*.md")):
+        if path.name == "README.md" or path.name.startswith("_"): continue
+        fields = card(path)
+        if root.name in ({fields.get("project", ""), path.stem} | names(fields.get("aliases", ""))):
+            terms |= ({fields.get("project", "")} | names(fields.get("aliases", ""))) - {""}
+            sec = re.search(r"^## 보관 사본\n(.*?)(?=^## |\Z)", path.read_text(encoding="utf-8"), re.S | re.M)
+            if sec and sec.group(1).strip() and not sec.group(1).strip().startswith("{"): archive_copy = path
+            break
+repo_terms = {url.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git") for url in remotes} - {""}
+terms |= repo_terms
+terms.discard("")
+
+roots_env = os.environ.get("DINNNO_PROJECT_ROOTS")
+bases = [Path(p).expanduser() for p in roots_env.split(":") if p] if roots_env is not None else [root.parent]
+if roots_env is None:
+    for extra in (Path.home() / "Workspace/dinnno-research-wrapper/researches", Path.home() / "Workspace/dinnno-toy-wrapper"):
+        if extra.is_dir() and extra.resolve() != root.parent.resolve(): bases.append(extra)
+projects = sorted({p.resolve() for base in bases if base.is_dir() for p in base.iterdir()
+                   if p.is_dir() and (p / "docs/RESEARCH_SPEC.md").is_file()} - {root})
+print("다른 프로젝트의 참조 (이름: " + ", ".join(sorted(terms)) + "):")
+excluded = [".git", "libs", "runs", "data", "ckpt*", "outputs", "wandb", "logs", "node_modules"]
+code_ext = {".py", ".yaml", ".yml", ".json", ".toml", ".sh", ".cfg"}
+hits = {"코드·설정": [], "문서": []}
+counts = {"코드·설정": 0, "문서": 0}
+search_errors = []
+rg = shutil.which("rg")
+for project in projects:
+    # a sibling worktree of the same repo mentions the repo name everywhere; match only directory names there
+    sibling = subprocess.run(["git", "-C", str(project), "rev-parse", "--path-format=absolute", "--git-common-dir"],
+                             capture_output=True, text=True).stdout.strip() == str(common)
+    pterms = terms - repo_terms if sibling else terms
+    if not pterms: continue
+    if rg:
+        cmd = [rg, "--no-ignore", "--hidden", "--color", "never", "--no-messages", "-n", "-F", "--max-columns", "300", "--max-columns-preview"]
+        cmd += ["--glob", "!**/.git"]
+        for d in excluded: cmd += ["--glob", f"!**/{d}/**"]
+        for term in sorted(pterms): cmd += ["-e", term]
+        cmd += ["."]
+    else:
+        cmd = ["grep", "-rInI", "-F", "--exclude=.git"]
+        for d in excluded: cmd += [f"--exclude-dir={d}"]
+        for term in sorted(pterms): cmd += ["-e", term]
+        cmd += ["."]
+    result = subprocess.run(cmd, cwd=project, capture_output=True, text=True, errors="replace")
+    if result.returncode not in (0, 1):
+        search_errors.append(project.name)
+        print(f"  검색 실패: {project}: {result.stderr.strip()}")
+        continue
+    for line in result.stdout.splitlines():
+        # a sibling line of the same repo naming its own directory (efficient-retarget-v2/...) is not a reference
+        if not any(t in line.split(":", 2)[-1].replace(project.name, "") for t in pterms): continue
+        rel = line.split(":", 1)[0].removeprefix("./")
+        kind = "코드·설정" if Path(rel).suffix.lower() in code_ext or Path(rel).name == ".gitmodules" else "문서"
+        counts[kind] += 1
+        if len(hits[kind]) < 30:
+            hits[kind].append(f"{project.name}/{line.removeprefix('./')}"[:200])
+for kind in ("코드·설정", "문서"):
+    print(f"  {kind}: 총 {counts[kind]}줄")
+    for hit in hits[kind]: print(f"    {hit}")
+    if counts[kind] > 30: print(f"    … {counts[kind] - 30}줄 생략")
+
+reasons = []
+if unpublished: reasons.append("추적 ref에 없는 커밋 (" + ", ".join(unpublished) + ")")
+if stashes: reasons.append(f"stash {stashes}개")
+if local_docs and archive_copy: print(f"로컬 전용 문서는 카드 보관 사본으로 대체됨 — 확인 2에서 대조: {archive_copy}")
+elif local_docs: reasons.append("로컬 전용 문서 (" + ", ".join(local_docs) + ") — 카드 '보관 사본'을 채우면 해제")
+if counts["코드·설정"]: reasons.append(f"다른 프로젝트 코드 참조 {counts['코드·설정']}줄")
+if search_errors: reasons.append("참조 검색 실패 (" + ", ".join(search_errors) + ")")
+print("보관 차단 요인: " + " · ".join(reasons) if reasons else "차단 요인 없음(데이터 유일본 판정은 별도)")
+print("제안 명령 (출력만, 실행하지 않음):")
+for branch, sha in branches:
+    slug = re.sub(r"[^A-Za-z0-9._-]+", "-", branch).strip("-.")
+    print(f"  git tag archive/{datetime.date.today().isoformat()}-{slug} {sha}")
+sys.exit(3 if reasons else 0)
+PY
+}
+
 # ---------------------------------------------------------------- gates
 # Gate table (plan section whose heading contains '게이트'): | gate | command | expect |
 #  - hash  = sha256(name|command|expect)[:8]; printed as #hash and stored in the §5 record line,
@@ -385,5 +650,6 @@ case "${1:-}" in
   tidy)   shift; cmd_tidy "$@";;
   review) shift; cmd_review "$@";;
   res)    shift; cmd_res "$@";;
+  pivot)  shift; cmd_pivot "$@";;
   *) sed -n '2,10p' "$0"; exit 2;;
 esac

@@ -35,7 +35,7 @@ Stage: {예: A — PoC} | spec: {v0} | last anchored commit: {hash} ({date})
 
 ## 결정 큐 + 아이디어 인박스
 
-<!-- 미룬 결정, [spec-drift], [kill-candidate], 💡 아이디어(사용자·Claude, 기록≠채택). 사용자가 고르면 체크하고 Phase/타임라인으로 흡수. -->
+<!-- 미룬 결정, [spec-drift], [kill-candidate], [pivot], 💡 아이디어(사용자·Claude, 기록≠채택). 사용자가 고르면 체크하고 Phase/타임라인으로 흡수. [spec-drift]·[kill-candidate]가 쌓이면 pivot 스킬의 입구다. -->
 
 - [ ] {YYYY-MM-DD} [{tag}] {결정 요지 한 줄} ← {출처 done_v{N}/plan}
 - 💡 {YYYY-MM-DD} {아이디어 한 줄}

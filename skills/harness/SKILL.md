@@ -20,7 +20,7 @@ description: dinnno 연구 프로젝트(docs/RESEARCH_SPEC.md가 있는 레포)�
 현황을 몇 문장으로 말하고 하나를 추천한다.
 
 - **init** — placeholder 채우기. `docs/_GUIDE.md`의 인터뷰 규약대로 사용자 발화에서 끌어낸다.
-- **spec** — thesis나 비교 축 변경. 사용자 소유 결정이라 초안은 제안일 뿐이다.
+- **spec** — thesis나 비교 축 변경. 사용자 소유 결정이라 초안은 제안일 뿐이다. 가설이 틀려서 바꾸는 것이거나, 연구가 다른 레포로 넘어가거나 멈추거나 끝나는 것이면 `pivot` 스킬로 한다.
 - **experiment v{N}** — 새 가설 또는 진행 중 가설 이어가기.
 - **loop** — 사용자가 명시적으로 원할 때만 `loop` 스킬.
 
@@ -32,7 +32,7 @@ description: dinnno 연구 프로젝트(docs/RESEARCH_SPEC.md가 있는 레포)�
 
 **실행.** 파일 한두 개, 30분 안에 끝나는 변경은 팀장이 직접 한다. 그보다 크거나 나눌 수 있는 plan §2의 변경은 `fanout` 스킬로 pane에 넘기고, 브리프에는 ARCHITECTURE와 plan 경로를 적는다. 회수한 몫은 plan §7 위임 대장에 한 줄씩 적고, 통합 후 합쳐진 상태에서 게이트나 테스트를 팀장이 한 번 돌린다. pane을 보내거나 긴 run을 시작할 때는 한 줄 알리고 진행한다. 긴 학습은 백그라운드로 돌리고 기다리는 동안 eval·plot·done 골격을 준비한다. plan §3 예산 안에서는 code-level 수정과 재실행을 묻지 않고 반복하되, 예산을 넘거나 수 시간 GPU가 드는 재실행은 먼저 보고한다. experiment-level 이상(발산, 가설 반증, 한 번 고친 뒤 재실패)은 원문 출력과 함께 보고하고 멈춘다.
 
-**done.** `docs/done/_done_template.md`를 복사해 `done_v{N}.md`. `dinnno gates docs/plans/plan_v{N}_{slug}.md`(리뷰 파일 `*_codex.md` 말고 plan 본문) 결과가 §2의 근거다. done을 쓰면 그 자리에서 `close` 스킬의 1~3단계(게이트 실행, 이 대화를 모르는 검토자의 근거 확인, 반영)를 수행한다. 쓴 사람이 자기 결과를 검토하지 않는다는 원칙이라 close를 따로 부르지 않아도 한다. negative 결과는 kill이 아니다. 주장 범위와 실측 범위가 같은지, metric이 목표 품질과 같은 방향인지, seed×rollout이 그 효과를 감지할 수 있었는지, baseline·config·데이터가 깨끗한지 네 가지를 스스로 확인하기 전에는 "insufficient evidence"로 쓴다. kill과 thesis 변경은 사용자 결정이다.
+**done.** `docs/done/_done_template.md`를 복사해 `done_v{N}.md`. `dinnno gates docs/plans/plan_v{N}_{slug}.md`(리뷰 파일 `*_codex.md` 말고 plan 본문) 결과가 §2의 근거다. done을 쓰면 그 자리에서 `close` 스킬의 1~3단계(게이트 실행, 이 대화를 모르는 검토자의 근거 확인, 반영)를 수행한다. 쓴 사람이 자기 결과를 검토하지 않는다는 원칙이라 close를 따로 부르지 않아도 한다. negative 결과는 kill이 아니다. 주장 범위와 실측 범위가 같은지, metric이 목표 품질과 같은 방향인지, seed×rollout이 그 효과를 감지할 수 있었는지, baseline·config·데이터가 깨끗한지 네 가지를 스스로 확인하기 전에는 "insufficient evidence"로 쓴다. kill과 thesis 변경은 사용자 결정이다. 다음 후보가 thesis 수정·무대 교체·중단 쪽이면 다음 단위로 `pivot`을 추천한다.
 
 ## 4. 위임과 모델
 
