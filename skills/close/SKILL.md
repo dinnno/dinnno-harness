@@ -12,4 +12,17 @@ description: 사용자가 "세션 close/마무리"라고 할 때. plan의 게이
 
 done을 쓸 때 1~3단계를 이미 했으면 다시 돌리지 않고 그 결과를 쓰고 4단계만 한다.
 
+## 원고 세션 (`paper` 스킬로 연 세션)
+
+plan/done이 없으므로 1~3단계 대신 이렇게 닫는다.
+
+1. `dinnno paper check`를 돌려 마지막 `[paper]` 요약 줄과 ERROR 줄을 그대로 붙인다. ERROR(bib에 없는 cite, STALE numbers)는 고치고 다시 돌린다. 고칠 수 없으면 이유를 적는다.
+2. `writing/README.md`의 섹션 상태 표(단계, 라운드, 마지막 검토, 남은 GAP/질문)와 "다음 시작점"(다음 섹션, 답 안 된 질문)을 갱신한다.
+3. check의 "Overleaf 미반영" 목록이 비어 있지 않으면 `dinnno paper export`를 돌리고, 업로드할 파일 목록을 종료 보고에 넣는다.
+4. 이번 세션에 사용자가 확인한 문체 규칙이 `writing/STYLE.md` 확정 절에 들어갔는지 본다.
+
+종료 보고는 섹션별 진척(라운드, 남은 GAP 수), 마감까지 D-day, 업로드할 파일, 다음 세션 시작점 순서로 쓴다.
+
+## 공통
+
 TODO 미체크 수와 progress에 done이 반영됐는지는 `dinnno check`가 보여 주므로 검토자에게 시키지 않고, 그 출력으로 4단계를 채운다. git commit/push는 사용자 몫이다.

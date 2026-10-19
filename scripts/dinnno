@@ -8,6 +8,7 @@
 #   dinnno review --with codex|claude PROMPT.md [-o OUT.md]
 #   dinnno res                             who uses this machine's GPU/RAM now, grouped by project
 #   dinnno pivot scan [PROJECT_PATH]       read-only inventory before archiving a project (exit 3 = blockers)
+#   dinnno paper export|import ZIP|numbers|check [--bib]   manuscript sync with Overleaf, number macros, checks
 #
 # Works from anywhere inside a dinnno project (a repo that has docs/RESEARCH_SPEC.md).
 set -uo pipefail
@@ -651,5 +652,6 @@ case "${1:-}" in
   review) shift; cmd_review "$@";;
   res)    shift; cmd_res "$@";;
   pivot)  shift; cmd_pivot "$@";;
-  *) sed -n '2,10p' "$0"; exit 2;;
+  paper)  shift; exec python3 "$HARNESS_DIR/scripts/dinnno_paper.py" "$@";;
+  *) sed -n '2,11p' "$0"; exit 2;;
 esac

@@ -1,0 +1,4 @@
+_export/
+.sync/conflicts/
+.sync/last_import.diff
+*.zip

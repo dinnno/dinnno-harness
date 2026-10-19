@@ -24,7 +24,7 @@ project/
 
 ## 선택 폴더 (필요할 때만)
 
-`data_generation/`(synthetic data), `retargeting/`(human → robot hand), `teleop/`(VIVE, MANUS), `deploy/`(실로봇, ROS 2), `notebooks/`(탐색용, `src`에서 import 금지), `assets/`(URDF, mesh).
+`data_generation/`(synthetic data), `retargeting/`(human → robot hand), `teleop/`(VIVE, MANUS), `deploy/`(실로봇, ROS 2), `notebooks/`(탐색용, `src`에서 import 금지), `assets/`(URDF, mesh), `writing/`(논문 원고, `paper` 스킬과 `dinnno paper`가 Overleaf와 동기화).
 
 ## 파이프라인
 

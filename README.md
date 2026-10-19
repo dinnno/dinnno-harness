@@ -7,8 +7,8 @@
 | 층 | 파일 | 하는 일 |
 |---|---|---|
 | 규약 | `AGENTS.md` (1페이지) | 멈추는 지점, 코드 규칙, 보고 스타일. 세 런타임이 같은 파일을 읽는다 |
-| 스킬 | `skills/*/SKILL.md` | `harness`(세션 진입) · `close`(근거 확인 후 마감) · `plan-redteam`(다른 모델의 plan 격추) · `loop`(opt-in 반복) · `fanout`(pane에 일 분담) · `pivot`(가설 변경·계승·대기·보관과 계보 카드) · `vis`(시각화 보관) · `research-second-brain`(문헌 위키 조회) · `bro`(쉬운 말 재설명) |
-| 스크립트 | `scripts/dinnno` | `check`(상태·크기·싱크) · `gates`(plan 게이트 실행) · `tidy`(산출물 정리) · `review`(다른 모델 검토 호출) · `res`(프로젝트별 GPU·RAM 점유) · `pivot scan`(보관 전 인벤토리) |
+| 스킬 | `skills/*/SKILL.md` | `harness`(세션 진입) · `close`(근거 확인 후 마감) · `plan-redteam`(다른 모델의 plan 격추) · `loop`(opt-in 반복) · `fanout`(pane에 일 분담) · `pivot`(가설 변경·계승·대기·보관과 계보 카드) · `paper`(논문 원고: 개괄 메모 → tex 라운드, 수치 매크로, 섹션 검토, Overleaf zip 동기화) · `vis`(시각화 보관) · `research-second-brain`(문헌 위키 조회) · `bro`(쉬운 말 재설명) |
+| 스크립트 | `scripts/dinnno` | `check`(상태·크기·싱크) · `gates`(plan 게이트 실행) · `tidy`(산출물 정리) · `review`(다른 모델 검토 호출) · `res`(프로젝트별 GPU·RAM 점유) · `pivot scan`(보관 전 인벤토리) · `paper`(Overleaf export/import, 수치 매크로 생성, 원고 점검) |
 | 템플릿 | `templates/` | 프로젝트 문서 골격 (spec, architecture, progress, plan/done) |
 
 판단이 필요한 일은 스킬(산문)에, 답이 정해진 일은 스크립트에 둔다. 세션 시작 훅이 `dinnno check`를 자동으로 돌린다. `dinnno review`는 sandbox(read-only) 안에서만 다른 모델을 돌리고, sandbox 밖 우회 옵션은 없다.
