@@ -80,6 +80,8 @@ pane의 모델은 사용자 지정이 우선이고, 없으면 몫의 종류로 �
 | 선행연구 조사·deep research | codex 또는 grok. **opus 금지**. 최신·트렌디한 연구 탐색에는 grok 활용 | `--kind codex -- -m gpt-6-sol -c model_reasoning_effort=<e>` 또는 `--kind grok -- --reasoning-effort high` |
 | 긴 맥락 판단·설계·문서 | claude opus, medium 기본 | `--kind claude -- --permission-mode auto --model opus --effort medium` |
 
+`--kind claude` 행은 `herdr agent start`를 쓰지 않고, `--` 뒤의 인자를 `dinnno claude-pane <이름> -- <인자>`로 넘긴다(§3, prime 계정).
+
 Claude opus는 medium이 기본이며, 시각화에도 xhigh를 고정하지 않는다. `opus` alias가 실제로
 Opus 5.5를 가리키는지 실행 환경에서 확인한다. GPT effort는 별도로 몫의 난이도에 맞춘다:
 단순 치환·형식 정리는 `low`나 `medium`, 보통 구현은 `high`, 설계 판단이 섞인 구현(인터페이스
@@ -176,8 +178,17 @@ PID=$(herdr pane split --current --direction down --cwd "$PWD" --no-focus \
 
 ```bash
 herdr agent start impl-loader --kind codex --pane <pane-id> -- -m gpt-6-sol -c model_reasoning_effort=high
-herdr agent start vis-rollout --kind claude --pane <pane-id> -- --permission-mode auto --model opus --effort medium
 herdr agent start survey-prior --kind grok --pane <pane-id> -- --reasoning-effort high
+```
+
+claude pane은 split과 start를 따로 하지 않고 `dinnno claude-pane`으로 한 번에 띄운다.
+팀장은 기본 계정(sj, `~/.claude`)이고 claude 팀원은 두 번째 계정(prime, `~/.claude-prime`)으로
+돌려 사용량을 나눈다. 이 명령이 pane에 `CLAUDE_CONFIG_DIR`을 넣고, prime이 처음 보는 폴더의
+신뢰 확인 창은 sj가 그 폴더를 이미 신뢰했을 때만 넘긴다. 성공하면 pane id 한 줄을 출력한다.
+실패(exit 1)면 출력된 pane을 `herdr pane read`로 보고 사용자에게 알린다.
+
+```bash
+PID=$(dinnno claude-pane vis-rollout --direction right -- --permission-mode auto --model opus --effort medium)
 ```
 
 pane id는 나중에 닫을 때 필요하니 `$FO/<이름>/pane_id`에 적어 둔다.

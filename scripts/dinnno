@@ -9,6 +9,7 @@
 #   dinnno res                             who uses this machine's GPU/RAM now, grouped by project
 #   dinnno pivot scan [PROJECT_PATH]       read-only inventory before archiving a project (exit 3 = blockers)
 #   dinnno paper export|import ZIP|numbers|check [--bib]   manuscript sync with Overleaf, number macros, checks
+#   dinnno claude-pane NAME [--direction right|down] [-- CLAUDE_ARGS...]   fanout claude pane on the worker account; prints pane id
 #
 # Works from anywhere inside a dinnno project (a repo that has docs/RESEARCH_SPEC.md).
 set -uo pipefail
@@ -645,6 +646,35 @@ cmd_review() {
   echo "REVIEW OK: $out ($(kb "$out"), ${with})"
 }
 
+# ---------------------------------------------------------------- claude-pane
+# fanout의 claude 팀원은 팀원 계정(기본 ~/.claude-prime)으로 띄우고 팀장은 기본 계정(~/.claude)에 남긴다.
+# 팀원 계정의 폴더 신뢰 확인 창은, 기본 계정이 같은 폴더를 이미 신뢰했을 때만 넘긴다.
+cmd_claude_pane() {
+  local name="" dir="right"
+  while (( $# )); do case "$1" in
+    --direction) dir="$2"; shift;; --) shift; break;; *) name="$1";; esac; shift; done
+  [[ -n "$name" ]] || { echo "usage: dinnno claude-pane NAME [--direction right|down] [-- CLAUDE_ARGS...]"; exit 2; }
+  local cfg="${DINNNO_PANE_CLAUDE_CONFIG_DIR:-$HOME/.claude-prime}" env=() pid
+  if [[ -d "$cfg" ]]; then env=(--env "CLAUDE_CONFIG_DIR=$cfg"); else echo "팀원 계정 폴더 $cfg 없음 — 기본 계정으로 띄운다" >&2; fi
+  pid=$(herdr pane split --current --direction "$dir" --cwd "$PWD" --no-focus "${env[@]}" \
+        | python3 -c "import json,sys;print(json.load(sys.stdin)['result']['pane']['pane_id'])") || exit 1
+  if ! herdr agent start "$name" --kind claude --pane "$pid" -- "$@" >/dev/null 2>&1; then
+    if herdr pane read "$pid" 2>/dev/null | grep -q "trust this folder" && python3 - "$PWD" <<'PY'
+import json, os, sys
+p = json.load(open(os.path.expanduser("~/.claude.json"))).get("projects", {})
+sys.exit(0 if p.get(sys.argv[1], {}).get("hasTrustDialogAccepted") else 1)
+PY
+    then
+      herdr pane send-keys "$pid" Down Enter >/dev/null
+      herdr agent wait "$name" --until idle --timeout 30000 >/dev/null \
+        || { echo "agent $name 준비 안 됨 — herdr pane read $pid 로 확인" >&2; echo "$pid"; exit 1; }
+    else
+      echo "agent $name 시작 중 막힘(기본 계정도 신뢰하지 않은 폴더일 수 있음) — herdr pane read $pid 로 확인" >&2; echo "$pid"; exit 1
+    fi
+  fi
+  echo "$pid"
+}
+
 case "${1:-}" in
   check)  shift; cmd_check "$@";;
   gates)  shift; cmd_gates "$@";;
@@ -653,5 +683,6 @@ case "${1:-}" in
   res)    shift; cmd_res "$@";;
   pivot)  shift; cmd_pivot "$@";;
   paper)  shift; exec python3 "$HARNESS_DIR/scripts/dinnno_paper.py" "$@";;
-  *) sed -n '2,11p' "$0"; exit 2;;
+  claude-pane) shift; cmd_claude_pane "$@";;
+  *) sed -n '2,12p' "$0"; exit 2;;
 esac
