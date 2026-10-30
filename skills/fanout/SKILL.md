@@ -65,7 +65,8 @@ herdr CLI 문법이 헷갈리면 `herdr agent`, `herdr pane`을 인자 없이 �
 pane 수를 정한 직후 `dinnno res`로 이웃 프로젝트가 지금 쓰는 GPU·RAM을 보고 **자원을 나눈다.**
 실행하는 몫마다 probe 최대치(없으면 한 줄 추정)의 1.5배를 상한으로 브리프에 적고, 그 합이
 지금 여유 안에 들어가면 그대로 동시에 띄운다. 안 들어가면 몫을 줄이지 말고 순서를 나눈다.
-실행이 없는 몫(문서·리뷰)은 예산에서 뺀다.
+실행이 없는 몫(문서·리뷰)은 예산에서 뺀다. 이 머신에 자리가 없으면 `dinnno gpu where`로 다른 머신을 고르고, 브리프 §5의 실행 명령을
+`dinnno gpu run --host <머신> --mem <probe 최대치> --hours <예상> --cwd <그 머신 경로> -- <명령>`으로 적어 준다.
 
 ### 모델 배정
 
@@ -178,21 +179,29 @@ mkdir -p "$FO"
 
 ## 3. pane 띄우기
 
-호출한 pane에서 갈라내고 포커스는 사용자에게 남긴다. 넓으면 오른쪽, 좁거나 길면 아래.
+팀원 pane은 팀장의 tab을 쪼개지 않고 **fanout 하나당 새 tab 하나**에 모은다. 팀장 화면은 그대로
+두고, 일이 끝나면 tab째로 수거한다(§8). 포커스는 사용자에게 남긴다.
 
 ```bash
-herdr pane layout --pane "$HERDR_PANE_ID"
-herdr pane split --current --direction right --cwd "$PWD" --no-focus
+TAB_JSON=$(herdr tab create --cwd "$PWD" --label "fo-$(basename "$FO")" --no-focus)
+python3 -c "import json,sys;print(json.loads(sys.argv[1])['result']['tab']['tab_id'])" "$TAB_JSON" > "$FO/tab_id"
+ROOT=$(python3 -c "import json,sys;print(json.loads(sys.argv[1])['result']['root_pane']['pane_id'])" "$TAB_JSON")
 ```
 
-pane id는 응답에서 꺼낸다. 사이드바 순서나 예시에서 추측하지 않는다.
+첫 몫은 `$ROOT`에서 갈라내고, 다음 몫부터는 직전 몫의 pane에서 갈라낸다. 같은 방향으로 반복해서
+쪼개면 쓸 수 없이 좁아지니 오른쪽과 아래를 번갈아 간다. pane id는 응답에서 꺼낸다. 사이드바
+순서나 예시에서 추측하지 않는다.
 
 ```bash
-PID=$(herdr pane split --current --direction down --cwd "$PWD" --no-focus \
+PID=$(herdr pane split "$ROOT" --direction right --cwd "$PWD" --no-focus \
       | python3 -c "import json,sys;print(json.load(sys.stdin)['result']['pane']['pane_id'])")
 ```
 
-같은 방향으로 반복해서 쪼개면 쓸 수 없이 좁아진다. 3개 이상이면 방향을 번갈아 간다.
+몫을 모두 띄운 뒤 빈 셸인 `$ROOT`를 닫는다. tab은 남은 pane으로 유지된다.
+
+```bash
+herdr pane close "$ROOT"
+```
 
 ```bash
 herdr agent start impl-loader --kind codex --pane <pane-id> -- -m gpt-6-sol -c model_reasoning_effort=high
@@ -206,8 +215,10 @@ claude pane은 split과 start를 따로 하지 않고 `dinnno claude-pane`으로
 실패(exit 1)면 출력된 pane을 `herdr pane read`로 보고 사용자에게 알린다.
 
 ```bash
-PID=$(dinnno claude-pane vis-rollout --direction right -- --permission-mode auto --model opus --effort medium)
+PID=$(dinnno claude-pane vis-rollout --from "$ROOT" --direction right -- --permission-mode auto --model opus --effort medium)
 ```
+
+`--from`을 빼면 팀장 pane을 쪼개므로 항상 붙인다(첫 몫은 `$ROOT`, 그 뒤는 직전 몫의 pane).
 
 pane id는 나중에 닫을 때 필요하니 `$FO/<이름>/pane_id`에 적어 둔다.
 
@@ -317,9 +328,17 @@ pane별로 한 줄씩, 사용자가 다음에 무엇을 결정하면 되는지�
 | review-metrics | 지표 정의 검토 | opus (Opus 5.5 확인) medium | 판단 필요 | 미실행 (질문 1건) | 열어 둠 |
 | survey-prior | 최신 선행연구 조사 | grok (실제 모델 확인 후 기록) | 완료 | 출처 대조 | 닫음 |
 
-## 8. pane 정리
+## 8. pane과 tab 수거
 
 통합이 끝나면 팀장이 판단해서 필요 없는 pane을 닫는다. 사용자에게 묻지 않는다.
+열어 둘 pane이 하나도 없으면 tab째로 닫는다. 이것이 fanout의 마지막 동작이다.
+
+```bash
+herdr tab close "$(cat "$FO/tab_id")"
+```
+
+열어 둘 pane이 남으면 끝난 pane만 닫고 tab은 남긴다. 남긴 pane의 일이 끝나 회수하는 턴에
+tab을 닫는다. tab을 남긴 채 턴을 끝낼 때는 보고에 "fo-… tab 열어 둠: 이유"를 한 줄 붙인다.
 
 닫는다: report를 읽고 §6의 대조까지 마쳐 완료로 확정한 pane, 조사·리뷰처럼 산출물이 report
 파일로 다 넘어온 pane.
@@ -332,4 +351,4 @@ herdr agent get <이름>            # working이면 닫지 않는다
 herdr pane close "$(cat "$FO/<이름>/pane_id")"
 ```
 
-이 스킬이 만든 pane만 닫는다. 어느 pane을 닫고 남겼는지는 위 보고 표의 마지막 열에 적는다.
+이 스킬이 만든 pane과 tab(`$FO/tab_id`)만 닫는다. 어느 pane을 닫고 남겼는지는 위 보고 표의 마지막 열에 적는다.

@@ -1,0 +1,11 @@
+{
+  "_doc": "dinnno gpu 의 머신 프로파일. kind: queue = 장부·대기열로 자리를 나눈다 / manual = 사람이 외부(웹)에서 예약하고 장부엔 hold로 기록만 / slurm = 스케줄러에 맡기고 현황만 본다. hostname은 그 머신의 `hostname` 출력(로컬 판별용). until은 사용 종료일.",
+  "hosts": [
+    {"name": "jun",     "ssh": "jun",     "hostname": "jun",                  "kind": "queue"},
+    {"name": "prime",   "ssh": "prime",   "hostname": "prime",                "kind": "queue"},
+    {"name": "prime2",  "ssh": "prime2",  "hostname": "prime-ws",             "kind": "queue"},
+    {"name": "prime4",  "ssh": "prime4",  "hostname": "user-X870E-AORUS-PRO", "kind": "queue"},
+    {"name": "tako",    "ssh": "tako",    "hostname": "tako",                 "kind": "manual", "note": "공용 서버. GPU는 사용자가 웹에서 직접 예약한다"},
+    {"name": "hangang", "ssh": "hangang", "hostname": "glogin03",             "kind": "slurm",  "until": "2026-11-22"}
+  ]
+}

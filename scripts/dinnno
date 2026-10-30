@@ -7,9 +7,10 @@
 #   dinnno tidy   [--apply FILE...]        list loose artifacts; --apply moves given files to docs/archive/
 #   dinnno review --with codex|claude PROMPT.md [-o OUT.md]
 #   dinnno res                             who uses this machine's GPU/RAM now, grouped by project
+#   dinnno gpu ls|where|run|hold|cancel|wait   GPU ledger and queue across machines (config/gpu_hosts.json)
 #   dinnno pivot scan [PROJECT_PATH]       read-only inventory before archiving a project (exit 3 = blockers)
 #   dinnno paper export|import ZIP|numbers|check [--bib]   manuscript sync with Overleaf, number macros, checks
-#   dinnno claude-pane NAME [--direction right|down] [-- CLAUDE_ARGS...]   fanout claude pane on the worker account; prints pane id
+#   dinnno claude-pane NAME [--from PANE_ID] [--direction right|down] [-- CLAUDE_ARGS...]   fanout claude pane on the worker account; prints pane id
 #
 # Works from anywhere inside a dinnno project (a repo that has docs/RESEARCH_SPEC.md).
 set -uo pipefail
@@ -650,13 +651,13 @@ cmd_review() {
 # fanout의 claude 팀원은 팀원 계정(기본 ~/.claude-prime)으로 띄우고 팀장은 기본 계정(~/.claude)에 남긴다.
 # 팀원 계정의 폴더 신뢰 확인 창은, 기본 계정이 같은 폴더를 이미 신뢰했을 때만 넘긴다.
 cmd_claude_pane() {
-  local name="" dir="right"
+  local name="" dir="right" from="--current"
   while (( $# )); do case "$1" in
-    --direction) dir="$2"; shift;; --) shift; break;; *) name="$1";; esac; shift; done
-  [[ -n "$name" ]] || { echo "usage: dinnno claude-pane NAME [--direction right|down] [-- CLAUDE_ARGS...]"; exit 2; }
+    --direction) dir="$2"; shift;; --from) from="$2"; shift;; --) shift; break;; *) name="$1";; esac; shift; done
+  [[ -n "$name" ]] || { echo "usage: dinnno claude-pane NAME [--from PANE_ID] [--direction right|down] [-- CLAUDE_ARGS...]"; exit 2; }
   local cfg="${DINNNO_PANE_CLAUDE_CONFIG_DIR:-$HOME/.claude-prime}" env=() pid
   if [[ -d "$cfg" ]]; then env=(--env "CLAUDE_CONFIG_DIR=$cfg"); else echo "팀원 계정 폴더 $cfg 없음 — 기본 계정으로 띄운다" >&2; fi
-  pid=$(herdr pane split --current --direction "$dir" --cwd "$PWD" --no-focus "${env[@]}" \
+  pid=$(herdr pane split "$from" --direction "$dir" --cwd "$PWD" --no-focus "${env[@]}" \
         | python3 -c "import json,sys;print(json.load(sys.stdin)['result']['pane']['pane_id'])") || exit 1
   if ! herdr agent start "$name" --kind claude --pane "$pid" -- "$@" >/dev/null 2>&1; then
     if herdr pane read "$pid" 2>/dev/null | grep -q "trust this folder" && python3 - "$PWD" <<'PY'
@@ -683,6 +684,7 @@ case "${1:-}" in
   res)    shift; cmd_res "$@";;
   pivot)  shift; cmd_pivot "$@";;
   paper)  shift; exec python3 "$HARNESS_DIR/scripts/dinnno_paper.py" "$@";;
+  gpu)    shift; exec python3 "$HARNESS_DIR/scripts/dinnno_gpu.py" "$@";;
   claude-pane) shift; cmd_claude_pane "$@";;
-  *) sed -n '2,12p' "$0"; exit 2;;
+  *) sed -n '2,13p' "$0"; exit 2;;
 esac
